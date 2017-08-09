@@ -1,0 +1,7 @@
+number of waiters: 3
+number of tables: 7
+max size of table: 8
+customer period: 15
+doorman period: 5
+waiter period: 5
+moneyamount: 300
