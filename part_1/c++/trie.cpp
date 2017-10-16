@@ -10,9 +10,9 @@ TrieNode::TrieNode() {
         cout << "Could not allocate memory!" << endl;
         exit(-1);
     }
-    // Mark all children as empty
+    //Mark all children as empty
 //    for (int i = 0; i < capacity; i++) {
-//        children[i]->word(, '');
+//        children[i]->word = ("");
 //    }
 }
 
@@ -21,22 +21,24 @@ TrieNode::~TrieNode() {
 }
 
 int TrieNode::insert(string newWord) {
-//    if(capacity < occupiedPositions) {
-//        for (int i = 0; i < capacity; i++) {
-//            if(!children[i]->word.empty()){
-//                int result = newWord.compare(children[i]->word);
-//                if (result == 0) {
-//                    cout << "exists already" << endl;
-//                    return 0;
-//                }
-//            } else {
-//                children[i]->word = newWord;
-//                occupiedPositions++;
-//            }
-//        }
-//    } else {
-//        return -1;
-//    }
+    // if(occupiedPositions < capacity) {
+    //     for (int i = 0; i < capacity; i++) {
+    //         if(children[i]->word == ""){
+    //             cout << "aaaaa" << endl;
+    //             int result = newWord.compare(children[i]->word);
+    //             if (result == 0) {
+    //                 cout << "exists already" << endl;
+    //                 return 0;
+    //             }
+    //         } else {
+    //             children[i]->word = newWord;
+    //             occupiedPositions++;
+    //             break;
+    //         }
+    //     }
+    // } else {
+    //     return -1;
+    // }
 }
 
 ////////////////////////////////////////////////////////////
