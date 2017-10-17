@@ -8,26 +8,35 @@
 Trie* trie_create() {
     printf("trie init\n");
     Trie *trie = malloc(sizeof(Trie));
-    trie->root = malloc(sizeof(TrieNode));
-    if (!trie->root) {
-        printf("malloc error %s\n", strerror(errno));
-        exit(-1);
-    }
-    trie->root->capacity = STARTING_SIZE_CHILD_ARRAY;
-    trie->root->occupiedPositions = 0;
-    trie->root->children = malloc(trie->root->capacity * sizeof(TrieNode));
-    if (!trie->root->children) {
-        printf("malloc error %s\n", strerror(errno));
-        exit(-1);
-    }
+    trie->root = trie_node_create();
     return trie;
 }
 
 int trie_delete(Trie *trie) {
-    free(trie->root);
-    free(trie->root->children);
+    free(trie);
 }
 
 int trie_insert(Trie *trie, char *newWord) {
 
+}
+
+TrieNode* trie_node_create() {
+    TrieNode *trieNode = malloc(sizeof(TrieNode));
+    if (!trieNode) {
+        printf("malloc error %s\n", strerror(errno));
+        exit(-1);
+    }
+    trieNode->capacity = STARTING_SIZE_CHILD_ARRAY;
+    trieNode->occupiedPositions = 0;
+    trieNode->children = malloc(trieNode->capacity * sizeof(TrieNode));
+    if (!trieNode->children) {
+        printf("malloc error %s\n", strerror(errno));
+        exit(-1);
+    }
+    return trieNode;
+}
+
+int trie_node_delete(TrieNode *trieNode) {
+    free(trieNode->children);
+    free(trieNode);
 }

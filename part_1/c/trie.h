@@ -4,8 +4,9 @@
 #define STARTING_SIZE_CHILD_ARRAY 4
 
 typedef struct TrieNode {
-    char *word;
-    struct TrieNode **children;
+    char word[32];
+    struct TrieNode *children;
+    struct TrieNode *parent;
     int occupiedPositions;
     int capacity;
     char isFinal;
@@ -18,5 +19,8 @@ typedef struct Trie {
 Trie* trie_create();
 int trie_delete(Trie *trie);
 int trie_insert(Trie *trie, char *newWord);
+
+TrieNode* trie_node_create();
+int trie_node_delete(TrieNode *trieNode);
 
 #endif //TRIE_H
