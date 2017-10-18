@@ -17,13 +17,11 @@ do
 					numberOfActive=$((numberOfActive+1))
 					active="$active $f " 
 					active="$active with PID: "
-					active="$active $PID
-"
+					active="$active $PID"
 				else
 					numberOfInactive=$((numberOfInactive+1))
 					inactive="$inactive $f " 
-					inactive="$inactive
-"
+					inactive="$inactive"
 				fi
 			fi
     	done
