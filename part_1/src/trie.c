@@ -26,7 +26,6 @@ int trie_delete(Trie *trie) {
     free(trie);
 }
 
-//todo add binary search
 int trie_insert(Trie *trie, char *ngram) {
     TrieNode *current = trie->root;
     int i;
@@ -34,8 +33,14 @@ int trie_insert(Trie *trie, char *ngram) {
     char *word = strtok(ngram, " ");
     while (word != NULL) {
         printf("%s\n", word);
-
-        SearchResults result = binary_search(current->children, word, current->occupiedPositions);
+        // Don't call binary_search if the children array is empty
+        if (current->occupiedPositions == 0) {
+            result.position = 0;
+            result.found = 0;
+        } else {
+            result = binary_search(current->children, word, current->occupiedPositions);
+        }
+        printf("Binary search returned pos: %d\n", result.position);
         int position = result.position;
         if (result.found == 0) {
             // Reallocate space if the children array is full
@@ -114,17 +119,18 @@ SearchResults binary_search(TrieNode *childrenArray, char *word, int occupiedPos
             printf("greater than\n");
             right = middle - 1;
             continue;
+        } else {
+            results.found = 1;
+            break;
         }
-        results.found = 1;
-        break;
     }
     results.position = middle;
-//    strncmp_result = strncmp(childrenArray[middle].word, word, WORD_SIZE);
-//    if(strncmp_result > 0) {
-//        results.position--;
-//    }
-//    } else if(strncmp_result < 0) {
-//        results.position++;
-//    }
+
+    // Check if the word of middle is less than the target
+    // If it is true, increase the target position
+    strncmp_result = strncmp(childrenArray[middle].word, word, WORD_SIZE);
+    if(strncmp_result < 0) {
+        results.position++;
+    }
     return results;
 }
