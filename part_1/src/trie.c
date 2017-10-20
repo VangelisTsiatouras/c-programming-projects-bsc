@@ -22,6 +22,7 @@ Trie *trie_create() {
 }
 
 int trie_delete(Trie *trie) {
+    trie_node_delete(trie->root);
     free(trie->root);
     free(trie);
 }
@@ -86,6 +87,10 @@ int trie_node_create(TrieNode *trieNode, TrieNode *parent) {
 }
 
 int trie_node_delete(TrieNode *trieNode) {
+    int i;
+    for (i = 0; i < trieNode->occupiedPositions; ++i) {
+        trie_node_delete(&trieNode->children[i]);
+    }
     free(trieNode->children);
 }
 
@@ -128,8 +133,7 @@ SearchResults binary_search(TrieNode *childrenArray, char *word, int occupiedPos
 
     // Check if the word of middle is less than the target
     // If it is true, increase the target position
-    strncmp_result = strncmp(childrenArray[middle].word, word, WORD_SIZE);
-    if(strncmp_result < 0) {
+    if(strncmp(childrenArray[middle].word, word, WORD_SIZE) < 0) {
         results.position++;
     }
     return results;
