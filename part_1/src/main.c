@@ -18,6 +18,8 @@ int main() {
     trie_insert(trie, ngram4);
     trie_insert(trie, ngram7);
 
+    trie_node_print(trie->root);
+
     trie_node_delete(trie->root);
     trie_delete(trie);
     printf("exiting..!\n");
