@@ -138,3 +138,15 @@ SearchResults binary_search(TrieNode *childrenArray, char *word, int occupiedPos
     }
     return results;
 }
+
+void dfs_trie(TrieNode *trieNode) {
+    int i;
+    printf("%s ", trieNode->word);
+    if(trieNode->isFinal == 1) {
+        printf("FINAL!");
+    }
+    printf("\n");
+    for(i = 0; i < trieNode->occupiedPositions; i++) {
+        dfs_trie(&trieNode->children[i]);
+    }
+}
