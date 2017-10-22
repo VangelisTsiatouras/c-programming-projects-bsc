@@ -3,6 +3,7 @@
 
 #define STARTING_SIZE_CHILD_ARRAY 4
 #define WORD_SIZE 32
+#define DEFAULT_NGRAM_WORDS 10
 
 typedef struct TrieNode {
     char word[WORD_SIZE];
@@ -29,6 +30,8 @@ int trie_delete(Trie *trie);
 
 int trie_insert(Trie *trie, char *ngram);
 
+void trie_query(Trie *trie, char *ngram);
+
 int trie_node_create(TrieNode *trieNode, TrieNode *parent);
 
 int trie_node_delete(TrieNode *trieNode);
@@ -37,6 +40,6 @@ void trie_node_print(TrieNode *trieNode);
 
 SearchResults binary_search(TrieNode *childrenArray, char *word, int occupiedPositions);
 
-void dfs_trie(TrieNode *trieNode);
+void trie_dfs(TrieNode *trieNode);
 
 #endif //TRIE_H
