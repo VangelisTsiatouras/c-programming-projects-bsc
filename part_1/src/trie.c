@@ -57,7 +57,7 @@ int trie_insert(Trie *trie, char *ngram) {
             }
             // Shift elements to keep the children array sorted
             if (position < current->occupiedPositions) {
-                printf("shifting %d positions\n", (current->occupiedPositions - position));
+//                printf("shifting %d positions\n", (current->occupiedPositions - position));
                 memmove(&current->children[position + 1], &current->children[position],
                         sizeof(TrieNode) * (current->occupiedPositions - position));
             }
@@ -79,7 +79,7 @@ void trie_query(Trie *trie, char *ngram) {
     TrieNode *current;
     SearchResults result;
     int i, j;
-    //Split the ngram to words and store them to array
+    // Split the ngram to words and store them to array
     int numberOfWords = 0, maxSize = DEFAULT_NGRAM_WORDS;
     char **ngramSplitted = malloc(sizeof(char *) * maxSize);
     if (!ngramSplitted) {
@@ -89,7 +89,7 @@ void trie_query(Trie *trie, char *ngram) {
     char *word = strtok(ngram, " ");
     while (word != NULL) {
         numberOfWords++;
-        if(numberOfWords == maxSize) {
+        if (numberOfWords == maxSize) {
             maxSize *= 2;
             ngramSplitted = realloc(ngramSplitted, sizeof(char *) * maxSize);
             if (!ngramSplitted) {
@@ -102,31 +102,43 @@ void trie_query(Trie *trie, char *ngram) {
     }
 
     int offset;
-    size_t sizeBuffer = (size_t)numberOfWords * WORD_SIZE;
+    size_t sizeBuffer = (size_t) numberOfWords * WORD_SIZE;
     char *resultsBuffer = malloc(sizeBuffer * sizeof(char));
     if (!resultsBuffer) {
         printf("malloc error %s\n", strerror(errno));
         exit(1);
     }
 
-    //Iterate the ngram word by word
-    for(i = 0; i < numberOfWords; i++){
+    int resultsFound = 0;
+    // Iterate the ngram word by word
+    for (i = 0; i < numberOfWords; i++) {
         current = trie->root;
         offset = 0;
         resultsBuffer[0] = '\0';
-        for(j = i; j < numberOfWords; j++){
+        for (j = i; j < numberOfWords; j++) {
             result = binary_search(current->children, ngramSplitted[j], current->occupiedPositions);
-            if(result.found == 0) {
+            if (result.found == 0) {
                 break;
             }
             current = &current->children[result.position];
-            //avoid OVERFLOWS with offset
+            // Avoid OVERFLOWS with offset
             offset += snprintf(resultsBuffer + offset, sizeBuffer - offset, "%s ", ngramSplitted[j]);
-            if(current->isFinal == 1) {
-                printf("%s\n",resultsBuffer);
+            if (current->isFinal == 1) {
+                // Remove the last space character ' '
+                resultsBuffer[offset - 1] = 0;
+                // For the first print, don't print '|'
+                if (resultsFound == 1) {
+                    printf("|");
+                }
+                printf("%s", resultsBuffer);
+                resultsFound = 1;
             }
         }
     }
+    if (resultsFound == 0) {
+        printf("-1");
+    }
+    printf("\n");
 
     free(resultsBuffer);
     free(ngramSplitted);
@@ -155,10 +167,10 @@ int trie_node_delete(TrieNode *trieNode) {
 
 void trie_node_print(TrieNode *trieNode) {
     int i;
-    if(trieNode->word != NULL) {
+    if (trieNode->word != NULL) {
         printf("Node with word: %s\n", trieNode->word);
     }
-    for(i = 0; i < trieNode->occupiedPositions; i++) {
+    for (i = 0; i < trieNode->occupiedPositions; i++) {
         printf("child %d: %s\n", i, trieNode->children[i].word);
     }
 }
@@ -190,7 +202,7 @@ SearchResults binary_search(TrieNode *childrenArray, char *word, int occupiedPos
 
     // Check if the word of middle is less than the target
     // If it is true, increase the target position
-    if(strncmp(childrenArray[middle].word, word, WORD_SIZE) < 0) {
+    if (strncmp(childrenArray[middle].word, word, WORD_SIZE) < 0) {
         results.position++;
     }
     return results;
@@ -199,11 +211,11 @@ SearchResults binary_search(TrieNode *childrenArray, char *word, int occupiedPos
 void trie_dfs(TrieNode *trieNode) {
     int i;
     printf("%s ", trieNode->word);
-    if(trieNode->isFinal == 1) {
+    if (trieNode->isFinal == 1) {
         printf("FINAL!");
     }
     printf("\n");
-    for(i = 0; i < trieNode->occupiedPositions; i++) {
+    for (i = 0; i < trieNode->occupiedPositions; i++) {
         trie_dfs(&trieNode->children[i]);
     }
 }
