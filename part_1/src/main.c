@@ -8,7 +8,7 @@ int main() {
 
     srand (time(NULL));
 
-//    char ngram1[100] = "one";
+//    char ngram1[100] = "1one";
 //    char ngram2[100] = "2two";
 //    char ngram3[100] = "3three";
 //    char ngram4[100] = "4four";
@@ -28,6 +28,7 @@ int main() {
     char assignment_ngram5[] = "this is a test";
     char assignment_ngram6[] = "this is a";
     char assignment_ngram7[] = "test";
+    char assignment_ngram8[] = "fast car";
 
     char assignment_query1[] = "this is a cat and a dog";
     char assignment_query2[] = "this is not the test";
@@ -35,7 +36,9 @@ int main() {
     char assignment_query4[] = "the car is red and fast";
 
 
+
     Trie *trie = trie_create();
+
 
 //    for (int i = 0; i < 100; ++i) {
 //        char *temp = malloc(20);
@@ -45,7 +48,7 @@ int main() {
 //    }
 
 //    trie_query(trie, ngramLarge);
-
+//
     trie_insert(trie, assignment_ngram1);
     trie_insert(trie, assignment_ngram2);
     trie_insert(trie, assignment_ngram3);
@@ -61,27 +64,14 @@ int main() {
     char assignment_query2COPY[] = "this is not the test";
     trie_query(trie, assignment_query2COPY);
 
-    trie_query(trie, assignment_query3);
+    trie_insert(trie, assignment_ngram8);
+
+    trie_delete_ngram(trie, assignment_query3);
+
     trie_query(trie, assignment_query4);
 
 
-//    trie_dfs(trie->root);
-
-
-//    trie_insert(trie, ngram5);
-//    trie_insert(trie, ngram1);
-//
-//    trie_insert(trie, ngram3);
-//
-//    trie_insert(trie, ngram6);
-//    trie_insert(trie, ngram4);
-//    trie_insert(trie, ngram2);
-//    trie_insert(trie, ngram7);
-
-//    trie_node_print(trie->root);
-//    trie_node_delete(trie->root);
-
-    trie_delete(trie);
+    trie_destroy(trie);
     printf("exiting..!\n");
     return 0;
 }
