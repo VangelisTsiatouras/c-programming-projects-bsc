@@ -79,27 +79,8 @@ void trie_query(Trie *trie, char *ngram) {
     TrieNode *current;
     SearchResults result;
     int i, j;
-    // Split the ngram to words and store them to array
-    int numberOfWords = 0, maxSize = DEFAULT_NGRAM_WORDS;
-    char **ngramSplitted = malloc(sizeof(char *) * maxSize);
-    if (!ngramSplitted) {
-        printf("malloc error %s\n", strerror(errno));
-        exit(1);
-    }
-    char *word = strtok(ngram, " ");
-    while (word != NULL) {
-        numberOfWords++;
-        if (numberOfWords == maxSize) {
-            maxSize *= 2;
-            ngramSplitted = realloc(ngramSplitted, sizeof(char *) * maxSize);
-            if (!ngramSplitted) {
-                printf("realloc error %s\n", strerror(errno));
-                exit(1);
-            }
-        }
-        ngramSplitted[numberOfWords - 1] = word;
-        word = strtok(NULL, " ");
-    }
+    int numberOfWords;
+    char **ngramSplitted = split_ngram(ngram, &numberOfWords);
 
     int offset;
     size_t sizeBuffer = (size_t) numberOfWords * WORD_SIZE;
@@ -148,27 +129,8 @@ void trie_delete_ngram(Trie *trie, char *ngram) {
     TrieNode *current;
     SearchResults result;
     int i, j;
-    // Split the ngram to words and store them to array
-    int numberOfWords = 0, maxSize = DEFAULT_NGRAM_WORDS;
-    char **ngramSplitted = malloc(sizeof(char *) * maxSize);
-    if (!ngramSplitted) {
-        printf("malloc error %s\n", strerror(errno));
-        exit(1);
-    }
-    char *word = strtok(ngram, " ");
-    while (word != NULL) {
-        numberOfWords++;
-        if (numberOfWords == maxSize) {
-            maxSize *= 2;
-            ngramSplitted = realloc(ngramSplitted, sizeof(char *) * maxSize);
-            if (!ngramSplitted) {
-                printf("realloc error %s\n", strerror(errno));
-                exit(1);
-            }
-        }
-        ngramSplitted[numberOfWords - 1] = word;
-        word = strtok(NULL, " ");
-    }
+    int numberOfWords;
+    char **ngramSplitted = split_ngram(ngram, &numberOfWords);
 
     // Iterate the trie from root and compare its words with the ngram given
     current = trie->root;
@@ -176,6 +138,7 @@ void trie_delete_ngram(Trie *trie, char *ngram) {
         result = binary_search(current->children, ngramSplitted[i], current->occupiedPositions);
         if (result.found == 0) {
             printf("ngram not found\n"); //todo return int code
+            free(ngramSplitted);
             return;
         }
         current = &current->children[result.position];
@@ -187,6 +150,7 @@ void trie_delete_ngram(Trie *trie, char *ngram) {
     for (i = numberOfWords - 1; i >= 0; i--) {
         // If you found a node that has children, return
         if (current->occupiedPositions > 0) {
+            free(ngramSplitted);
             return;
         }
         current = current->parent;
@@ -283,6 +247,32 @@ SearchResults binary_search(TrieNode *childrenArray, char *word, int occupiedPos
         results.position++;
     }
     return results;
+}
+
+char **split_ngram(char *ngram, int *numberOfWords) {
+    // Split the ngram to words and store them to array
+    int maxSize = DEFAULT_NGRAM_WORDS;
+    *numberOfWords = 0;
+    char **ngramSplitted = malloc(sizeof(char *) * maxSize);
+    if (!ngramSplitted) {
+        printf("malloc error %s\n", strerror(errno));
+        exit(1);
+    }
+    char *word = strtok(ngram, " ");
+    while (word != NULL) {
+        (*numberOfWords)++;
+        if (*numberOfWords == maxSize) {
+            maxSize *= 2;
+            ngramSplitted = realloc(ngramSplitted, sizeof(char *) * maxSize);
+            if (!ngramSplitted) {
+                printf("realloc error %s\n", strerror(errno));
+                exit(1);
+            }
+        }
+        ngramSplitted[*numberOfWords - 1] = word;
+        word = strtok(NULL, " ");
+    }
+    return ngramSplitted;
 }
 
 void trie_dfs(TrieNode *trieNode) {

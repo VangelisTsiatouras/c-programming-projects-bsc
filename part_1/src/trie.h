@@ -44,6 +44,8 @@ void trie_node_print(TrieNode *trieNode);
 
 SearchResults binary_search(TrieNode *childrenArray, char *word, int occupiedPositions);
 
+char **split_ngram(char *ngram, int *numberOfWords);
+
 void trie_dfs(TrieNode *trieNode);
 
 #endif //TRIE_H
