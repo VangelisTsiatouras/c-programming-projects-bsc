@@ -3,6 +3,6 @@
 
 #include "trie.h"
 
-int parser(char *initFile, char *queryFile);
+int parser(Trie *trie, char *initFile, char *queryFile);
 
 #endif //PARSER_H

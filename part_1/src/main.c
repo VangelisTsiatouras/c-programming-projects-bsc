@@ -51,8 +51,9 @@ int main(int argc, char *argv[]) {
     if (error != 0) {
         exit(0);
     }
-
-    parser(initFile, queryFile);
+    Trie *trie = trie_create();
+    parser(trie, initFile, queryFile);
+    trie_destroy(trie);
 
     return 0;
 }
