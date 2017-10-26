@@ -6,7 +6,6 @@
 #include "trie.h"
 
 Trie *trie_create() {
-    printf("trie init\n");
     Trie *trie = malloc(sizeof(Trie));
     if (!trie) {
         printf("malloc error %s\n", strerror(errno));
@@ -74,7 +73,7 @@ int trie_insert(Trie *trie, char *ngram) {
     current->isFinal = 1;
 }
 
-void trie_query(Trie *trie, char *ngram) {
+void trie_query(Trie *trie, char *ngram, QueryResults *queryResults) {
     TrieNode *current;
     SearchResults result;
     int i, j;
@@ -94,33 +93,29 @@ void trie_query(Trie *trie, char *ngram) {
     for (i = 0; i < numberOfWords; i++) {
         current = trie->root;
         offset = 0;
-        resultsBuffer[0] = '\0';
+       resultsBuffer[0] = '\0';
         for (j = i; j < numberOfWords; j++) {
             result = binary_search(current->children, ngramSplitted[j], current->occupiedPositions);
             if (result.found == 0) {
                 break;
             }
             current = &current->children[result.position];
+
             // Avoid overflows with offset
             offset += snprintf(resultsBuffer + offset, sizeBuffer - offset, "%s ", ngramSplitted[j]);
             if (current->isFinal == 1) {
                 // Remove the last space character ' '
-                resultsBuffer[offset - 1] = 0;
-                // For the first print, don't print '|'
-                if (resultsFound == 1) {
-                    printf("|");
-                }
-                printf("%s", resultsBuffer);
+                resultsBuffer[offset - 1] = '\0';
+                addLineQueryResults(queryResults, resultsBuffer);
                 resultsFound = 1;
 
             }
         }
     }
     if (resultsFound == 0) {
-        printf("-1");
+        sprintf(resultsBuffer, "-1");
+        addLineQueryResults(queryResults, resultsBuffer);
     }
-    printf("\n");
-
     free(resultsBuffer);
     free(ngramSplitted);
 }

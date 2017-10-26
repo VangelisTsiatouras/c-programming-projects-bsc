@@ -1,6 +1,8 @@
 #ifndef TRIE_H
 #define TRIE_H
 
+#include "queryresults.h"
+
 #define STARTING_SIZE_CHILD_ARRAY 4
 #define WORD_SIZE 32
 #define DEFAULT_NGRAM_WORDS 10
@@ -30,7 +32,7 @@ int trie_destroy(Trie *trie);
 
 int trie_insert(Trie *trie, char *ngram);
 
-void trie_query(Trie *trie, char *ngram);
+void trie_query(Trie *trie, char *ngram, QueryResults *queryResults);
 
 void trie_delete_ngram(Trie *trie, char *ngram);
 

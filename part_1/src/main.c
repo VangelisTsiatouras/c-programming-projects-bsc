@@ -6,8 +6,6 @@
 #include "queryresults.h" // todo na fugei sto teliko
 
 int main(int argc, char *argv[]) {
-    unitTestQueryResults();
-    return 0;
     int i, error = 0;
     char *initFile = NULL, *queryFile = NULL;
     // Parse arguments
