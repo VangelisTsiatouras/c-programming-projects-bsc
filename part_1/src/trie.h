@@ -51,6 +51,6 @@ SearchResults binary_search(TrieNode *childrenArray, char *word, int occupiedPos
 
 char **split_ngram(char *ngram, int *numberOfWords);
 
-void trie_dfs(TrieNode *trieNode);
+void trie_dfs_print(TrieNode *trieNode);
 
 #endif //TRIE_H

@@ -49,7 +49,6 @@ int parser(Trie *trie, char *initFile, char *queryFile) {
                 printf("default\n");
 
         }
-        //printf("%ld %s", lineSize, line);
     }
     free(line);
 

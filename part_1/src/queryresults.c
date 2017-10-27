@@ -91,6 +91,7 @@ int addLineQueryResults(QueryResults *queryResults, char *newLine) {
         return 0;
     }
     size_t currentSize = queryResults->lineSize[position];
+    // If new line cant fit in existing space
     if (newLineSize > currentSize) {
         if (newLineSize < currentSize * 2) {
             newLineSize = currentSize * 2;
@@ -109,7 +110,7 @@ int addLineQueryResults(QueryResults *queryResults, char *newLine) {
 
 void clearQueryResults(QueryResults *queryResults) {
     int i;
-    for (int i = 0; i < queryResults->totalLines; i++) {
+    for (i = 0; i < queryResults->totalLines; i++) {
         queryResults->lines[i][0] = '\0';
     }
     queryResults->elements = 0;
