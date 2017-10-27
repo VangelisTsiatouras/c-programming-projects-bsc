@@ -55,7 +55,7 @@ void printQueryResults(QueryResults *queryResults) {
     printf("\n");
 }
 
-int addLineQueryResults(QueryResults *queryResults, char *newLine) { //todo add lines if full
+int addLineQueryResults(QueryResults *queryResults, char *newLine) {
     int i;
     int position = queryResults->elements;
 

@@ -4,7 +4,6 @@
 #include <time.h>
 
 #include "parser.h"
-#include "queryresults.h" // todo na fugei sto teliko
 
 int main(int argc, char *argv[]) {
 
