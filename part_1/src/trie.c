@@ -27,6 +27,7 @@ int trie_destroy(Trie *trie) {
 }
 
 int trie_insert(Trie *trie, char *ngram) {
+
     TrieNode *current = trie->root;
     SearchResults result;
     char *word = strtok(ngram, " \n");
@@ -93,7 +94,7 @@ void trie_query(Trie *trie, char *ngram, QueryResults *queryResults) {
     for (i = 0; i < numberOfWords; i++) {
         current = trie->root;
         offset = 0;
-       resultsBuffer[0] = '\0';
+        resultsBuffer[0] = '\0';
         for (j = i; j < numberOfWords; j++) {
             result = binary_search(current->children, ngramSplitted[j], current->occupiedPositions);
             if (result.found == 0) {
@@ -102,13 +103,14 @@ void trie_query(Trie *trie, char *ngram, QueryResults *queryResults) {
             current = &current->children[result.position];
 
             // Avoid overflows with offset
-            offset += snprintf(resultsBuffer + offset, sizeBuffer - offset, "%s ", ngramSplitted[j]);
+            // If this is not the first, add a space to separate words
+            if (j != i) {
+                offset += snprintf(resultsBuffer + offset, sizeBuffer - offset, " ");
+            }
+            offset += snprintf(resultsBuffer + offset, sizeBuffer - offset, "%s", ngramSplitted[j]);
             if (current->isFinal == 1) {
-                // Remove the last space character ' '
-                resultsBuffer[offset - 1] = '\0';
                 addLineQueryResults(queryResults, resultsBuffer);
                 resultsFound = 1;
-
             }
         }
     }
