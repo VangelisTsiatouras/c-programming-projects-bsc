@@ -62,7 +62,17 @@ int trie_insert(Trie *trie, char *ngram) {
             }
             trie_node_create(&current->children[position], current);
 //            printf("Creating node with word: %s\n", word);
-            strncpy(current->children[position].word, word, WORD_SIZE);
+            size_t newWordLength = strlen(word) + 1;
+            if (newWordLength > WORD_SIZE) {
+                current->children[position].largeWord = malloc(newWordLength * sizeof(char));
+                if (!current->children[position].largeWord) {
+                    printf("malloc error %s\n", strerror(errno));
+                    exit(1);
+                }
+                strncpy(current->children[position].largeWord, word, newWordLength);
+            } else {
+                strncpy(current->children[position].word, word, WORD_SIZE);
+            }
             current->occupiedPositions++;
         }
 
@@ -165,6 +175,8 @@ void trie_delete_ngram(Trie *trie, char *ngram) {
 }
 
 int trie_node_create(TrieNode *trieNode, TrieNode *parent) {
+    trieNode->word[0] = '\0';
+    trieNode->largeWord = NULL;
     trieNode->capacity = STARTING_SIZE_CHILD_ARRAY;
     trieNode->occupiedPositions = 0;
     trieNode->parent = parent;
@@ -182,7 +194,17 @@ int trie_node_destroy(TrieNode *trieNode) {
     for (i = 0; i < trieNode->occupiedPositions; ++i) {
         trie_node_destroy(&trieNode->children[i]);
     }
+    if (trieNode->largeWord != NULL) {
+        free(trieNode->largeWord);
+    }
     free(trieNode->children);
+}
+
+char* trie_node_get_word(TrieNode *trieNode) {
+    if (trieNode->largeWord == NULL) {
+        return trieNode->word;
+    }
+    return trieNode->largeWord;
 }
 
 int trie_node_delete_word(TrieNode *trieNode, int position) {
@@ -209,8 +231,9 @@ void trie_node_print(TrieNode *trieNode) {
 
 SearchResults binary_search(TrieNode *childrenArray, char *word, int occupiedPositions) {
     SearchResults results;
-    int strncmp_result;
+    int strcmp_result;
     int left, right, middle = 0;
+    char *nodeWord;
     results.found = 0;
     left = 0;
     right = occupiedPositions - 1;
@@ -224,12 +247,13 @@ SearchResults binary_search(TrieNode *childrenArray, char *word, int occupiedPos
     }
     while (left <= right) {
         middle = (left + right) / 2;
-        strncmp_result = strncmp(childrenArray[middle].word, word, WORD_SIZE);
+        nodeWord = trie_node_get_word(&childrenArray[middle]);
+        strcmp_result = strcmp(nodeWord, word);
 //        printf("%s\n", childrenArray[middle].word);
-        if (strncmp_result < 0) {
+        if (strcmp_result < 0) {
             left = middle + 1;
             continue;
-        } else if (strncmp_result > 0) {
+        } else if (strcmp_result > 0) {
             right = middle - 1;
             continue;
         } else {
@@ -241,7 +265,7 @@ SearchResults binary_search(TrieNode *childrenArray, char *word, int occupiedPos
 
     // Check if the word of middle is less than the target
     // If it is true, increase the target position
-    if (strncmp(childrenArray[middle].word, word, WORD_SIZE) < 0) {
+    if (strcmp(nodeWord, word) < 0) {
         results.position++;
     }
     return results;
