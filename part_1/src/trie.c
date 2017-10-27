@@ -47,7 +47,7 @@ int trie_insert(Trie *trie, char *ngram) {
             if (current->occupiedPositions == current->capacity) {
                 // The new size will be the double of the old size
                 current->capacity *= 2;
-                TrieNode *tempChildren = (TrieNode *) realloc(current->children, current->capacity * sizeof(TrieNode)); //todo na fugei to cast
+                TrieNode *tempChildren = realloc(current->children, current->capacity * sizeof(TrieNode));
                 if (tempChildren == NULL) {
                     printf("realloc error %s\n", strerror(errno));
                     exit(-1);
