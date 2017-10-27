@@ -1,11 +1,14 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <time.h>
 
 #include "parser.h"
 #include "queryresults.h" // todo na fugei sto teliko
 
 int main(int argc, char *argv[]) {
+
+    clock_t begin = clock();
     int i, error = 0;
     char *initFile = NULL, *queryFile = NULL;
     // Parse arguments
@@ -55,6 +58,10 @@ int main(int argc, char *argv[]) {
     Trie *trie = trie_create();
     parser(trie, initFile, queryFile);
     trie_destroy(trie);
+
+    clock_t end = clock();
+    double timeSpent = (double)(end - begin) / CLOCKS_PER_SEC;
+    printf("time elapsed %.4f seconds\n", timeSpent);
 
     return 0;
 }
