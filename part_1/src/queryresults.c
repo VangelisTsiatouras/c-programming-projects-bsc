@@ -31,6 +31,13 @@ QueryResults *createQueryResults(int lines, size_t lineSize) {
             exit(-1);
         }
     }
+    queryResults->printBuffer = malloc(DEFAULT_PRINT_BUFFER * sizeof(char));
+    if (!queryResults->printBuffer) {
+        printf("malloc error %s\n", strerror(errno));
+        exit(-1);
+    }
+    queryResults->printBufferSize = DEFAULT_PRINT_BUFFER;
+    queryResults->printBufferOffset = 0;
     return queryResults;
 }
 
@@ -41,18 +48,44 @@ void destroyQueryResults(QueryResults *queryResults) {
     }
     free(queryResults->lines);
     free(queryResults->lineSize);
+    free(queryResults->printBuffer);
     free(queryResults);
 }
 
-void printQueryResults(QueryResults *queryResults) {
+void copyResultsToBufferQueryResults(QueryResults *queryResults) {
     int i;
-    for (i = 0; i < queryResults->elements; ++i) {
-        if (i != 0) {
-            printf("|");
+    char *buffer = queryResults->printBuffer;
+    int offset = queryResults->printBufferOffset;
+    for (i = 0; i < queryResults->elements; i++) {
+        size_t length = queryResults->lineSize[i] + 1;//strlen(queryResults->lines[i]) + 1;
+        size_t newSize = offset + length + 2;
+        if (newSize > queryResults->printBufferSize) {
+            queryResults->printBufferSize *= 2;
+            if (newSize > queryResults->printBufferSize) {
+                queryResults->printBufferSize = newSize;
+            }
+            buffer = realloc(buffer, queryResults->printBufferSize * sizeof(char));
+            if (!buffer) {
+                printf("realloc error %s\n", strerror(errno));
+                exit(-1);
+            }
+            queryResults->printBuffer = buffer;
         }
-        printf("%s", queryResults->lines[i]);
+        if (i != 0) {
+            offset += sprintf(buffer + offset, "|");
+        }
+        offset += sprintf(buffer + offset, "%s", queryResults->lines[i]);
     }
-    printf("\n");
+    offset += sprintf(buffer + offset, "\n");
+    queryResults->printBufferOffset = offset;
+    clearQueryResults(queryResults);
+}
+
+void flushQueryResults(QueryResults *queryResults) {
+    printf("%s", queryResults->printBuffer);
+    queryResults->printBufferOffset = 0;
+    queryResults->printBuffer[0] = '\0';
+    clearQueryResults(queryResults);
 }
 
 int addLineQueryResults(QueryResults *queryResults, char *newLine) {
@@ -122,15 +155,12 @@ void unitTestQueryResults() {
     addLineQueryResults(queryResults, "Second sentence");
     // Add a big sentence
     addLineQueryResults(queryResults, "This is a big line. This is a big line. This is a big line");
-    printQueryResults(queryResults);
+    copyResultsToBufferQueryResults(queryResults);
     // Add a sentence when you dont have space
     addLineQueryResults(queryResults, "Last sentence");
     // Print
-    printQueryResults(queryResults);
-    // Clear
-    clearQueryResults(queryResults);
-    // Print the empty
-    printQueryResults(queryResults);
+    copyResultsToBufferQueryResults(queryResults);
+    flushQueryResults(queryResults);
     // Destroy
     destroyQueryResults(queryResults);
 }

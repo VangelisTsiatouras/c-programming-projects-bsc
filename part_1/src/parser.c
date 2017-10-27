@@ -30,8 +30,8 @@ int parser(Trie *trie, char *initFile, char *queryFile) {
             case 'Q':
                 //printf("%s", line);
                 trie_query(trie, &line[2], queryResults);
-                printQueryResults(queryResults);
-                clearQueryResults(queryResults);
+                copyResultsToBufferQueryResults(queryResults);
+
                 break;
             case 'A':
                 trie_insert(trie, &line[2]);
@@ -44,6 +44,7 @@ int parser(Trie *trie, char *initFile, char *queryFile) {
                 break;
             case 'F':
 //                printf("F\n");
+                flushQueryResults(queryResults);
                 break;
             default:
                 printf("default\n");

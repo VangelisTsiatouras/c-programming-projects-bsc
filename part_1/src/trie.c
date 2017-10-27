@@ -88,7 +88,7 @@ void trie_query(Trie *trie, char *ngram, QueryResults *queryResults) {
     char **splitNgram = split_ngram(ngram, &numberOfWords);
 
     int offset;
-    size_t sizeBuffer = (size_t) numberOfWords * WORD_SIZE;
+    size_t sizeBuffer = (size_t) numberOfWords * WORD_SIZE; //todo den 8a xwresoun ola
     char *resultsBuffer = malloc(sizeBuffer * sizeof(char));
     if (!resultsBuffer) {
         printf("malloc error %s\n", strerror(errno));
