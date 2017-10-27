@@ -122,39 +122,45 @@ void trie_query(Trie *trie, char *ngram, QueryResults *queryResults) {
     free(ngramSplitted);
 }
 
-void trie_delete_ngram(Trie *trie, char *ngram) {//todo optimize
+void trie_delete_ngram(Trie *trie, char *ngram) {
     TrieNode *current;
     SearchResults result;
     int i, j;
     int numberOfWords;
     char **ngramSplitted = split_ngram(ngram, &numberOfWords);
+    int *positionArray = malloc(numberOfWords * sizeof(int));
+    if (!positionArray) {
+        printf("malloc error %s\n", strerror(errno));
+        exit(-1);
+    }
 
     // Iterate the trie from root and compare its words with the ngram given
     current = trie->root;
     for (i = 0; i < numberOfWords; i++) {
         result = binary_search(current->children, ngramSplitted[i], current->occupiedPositions);
+        positionArray[i] = result.position;
         if (result.found == 0) {
             //printf("ngram not found\n"); //todo return int code
+            free(positionArray);
             free(ngramSplitted);
             return;
         }
         current = &current->children[result.position];
     }
-    // Mark the last word as not final
-    //TrieNode *inner = current;
     // If you are then the ngram was stored in the trie
     // Iterate the ngram bottom-up
     for (i = numberOfWords - 1; i >= 0; i--) {
         // If you found a node that has children or is final, return
         if (current->occupiedPositions > 0 || current->isFinal == 1) {
+            free(positionArray);
             free(ngramSplitted);
             current->isFinal = 0;
             return;
         }
         current = current->parent;
-        trie_node_delete_word(current, ngramSplitted[i]);
+        trie_node_delete_word(current, positionArray[i]);
     }
-    //inner->isFinal = 0;
+    free(positionArray);
     free(ngramSplitted);
 }
 
@@ -179,14 +185,7 @@ int trie_node_destroy(TrieNode *trieNode) {
     free(trieNode->children);
 }
 
-int trie_node_delete_word(TrieNode *trieNode, char *word) {
-    SearchResults results;
-    results = binary_search(trieNode->children, word, trieNode->occupiedPositions);
-    int position = results.position;
-    // Node with the given word not found
-    if (results.found == 0) {
-        return 1;
-    }
+int trie_node_delete_word(TrieNode *trieNode, int position) {
     // Free the node
     trie_node_destroy(&trieNode->children[position]);
     // If this isn't the last element in the children array

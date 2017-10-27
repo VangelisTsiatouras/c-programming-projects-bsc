@@ -40,7 +40,7 @@ int trie_node_create(TrieNode *trieNode, TrieNode *parent);
 
 int trie_node_destroy(TrieNode *trieNode);
 
-int trie_node_delete_word(TrieNode *trieNode, char *word);
+int trie_node_delete_word(TrieNode *trieNode, int position);
 
 void trie_node_print(TrieNode *trieNode);
 
