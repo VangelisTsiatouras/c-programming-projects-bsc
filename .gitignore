@@ -30,6 +30,7 @@
 *.exe
 *.out
 *.app
+*trie
 
 # Ignore CLion's files
 *.idea/
