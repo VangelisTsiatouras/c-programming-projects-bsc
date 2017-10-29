@@ -4,8 +4,9 @@
 #include "queryresults.h"
 
 #define STARTING_SIZE_CHILD_ARRAY 4
-#define WORD_SIZE 16
+#define WORD_SIZE 20
 #define DEFAULT_NGRAM_WORDS 10
+#define DEFAULT_QUERY_BUFFER 20
 
 typedef struct TrieNode {
     char word[WORD_SIZE];

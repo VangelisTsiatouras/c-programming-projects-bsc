@@ -88,7 +88,7 @@ void trie_query(Trie *trie, char *ngram, QueryResults *queryResults) {
     char **splitNgram = split_ngram(ngram, &numberOfWords);
 
     int offset;
-    size_t sizeBuffer = (size_t) numberOfWords * WORD_SIZE; //todo den 8a xwresoun ola
+    size_t sizeBuffer = DEFAULT_QUERY_BUFFER;
     char *resultsBuffer = malloc(sizeBuffer * sizeof(char));
     if (!resultsBuffer) {
         printf("malloc error %s\n", strerror(errno));
@@ -107,6 +107,22 @@ void trie_query(Trie *trie, char *ngram, QueryResults *queryResults) {
                 break;
             }
             current = &current->children[result.position];
+            // Check if next word fits in resultsBuffer
+            // If not realloc buffer
+            size_t wordSize = strlen(splitNgram[j]) + 1;
+            size_t newSize = offset + wordSize + 1;
+            if (newSize > sizeBuffer) {
+                sizeBuffer *= 2;
+                if (newSize > sizeBuffer) {
+                    sizeBuffer = newSize;
+                }
+                resultsBuffer = realloc(resultsBuffer, sizeBuffer * sizeof(char));
+                if (!resultsBuffer) {
+                    printf("realloc error %s\n", strerror(errno));
+                    exit(-1);
+                }
+
+            }
             // Avoid overflows with offset
             // If this is not the first, add a space to separate words
             if (j != i) {
@@ -303,7 +319,3 @@ void trie_dfs_print(TrieNode *trieNode) {
         trie_dfs_print(&trieNode->children[i]);
     }
 }
-
-//TODO LIST
-//todo 1 use buffer sthn trie_query
-//todo 2 use hybrid string gia to word
