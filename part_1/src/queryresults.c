@@ -141,19 +141,3 @@ void clearQueryResults(QueryResults *queryResults) {
     }
     queryResults->elements = 0;
 }
-
-void unitTestQueryResults() {
-    QueryResults *queryResults = createQueryResults(3, 20);
-    addLineQueryResults(queryResults, "Test sentence");
-    addLineQueryResults(queryResults, "Second sentence");
-    // Add a big sentence
-    addLineQueryResults(queryResults, "This is a big line. This is a big line. This is a big line");
-    copyResultsToBufferQueryResults(queryResults);
-    // Add a sentence when you dont have space
-    addLineQueryResults(queryResults, "Last sentence");
-    // Print
-    copyResultsToBufferQueryResults(queryResults);
-    flushQueryResults(queryResults);
-    // Destroy
-    destroyQueryResults(queryResults);
-}

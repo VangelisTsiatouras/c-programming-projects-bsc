@@ -30,6 +30,4 @@ int addLineQueryResults(QueryResults *queryResults, char *line);
 
 void clearQueryResults(QueryResults *queryResults);
 
-void unitTestQueryResults();
-
 #endif //QUERYRESULTS_H
