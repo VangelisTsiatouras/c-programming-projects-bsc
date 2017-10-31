@@ -8,33 +8,32 @@ QueryResults *createQueryResults(int lines, size_t lineSize) {
     QueryResults *queryResults = malloc(sizeof(QueryResults));
     if (!queryResults) {
         printf("malloc error %s\n", strerror(errno));
-        exit(-1);
+        exit(MALLOC_ERROR);
     }
     queryResults->elements = 0;
     queryResults->totalLines = lines;
     queryResults->lineSize = malloc(lines * sizeof(size_t));
     if (!queryResults->lineSize) {
         printf("malloc error %s\n", strerror(errno));
-        exit(-1);
+        exit(MALLOC_ERROR);
     }
     queryResults->lines = malloc(lines * sizeof(char *));
     if (!queryResults->lines) {
         printf("malloc error %s\n", strerror(errno));
-        exit(-1);
+        exit(MALLOC_ERROR);
     }
-    int i;
-    for (i = 0; i < lines; i++) {
+    for (int i = 0; i < lines; i++) {
         queryResults->lineSize[i] = lineSize;
         queryResults->lines[i] = malloc(lineSize * sizeof(char));
         if (!queryResults->lines[i]) {
             printf("malloc error %s\n", strerror(errno));
-            exit(-1);
+            exit(MALLOC_ERROR);
         }
     }
     queryResults->printBuffer = malloc(DEFAULT_PRINT_BUFFER * sizeof(char));
     if (!queryResults->printBuffer) {
         printf("malloc error %s\n", strerror(errno));
-        exit(-1);
+        exit(MALLOC_ERROR);
     }
     queryResults->printBufferSize = DEFAULT_PRINT_BUFFER;
     queryResults->printBufferOffset = 0;
@@ -42,8 +41,7 @@ QueryResults *createQueryResults(int lines, size_t lineSize) {
 }
 
 void destroyQueryResults(QueryResults *queryResults) {
-    int i;
-    for (i = 0; i < queryResults->totalLines; i++) {
+    for (int i = 0; i < queryResults->totalLines; i++) {
         free(queryResults->lines[i]);
     }
     free(queryResults->lines);
@@ -53,11 +51,10 @@ void destroyQueryResults(QueryResults *queryResults) {
 }
 
 void copyResultsToBufferQueryResults(QueryResults *queryResults) {
-    int i;
     char *buffer = queryResults->printBuffer;
     int offset = queryResults->printBufferOffset;
-    for (i = 0; i < queryResults->elements; i++) {
-        size_t length = queryResults->lineSize[i] + 1;//strlen(queryResults->lines[i]) + 1;
+    for (int i = 0; i < queryResults->elements; i++) {
+        size_t length = queryResults->lineSize[i] + 1;
         size_t newSize = offset + length + 2;
         if (newSize > queryResults->printBufferSize) {
             queryResults->printBufferSize *= 2;
@@ -67,7 +64,7 @@ void copyResultsToBufferQueryResults(QueryResults *queryResults) {
             buffer = realloc(buffer, queryResults->printBufferSize * sizeof(char));
             if (!buffer) {
                 printf("realloc error %s\n", strerror(errno));
-                exit(-1);
+                exit(REALLOC_ERROR);
             }
             queryResults->printBuffer = buffer;
         }
@@ -89,12 +86,10 @@ void flushQueryResults(QueryResults *queryResults) {
 }
 
 int addLineQueryResults(QueryResults *queryResults, char *newLine) {
-    int i;
     int position = queryResults->elements;
-
-    for (i = 0; i < position; ++i) {
+    for (int i = 0; i < position; i++) {
         if (strcmp(newLine, queryResults->lines[i]) == 0) {
-            return 1;
+            return ADD_LINE_FOUND;
         }
     }
     size_t newLineSize = strlen(newLine) + 1;
@@ -104,24 +99,23 @@ int addLineQueryResults(QueryResults *queryResults, char *newLine) {
         queryResults->lines = realloc(queryResults->lines, queryResults->totalLines * sizeof(char *));
         if (!queryResults->lines) {
             printf("realloc error %s\n", strerror(errno));
-            exit(-1);
+            exit(REALLOC_ERROR);
         }
-
         queryResults->lineSize = realloc(queryResults->lineSize, queryResults->totalLines * sizeof(size_t));
         if (!queryResults->lineSize) {
             printf("realloc error %s\n", strerror(errno));
-            exit(-1);
+            exit(REALLOC_ERROR);
         }
         queryResults->lineSize[position] = newLineSize;
         queryResults->lines[position] = malloc(newLineSize * sizeof(char));
         if (!queryResults->lines[position]) {
             printf("malloc error %s\n", strerror(errno));
-            exit(-1);
+            exit(MALLOC_ERROR);
         }
         strcpy(queryResults->lines[position], newLine);
         queryResults->elements++;
         queryResults->lineSize[position] = newLineSize;
-        return 0;
+        return SUCCESS;
     }
     size_t currentSize = queryResults->lineSize[position];
     // If new line cant fit in existing space
@@ -132,18 +126,17 @@ int addLineQueryResults(QueryResults *queryResults, char *newLine) {
         queryResults->lines[position] = realloc(queryResults->lines[position], newLineSize * sizeof(char));
         if (!queryResults->lines[position]) {
             printf("realloc error %s\n", strerror(errno));
-            exit(-1);
+            exit(REALLOC_ERROR);
         }
     }
     strcpy(queryResults->lines[position], newLine);
     queryResults->elements++;
     queryResults->lineSize[position] = newLineSize;
-    return 0;
+    return SUCCESS;
 }
 
 void clearQueryResults(QueryResults *queryResults) {
-    int i;
-    for (i = 0; i < queryResults->totalLines; i++) {
+    for (int i = 0; i < queryResults->totalLines; i++) {
         queryResults->lines[i][0] = '\0';
     }
     queryResults->elements = 0;

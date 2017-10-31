@@ -3,5 +3,5 @@ project(tries)
 
 set(CMAKE_C_STANDARD 99)
 
-set(SOURCE_FILES main.c parser.c parser.h trie.h trie.c queryresults.c queryresults.h)
+set(SOURCE_FILES main.c parser.c parser.h trie.h trie.c queryresults.c queryresults.h defs.h)
 add_executable(tries ${SOURCE_FILES})

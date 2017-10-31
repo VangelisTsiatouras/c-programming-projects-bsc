@@ -1,6 +1,8 @@
 #ifndef QUERYRESULTS_H
 #define QUERYRESULTS_H
 
+#include "defs.h"
+
 #define DEFAULT_LINES 8
 #define DEFAULT_LINE_SIZE 64
 #define DEFAULT_PRINT_BUFFER 1024
@@ -14,8 +16,6 @@ typedef struct QueryResults{
     size_t printBufferSize;
     int printBufferOffset;
 } QueryResults;
-
-//todo sunarthsh pou na kanei print se string kai na exei static metavlhth
 
 
 QueryResults *createQueryResults(int lines, size_t lineSize);

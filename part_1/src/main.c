@@ -35,7 +35,6 @@ int main(int argc, char *argv[]) {
             break;
         }
     }
-
     if (error != 0) {
         switch (error) {
             case 1:
@@ -52,7 +51,7 @@ int main(int argc, char *argv[]) {
         printf("NOTE: flags '-i' & '-q' are required\n");
     }
     if (error != 0) {
-        exit(0);
+        exit(SUCCESS);
     }
     Trie *trie = trie_create();
     parser(trie, initFile, queryFile);
@@ -62,5 +61,5 @@ int main(int argc, char *argv[]) {
     double timeSpent = (double)(end - begin) / CLOCKS_PER_SEC;
     printf("\nTime elapsed %.4f seconds\n", timeSpent);
 
-    return 0;
+    return SUCCESS;
 }

@@ -11,12 +11,12 @@ int parser(Trie *trie, char *initFile, char *queryFile) {
     iFile = fopen(initFile, "r");
     if(iFile == NULL) {
         printf("fopen error %s\n", strerror(errno));
-        exit(-1);
+        exit(FOPEN_ERROR);
     }
     qFile = fopen(queryFile, "r");
     if(qFile == NULL) {
         printf("fopen error %s\n", strerror(errno));
-        exit(-1);
+        exit(FOPEN_ERROR);
     }
     QueryResults *queryResults = createQueryResults(DEFAULT_LINES, DEFAULT_LINE_SIZE);
     char* line = NULL;
@@ -52,9 +52,8 @@ int parser(Trie *trie, char *initFile, char *queryFile) {
         }
     }
     free(line);
-
     fclose(iFile);
     fclose(qFile);
     destroyQueryResults(queryResults);
-    return 0;
+    return SUCCESS;
 }
