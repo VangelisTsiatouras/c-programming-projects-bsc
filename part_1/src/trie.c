@@ -213,7 +213,7 @@ void trie_node_delete_word(TrieNode *trieNode, int position) {
     // Free the node
     trie_node_destroy(&trieNode->children[position]);
     // If this isn't the last element in the children array
-    if (position < trieNode->occupiedPositions) {
+    if (position < trieNode->occupiedPositions - 1) {
         // Shift elements to the left
         memmove(&trieNode->children[position], &trieNode->children[position + 1],
                 sizeof(TrieNode) * (trieNode->occupiedPositions - position - 1));
