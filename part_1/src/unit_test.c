@@ -21,51 +21,55 @@ START_TEST (unitTestQueryResults)
         ck_assert_int_eq(
                 addLineQueryResults(queryResults, "This is a big line. This is a big line. This is a big line"),
                 SUCCESS);
-        //TODO unit test void function
         copyResultsToBufferQueryResults(queryResults);
         // Add a sentence when you dont have space
         ck_assert_int_eq(addLineQueryResults(queryResults, "Last sentence"), SUCCESS);
         // Print
-        //TODO unit test void function
         copyResultsToBufferQueryResults(queryResults);
         flushQueryResults(queryResults);
         // Destroy
         destroyQueryResults(queryResults);
-    }END_TEST;
+    }
+END_TEST;
 
-// WIP
+
 START_TEST(unitTestTrie)
     {
-        char tNgram[] = "test ngram";
-        char tNgram2[] = "test ngram";
-        char tNgram3[] = "test ngram";
-        char tNgram4[] = "test ngram2";
+        char tNgram[100] = "test ngram";
+        char tNgram2[100] = "test ngram";
+        char tNgram3[100] = "test ngram";
+        char tNgram4[100] = "test ngram2";
+        // TRIENODE CHECK
         TrieNode *trieNode = NULL;
-        ck_assert_int_eq(trie_node_create(trieNode, NULL), NOT_ALLOCATED_ERROR);
+        // Create node with unallocated space
+        ck_assert_int_eq(trie_node_create(trieNode), NOT_ALLOCATED_ERROR);
+
         trieNode = malloc(sizeof(TrieNode));
-        ck_assert_int_eq(trie_node_create(trieNode, NULL), SUCCESS);
+        // Create node with space
+        ck_assert_int_eq(trie_node_create(trieNode), SUCCESS);
         free(trieNode);
+
+        // TRIE CHECK
+        // Create the trie
         Trie *trie = trie_create();
         ck_assert_ptr_ne(trie, NULL);
+        // Insert an ngram
         ck_assert_int_eq(trie_insert(trie, tNgram), SUCCESS);
+        // Check if binary search finds its first word
         SearchResults se = binary_search(trie->root->children, "test", trie->root->occupiedPositions);
         ck_assert_int_eq(se.found, 1);
 
-        // This is already unit tested
+        // QueryResults is already unit tested
         QueryResults *queryResults = createQueryResults(DEFAULT_LINES, DEFAULT_LINE_SIZE);
         trie_query(trie, tNgram2, queryResults);
         copyResultsToBufferQueryResults(queryResults);
         flushQueryResults(queryResults);
+        // Check delete trie
         ck_assert_int_eq(trie_delete_ngram(trie, tNgram3), SUCCESS);
         ck_assert_int_eq(trie_delete_ngram(trie, tNgram4), DELETE_NOT_FOUND);
 
-
-
-
-
-        //ADD TESTS HERE!
-
-    }END_TEST;
+    }
+END_TEST;
 
 Suite *query_results_suite(void) {
     Suite *s;
@@ -73,7 +77,7 @@ Suite *query_results_suite(void) {
 
     s = suite_create("QueryResults");
 
-    /* Core test case */
+    // Core test case
     tc_core = tcase_create("Core");
 
     tcase_add_test(tc_core, unitTestQueryResults);
@@ -88,7 +92,7 @@ Suite *trie_suite(void) {
 
     s = suite_create("Trie");
 
-    /* Core test case */
+    // Core test case
     tc_core = tcase_create("Core");
 
     tcase_add_test(tc_core, unitTestTrie);
@@ -117,5 +121,4 @@ int main(void) {
     srunner_free(sr);
 
     return (number_failed == 0) ? EXIT_SUCCESS : EXIT_FAILURE;
-    // Add trie unit test here
 }

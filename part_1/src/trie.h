@@ -13,7 +13,6 @@ typedef struct TrieNode {
     char word[WORD_SIZE];
     char *largeWord;
     struct TrieNode *children;
-    struct TrieNode *parent;
     int occupiedPositions;
     int capacity;
     char isFinal;
@@ -36,7 +35,7 @@ int trie_insert(Trie *trie, char *ngram);
 void trie_query(Trie *trie, char *ngram, QueryResults *queryResults);
 int trie_delete_ngram(Trie *trie, char *ngram);
 
-int trie_node_create(TrieNode *trieNode, TrieNode *parent);
+int trie_node_create(TrieNode *trieNode);
 void trie_node_destroy(TrieNode *trieNode);
 char* trie_node_get_word(TrieNode *trieNode);
 void trie_node_delete_word(TrieNode *trieNode, int position);

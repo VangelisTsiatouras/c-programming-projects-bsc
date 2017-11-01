@@ -16,7 +16,7 @@ Trie *trie_create() {
         printf("malloc error %s\n", strerror(errno));
         exit(MALLOC_ERROR);
     }
-    trie_node_create(trie->root, NULL);
+    trie_node_create(trie->root);
     return trie;
 }
 
@@ -56,7 +56,7 @@ int trie_insert(Trie *trie, char *ngram) {
                 memmove(&current->children[position + 1], &current->children[position],
                         sizeof(TrieNode) * (current->occupiedPositions - position));
             }
-            trie_node_create(&current->children[position], current);
+            trie_node_create(&current->children[position]);
             size_t newWordLength = strlen(word) + 1;
             if (newWordLength > WORD_SIZE) {
                 current->children[position].largeWord = malloc(newWordLength * sizeof(char));
@@ -169,25 +169,26 @@ int trie_delete_ngram(Trie *trie, char *ngram) {
     // If you are then the ngram was stored in the trie
     // Iterate the ngram bottom-up
     for (int i = numberOfWords - 1; i >= 0; i--) {
-        // If you found a node that has children or is final, return
-        if (current->occupiedPositions > 0 || current->isFinal == 1) {
-            if (i < numberOfWords - 1) {
+        // If this is the last word of the ngram
+        if (i == numberOfWords - 1) {
+            current->isFinal = 0;
+            // If it has children
+            if (current->occupiedPositions > 0) {
                 free(positionArray);
                 free(splitNgram);
                 free(parents);
                 return SUCCESS;
-            } else {
-                current->isFinal = 0;
-                if (current->occupiedPositions > 0) {
-                    free(positionArray);
-                    free(splitNgram);
-                    free(parents);
-                    return SUCCESS;
-                }
             }
         }
+        // If it has children or if it is a final state
+        if (current->occupiedPositions > 0 || current->isFinal == 1) {
+            free(positionArray);
+            free(splitNgram);
+            free(parents);
+            return SUCCESS;
+
+        }
         current = parents[i];
-        //current = current->parent;
         trie_node_delete_word(current, positionArray[i]);
     }
     free(positionArray);
@@ -196,12 +197,14 @@ int trie_delete_ngram(Trie *trie, char *ngram) {
     return SUCCESS;
 }
 
-int trie_node_create(TrieNode *trieNode, TrieNode *parent) {
+int trie_node_create(TrieNode *trieNode) {
+    if (trieNode == NULL) {
+        return NOT_ALLOCATED_ERROR;
+    }
     trieNode->word[0] = '\0';
     trieNode->largeWord = NULL;
     trieNode->capacity = STARTING_SIZE_CHILD_ARRAY;
     trieNode->occupiedPositions = 0;
-    trieNode->parent = parent;
     trieNode->isFinal = 0;
     trieNode->children = malloc(trieNode->capacity * sizeof(TrieNode));
     if (!trieNode->children) {
@@ -212,7 +215,7 @@ int trie_node_create(TrieNode *trieNode, TrieNode *parent) {
 }
 
 void trie_node_destroy(TrieNode *trieNode) {
-    for (int i = 0; i < trieNode->occupiedPositions; ++i) {
+    for (int i = 0; i < trieNode->occupiedPositions; i++) {
         trie_node_destroy(&trieNode->children[i]);
     }
     if (trieNode->largeWord != NULL) {
