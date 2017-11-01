@@ -147,6 +147,11 @@ int trie_delete_ngram(Trie *trie, char *ngram) {
         printf("malloc error %s\n", strerror(errno));
         exit(MALLOC_ERROR);
     }
+    TrieNode **parents = malloc(numberOfWords * sizeof(TrieNode*));
+    if (!parents) {
+        printf("malloc error %s\n", strerror(errno));
+        exit(MALLOC_ERROR);
+    }
     // Iterate the trie from root and compare its words with the ngram given
     current = trie->root;
     for (int i = 0; i < numberOfWords; i++) {
@@ -155,8 +160,10 @@ int trie_delete_ngram(Trie *trie, char *ngram) {
         if (result.found == 0) {
             free(positionArray);
             free(splitNgram);
+            free(parents);
             return DELETE_NOT_FOUND;
         }
+        parents[i] = current;
         current = &current->children[result.position];
     }
     // If you are then the ngram was stored in the trie
@@ -164,16 +171,28 @@ int trie_delete_ngram(Trie *trie, char *ngram) {
     for (int i = numberOfWords - 1; i >= 0; i--) {
         // If you found a node that has children or is final, return
         if (current->occupiedPositions > 0 || current->isFinal == 1) {
-            free(positionArray);
-            free(splitNgram);
-            current->isFinal = 0;
-            return SUCCESS;
+            if (i < numberOfWords - 1) {
+                free(positionArray);
+                free(splitNgram);
+                free(parents);
+                return SUCCESS;
+            } else {
+                current->isFinal = 0;
+                if (current->occupiedPositions > 0) {
+                    free(positionArray);
+                    free(splitNgram);
+                    free(parents);
+                    return SUCCESS;
+                }
+            }
         }
-        current = current->parent;
+        current = parents[i];
+        //current = current->parent;
         trie_node_delete_word(current, positionArray[i]);
     }
     free(positionArray);
     free(splitNgram);
+    free(parents);
     return SUCCESS;
 }
 
