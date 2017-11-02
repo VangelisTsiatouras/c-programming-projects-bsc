@@ -16,7 +16,6 @@
 
 ### Compilation
 
-__MAKEFILE__
 * __make__ παράγει εκτελέσιμο trie
 * __make u_test__ παράγει εκτελέσιμο αρχείο για unit testing
 * __make clean__ διαγράφει εκτελέσιμα και αντικείμενα αρχεία
