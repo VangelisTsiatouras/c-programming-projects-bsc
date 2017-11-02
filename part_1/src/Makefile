@@ -1,11 +1,11 @@
 ######################################################################
 OBJS       = main.o trie.o parser.o queryresults.o
-SOURCE     = main.o trie.o parser.o queryresults.o
-HEADER     = trie.o parser.o queryresults. defs.h
+SOURCE     = main.c trie.c parser.c queryresults.c
+HEADER     = trie.h parser.h queryresults.h defs.h
 OUT        = trie
 U_TEST_OUT = u_test_trie
-CC  = gcc
-FLAGS   = -g -O2
+CC         = gcc
+FLAGS      = -g -O2
 # -g option enables debugging mode 
 # -O2 option enables optimize mode
 
