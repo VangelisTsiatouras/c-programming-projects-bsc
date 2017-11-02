@@ -7,7 +7,7 @@
 #define DEFAULT_LINE_SIZE 64
 #define DEFAULT_PRINT_BUFFER 1024
 
-typedef struct QueryResults{
+typedef struct QueryResults {
     char **lines;
     size_t *lineSize;
     int totalLines;
@@ -18,16 +18,11 @@ typedef struct QueryResults{
 } QueryResults;
 
 
-QueryResults *createQueryResults(int lines, size_t lineSize);
-
-void destroyQueryResults(QueryResults *queryResults);
-
-void copyResultsToBufferQueryResults(QueryResults *queryResults);
-
-void flushQueryResults(QueryResults *queryResults);
-
-int addLineQueryResults(QueryResults *queryResults, char *line);
-
-void clearQueryResults(QueryResults *queryResults);
+QueryResults *create_query_results(int lines, size_t lineSize);
+void destroy_query_results(QueryResults *queryResults);
+void copy_results_to_buffer_query_results(QueryResults *queryResults);
+void flush_query_results(QueryResults *queryResults);
+int add_line_query_results(QueryResults *queryResults, char *line);
+void clear_query_results(QueryResults *queryResults);
 
 #endif //QUERYRESULTS_H

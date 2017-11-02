@@ -4,7 +4,7 @@
 #include <errno.h>
 #include "queryresults.h"
 
-QueryResults *createQueryResults(int lines, size_t lineSize) {
+QueryResults *create_query_results(int lines, size_t lineSize) {
     QueryResults *queryResults = malloc(sizeof(QueryResults));
     if (!queryResults) {
         printf("malloc error %s\n", strerror(errno));
@@ -40,7 +40,7 @@ QueryResults *createQueryResults(int lines, size_t lineSize) {
     return queryResults;
 }
 
-void destroyQueryResults(QueryResults *queryResults) {
+void destroy_query_results(QueryResults *queryResults) {
     for (int i = 0; i < queryResults->totalLines; i++) {
         free(queryResults->lines[i]);
     }
@@ -50,7 +50,7 @@ void destroyQueryResults(QueryResults *queryResults) {
     free(queryResults);
 }
 
-void copyResultsToBufferQueryResults(QueryResults *queryResults) {
+void copy_results_to_buffer_query_results(QueryResults *queryResults) {
     char *buffer = queryResults->printBuffer;
     int offset = queryResults->printBufferOffset;
     for (int i = 0; i < queryResults->elements; i++) {
@@ -75,17 +75,17 @@ void copyResultsToBufferQueryResults(QueryResults *queryResults) {
     }
     offset += sprintf(buffer + offset, "\n");
     queryResults->printBufferOffset = offset;
-    clearQueryResults(queryResults);
+    clear_query_results(queryResults);
 }
 
-void flushQueryResults(QueryResults *queryResults) {
+void flush_query_results(QueryResults *queryResults) {
     printf("%s", queryResults->printBuffer);
     queryResults->printBufferOffset = 0;
     queryResults->printBuffer[0] = '\0';
-    clearQueryResults(queryResults);
+    clear_query_results(queryResults);
 }
 
-int addLineQueryResults(QueryResults *queryResults, char *newLine) {
+int add_line_query_results(QueryResults *queryResults, char *newLine) {
     int position = queryResults->elements;
     for (int i = 0; i < position; i++) {
         if (strcmp(newLine, queryResults->lines[i]) == 0) {
@@ -135,7 +135,7 @@ int addLineQueryResults(QueryResults *queryResults, char *newLine) {
     return SUCCESS;
 }
 
-void clearQueryResults(QueryResults *queryResults) {
+void clear_query_results(QueryResults *queryResults) {
     for (int i = 0; i < queryResults->totalLines; i++) {
         queryResults->lines[i][0] = '\0';
     }

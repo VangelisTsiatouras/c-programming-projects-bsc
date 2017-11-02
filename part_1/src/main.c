@@ -59,7 +59,7 @@ int main(int argc, char *argv[]) {
     trie_destroy(trie);
 
     clock_t end = clock();
-    double timeSpent = (double)(end - begin) / CLOCKS_PER_SEC;
+    double timeSpent = (double) (end - begin) / CLOCKS_PER_SEC;
     printf("\nTime elapsed %.4f seconds\n", timeSpent);
 
     return SUCCESS;

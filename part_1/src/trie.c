@@ -24,6 +24,7 @@ int trie_destroy(Trie *trie) {
     trie_node_destroy(trie->root);
     free(trie->root);
     free(trie);
+    return SUCCESS;
 }
 
 int trie_insert(Trie *trie, char *ngram) {
@@ -75,6 +76,7 @@ int trie_insert(Trie *trie, char *ngram) {
     }
     // Mark as final
     current->isFinal = 1;
+    return SUCCESS;
 }
 
 void trie_query(Trie *trie, char *ngram, QueryResults *queryResults) {
@@ -124,14 +126,14 @@ void trie_query(Trie *trie, char *ngram, QueryResults *queryResults) {
             }
             offset += snprintf(resultsBuffer + offset, sizeBuffer - offset, "%s", splitNgram[j]);
             if (current->isFinal == 1) {
-                addLineQueryResults(queryResults, resultsBuffer);
+                add_line_query_results(queryResults, resultsBuffer);
                 resultsFound = 1;
             }
         }
     }
     if (resultsFound == 0) {
         sprintf(resultsBuffer, "-1");
-        addLineQueryResults(queryResults, resultsBuffer);
+        add_line_query_results(queryResults, resultsBuffer);
     }
     free(resultsBuffer);
     free(splitNgram);
@@ -147,7 +149,7 @@ int trie_delete_ngram(Trie *trie, char *ngram) {
         printf("malloc error %s\n", strerror(errno));
         exit(MALLOC_ERROR);
     }
-    TrieNode **parents = malloc(numberOfWords * sizeof(TrieNode*));
+    TrieNode **parents = malloc(numberOfWords * sizeof(TrieNode *));
     if (!parents) {
         printf("malloc error %s\n", strerror(errno));
         exit(MALLOC_ERROR);
@@ -224,7 +226,7 @@ void trie_node_destroy(TrieNode *trieNode) {
     free(trieNode->children);
 }
 
-char* trie_node_get_word(TrieNode *trieNode) {
+char *trie_node_get_word(TrieNode *trieNode) {
     if (trieNode->largeWord == NULL) {
         return trieNode->word;
     }

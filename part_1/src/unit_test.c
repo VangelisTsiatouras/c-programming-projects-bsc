@@ -14,21 +14,21 @@
 START_TEST (unitTestQueryResults)
     {
         QueryResults *queryResults;
-        queryResults = createQueryResults(3, 20);
-        ck_assert_int_eq(addLineQueryResults(queryResults, "Test sentence"), SUCCESS);
-        ck_assert_int_eq(addLineQueryResults(queryResults, "Second sentence"), SUCCESS);
+        queryResults = create_query_results(3, 20);
+        ck_assert_int_eq(add_line_query_results(queryResults, "Test sentence"), SUCCESS);
+        ck_assert_int_eq(add_line_query_results(queryResults, "Second sentence"), SUCCESS);
         // Add a big sentence
         ck_assert_int_eq(
-                addLineQueryResults(queryResults, "This is a big line. This is a big line. This is a big line"),
+                add_line_query_results(queryResults, "This is a big line. This is a big line. This is a big line"),
                 SUCCESS);
-        copyResultsToBufferQueryResults(queryResults);
+        copy_results_to_buffer_query_results(queryResults);
         // Add a sentence when you dont have space
-        ck_assert_int_eq(addLineQueryResults(queryResults, "Last sentence"), SUCCESS);
+        ck_assert_int_eq(add_line_query_results(queryResults, "Last sentence"), SUCCESS);
         // Print
-        copyResultsToBufferQueryResults(queryResults);
-        flushQueryResults(queryResults);
+        copy_results_to_buffer_query_results(queryResults);
+        flush_query_results(queryResults);
         // Destroy
-        destroyQueryResults(queryResults);
+        destroy_query_results(queryResults);
     }
 END_TEST;
 
@@ -60,14 +60,14 @@ START_TEST(unitTestTrie)
         ck_assert_int_eq(se.found, 1);
 
         // QueryResults is already unit tested
-        QueryResults *queryResults = createQueryResults(DEFAULT_LINES, DEFAULT_LINE_SIZE);
+        QueryResults *queryResults = create_query_results(DEFAULT_LINES, DEFAULT_LINE_SIZE);
         trie_query(trie, tNgram2, queryResults);
-        copyResultsToBufferQueryResults(queryResults);
-        flushQueryResults(queryResults);
+        copy_results_to_buffer_query_results(queryResults);
+        flush_query_results(queryResults);
         // Check delete trie
         ck_assert_int_eq(trie_delete_ngram(trie, tNgram3), SUCCESS);
         ck_assert_int_eq(trie_delete_ngram(trie, tNgram4), DELETE_NOT_FOUND);
-
+        ck_assert_int_eq(trie_destroy(trie), SUCCESS);
     }
 END_TEST;
 

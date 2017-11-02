@@ -9,42 +9,37 @@
 int parser(Trie *trie, char *initFile, char *queryFile) {
     FILE *iFile, *qFile;
     iFile = fopen(initFile, "r");
-    if(iFile == NULL) {
+    if (iFile == NULL) {
         printf("fopen error %s\n", strerror(errno));
         exit(FOPEN_ERROR);
     }
     qFile = fopen(queryFile, "r");
-    if(qFile == NULL) {
+    if (qFile == NULL) {
         printf("fopen error %s\n", strerror(errno));
         exit(FOPEN_ERROR);
     }
-    QueryResults *queryResults = createQueryResults(DEFAULT_LINES, DEFAULT_LINE_SIZE);
-    char* line = NULL;
+    QueryResults *queryResults = create_query_results(DEFAULT_LINES, DEFAULT_LINE_SIZE);
+    char *line = NULL;
     size_t lineSize = 0;
     while (getline(&line, &lineSize, iFile) > 0) {
-        //printf("A %s", line);
         trie_insert(trie, line);
     }
     while (getline(&line, &lineSize, qFile) > 0) {
-        switch(line[0]) {
+        switch (line[0]) {
             case 'Q':
-                //printf("%s", line);
                 trie_query(trie, &line[2], queryResults);
-                copyResultsToBufferQueryResults(queryResults);
+                copy_results_to_buffer_query_results(queryResults);
 
                 break;
             case 'A':
                 trie_insert(trie, &line[2]);
-                //printf("A\n");
                 break;
             case 'D':
-                //printf("%s", line);
                 trie_delete_ngram(trie, &line[2]);
 
                 break;
             case 'F':
-//                printf("F\n");
-                flushQueryResults(queryResults);
+                flush_query_results(queryResults);
                 break;
             default:
                 printf("default\n");
@@ -54,6 +49,6 @@ int parser(Trie *trie, char *initFile, char *queryFile) {
     free(line);
     fclose(iFile);
     fclose(qFile);
-    destroyQueryResults(queryResults);
+    destroy_query_results(queryResults);
     return SUCCESS;
 }
