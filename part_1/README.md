@@ -23,4 +23,4 @@
 
 ### Unit testing
 
-Για το unit testing χρησιμοποιήθηκε το framework [Check](https://libcheck.github.io/check/)
+Για το unit testing χρησιμοποιήθηκε το framework [Check](https://libcheck.github.io/check/).
