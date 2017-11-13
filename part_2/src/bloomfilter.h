@@ -1,0 +1,4 @@
+#ifndef BLOOMFILTER_H
+#define BLOOMFILTER_H
+
+#endif //BLOOMFILTER_H
