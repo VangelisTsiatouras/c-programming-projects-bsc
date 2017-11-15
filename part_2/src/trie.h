@@ -1,6 +1,7 @@
 #ifndef TRIE_H
 #define TRIE_H
 
+#include "bloomfilter.h"
 #include "queryresults.h"
 #include "defs.h"
 
@@ -32,7 +33,7 @@ Trie *trie_create();
 
 int trie_destroy(Trie *trie);
 int trie_insert(Trie *trie, char *ngram);
-void trie_query(Trie *trie, char *ngram, QueryResults *queryResults);
+void trie_query(Trie *trie, char *ngram, BloomFilter *bloomFilter, QueryResults *queryResults);
 int trie_delete_ngram(Trie *trie, char *ngram);
 
 int trie_node_create(TrieNode *trieNode);

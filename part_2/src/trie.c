@@ -79,7 +79,7 @@ int trie_insert(Trie *trie, char *ngram) {
     return SUCCESS;
 }
 
-void trie_query(Trie *trie, char *ngram, QueryResults *queryResults) {
+void trie_query(Trie *trie, char *ngram, BloomFilter *bloomFilter, QueryResults *queryResults) {
     TrieNode *current;
     SearchResults result;
     int numberOfWords;
@@ -126,14 +126,17 @@ void trie_query(Trie *trie, char *ngram, QueryResults *queryResults) {
             }
             offset += snprintf(resultsBuffer + offset, sizeBuffer - offset, "%s", splitNgram[j]);
             if (current->isFinal == 1) {
-                add_line_query_results(queryResults, resultsBuffer);
+//                add_line_query_results(queryResults, resultsBuffer);
+                if (bloom_filter_check_insert(bloomFilter, resultsBuffer) == SUCCESS) {
+                    add_line_query_results_append(queryResults, resultsBuffer);
+                }
                 resultsFound = 1;
             }
         }
     }
     if (resultsFound == 0) {
         sprintf(resultsBuffer, "-1");
-        add_line_query_results(queryResults, resultsBuffer);
+        add_line_query_results_append(queryResults, resultsBuffer);
     }
     free(resultsBuffer);
     free(splitNgram);

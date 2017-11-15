@@ -18,6 +18,7 @@ int parser(Trie *trie, char *initFile, char *queryFile) {
         printf("fopen error %s\n", strerror(errno));
         exit(FOPEN_ERROR);
     }
+    BloomFilter *bloomFilter = bloom_filter_create();
     QueryResults *queryResults = create_query_results(DEFAULT_LINES, DEFAULT_LINE_SIZE);
     char *line = NULL;
     size_t lineSize = 0;
@@ -27,9 +28,9 @@ int parser(Trie *trie, char *initFile, char *queryFile) {
     while (getline(&line, &lineSize, qFile) > 0) {
         switch (line[0]) {
             case 'Q':
-                trie_query(trie, &line[2], queryResults);
+                trie_query(trie, &line[2], bloomFilter, queryResults);
                 copy_results_to_buffer_query_results(queryResults);
-
+                bloom_filter_set_to_zero(bloomFilter);
                 break;
             case 'A':
                 trie_insert(trie, &line[2]);
@@ -50,5 +51,6 @@ int parser(Trie *trie, char *initFile, char *queryFile) {
     fclose(iFile);
     fclose(qFile);
     destroy_query_results(queryResults);
+    bloom_filter_destroy(bloomFilter);
     return SUCCESS;
 }
