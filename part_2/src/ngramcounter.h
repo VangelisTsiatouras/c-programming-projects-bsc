@@ -1,7 +1,9 @@
 #ifndef NGRAMCOUNTER_H
 #define NGRAMCOUNTER_H
 
-#define NC_STATIC_HASH_SIZE 1009 // a big prime number todo choose optimal number
+#include "hashfunctions.h"
+
+#define NC_STATIC_HASH_SIZE 4 // a big prime number todo choose optimal number
 #define NC_BUCKET_SIZE 4
 #define MURMUR_SEED 5
 
@@ -19,18 +21,17 @@ typedef struct NgramCounter {
     NCBucket buckets[NC_STATIC_HASH_SIZE];
 } NgramCounter;
 
-void allocateNCBucketArray(NCBucket *ncBucket);
-void expandNCBucketArray(NCBucket *ncBucket);
-void destroyNCbucketArray(NCBucket *ncBucket);
-int insertNCBucketArray(NCBucket *ncBucket, char *ngram, unsigned int length);
-void clearNCBucketArray(NCBucket *ncBucket);
-void printNCBucketArray(NCBucket *ncBucket);
+void allocate_ncbucket_array(NCBucket *ncBucket);
+void expand_ncbucket_array(NCBucket *ncBucket);
+void destroy_ncbucket_array(NCBucket *ncBucket);
+void clear_ncbucket_array(NCBucket *ncBucket);
+void print_ncbucket_array(NCBucket *ncBucket);
 
 NgramCounter *create_ngram_counter();
 void destroy_gram_counter(NgramCounter *ngramCounter);
 int insert_ngram_counter(NgramCounter *ngramCounter, char *ngram);
 int clear_ngram_counter(NgramCounter *ngramCounter);
-unsigned int hashFunction(char *ngram, unsigned int length);
+unsigned int hash_function(char *ngram, unsigned int length);
 void print_ngram_counter(NgramCounter *ngramCounter);
 
 

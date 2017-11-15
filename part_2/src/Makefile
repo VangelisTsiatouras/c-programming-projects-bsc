@@ -1,8 +1,9 @@
 ######################################################################
-OBJS       = main.o trie.o parser.o queryresults.o
-SOURCE     = main.c trie.c parser.c queryresults.c
-HEADER     = trie.h parser.h queryresults.h defs.h
-OUT        = trie
+OBJS       = main.o trie.o parser.o queryresults.o bloomfilter.o hashfunctions.o ngramcounter.o
+SOURCE     = main.c trie.c parser.c queryresults.c bloomfilter.c hashfunctions.c ngramcounter.c
+TEST_SRC   = trie.c parser.c queryresults.c bloomfilter.c hashfunctions.c ngramcounter.c
+HEADER     = trie.h parser.h queryresults.h defs.h bloomfilter.h hashfunctions.h ngramcounter.h
+OUT        = ngrams
 U_TEST_OUT = u_test_trie
 CC         = gcc
 FLAGS      = -g -O2
@@ -13,7 +14,7 @@ all: $(OBJS)
 	$(CC) $(OBJS) $(FLAGS) -o $(OUT)
 
 u_test: unit_test.c
-	$(CC) unit_test.c trie.c parser.c queryresults.c $(FLAGS) -o $(U_TEST_OUT) -pthread -lcheck -lsubunit -lrt -lm 
+	$(CC) unit_test.c $(TEST_SRC) $(FLAGS) -o $(U_TEST_OUT) -pthread -lcheck -lsubunit -lrt -lm 
 
 # clean house
 clean:
