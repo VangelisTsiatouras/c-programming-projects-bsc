@@ -24,7 +24,8 @@ BloomFilter *bloom_filter_create() {
     bloom_filter_set_to_zero(bloomFilter);
 
     // Calculate false positive probability p
-    bloomFilter->expectedProbFalsePositives = pow(1.0 - pow(1.0 - (1.0 / (double)M), (double)K * (double)N), (double)K);
+    bloomFilter->expectedProbFalsePositives = pow(1.0 - pow(1.0 - (1.0 / (double) M), (double) K * (double) N),
+                                                  (double) K);
     printf("Bit vector size: %d\nNumber of hash functions: %d\nExpected false positive probability for %d elements: %lf\n",
            M, K, N, bloomFilter->expectedProbFalsePositives);
 
@@ -42,10 +43,28 @@ void bloom_filter_set_to_zero(BloomFilter *bloomFilter) {
     }
 }
 
-int bloom_filter_check(BloomFilter *bloomFilter, char *ngram) {
+int bloom_filter_check_insert(BloomFilter *bloomFilter, char *ngram) {
 
-}
+    int position, notFound = 0;
+    uint32_t seed1 = 12345678, seed2 = 87654321;
+    uint32_t hashes[3];
+    hashes[0] = murmurHash3(ngram, (uint32_t) strlen(ngram), seed1);
+    hashes[1] = murmurHash3(ngram, (uint32_t) strlen(ngram), seed2);
+    hashes[2] = hashes[0] + 2 * hashes[1]; // Kirsch-Mitzenmacher-Optimization
 
-int bloom_filter_insert(BloomFilter *bloomFilter, char *ngram) {
-
+    for (int i = 0; i < 3; i++) {
+        position = hashes[i] % bloomFilter->bitVectorSize;
+        //        printf("    murmur3(seed %d)=%u, position=%d\n", i, hash, position);
+        if (bloomFilter->bitVector[position] == 0) {
+            // Change bitVector[position] to 1
+            bloomFilter->bitVector[position] = 1;
+            notFound = 1;
+        }
+    }
+    if (notFound == 1) {
+        //call add_line
+        return SUCCESS;
+    } else {
+        return BLOOM_FILTER_FOUND;
+    }
 }
