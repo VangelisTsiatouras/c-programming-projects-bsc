@@ -9,6 +9,10 @@
 void allocate_ncbucket_array(NCBucket *ncBucket) {
     ncBucket->arraySize = NC_BUCKET_SIZE;
     ncBucket->array = malloc(NC_BUCKET_SIZE * sizeof(Pair));
+    for (int i = 0; i < NC_BUCKET_SIZE; i++) {
+        ncBucket->array[i].ngram = NULL;
+        ncBucket->array[i].counter = 0;
+    }
     if (!ncBucket->array) {
         printf("malloc error %s\n", strerror(errno));
         exit(MALLOC_ERROR);

@@ -37,15 +37,15 @@ START_TEST (unitTestNgramCounter)
     {
         NgramCounter* nc = create_ngram_counter();
         ck_assert_int_eq(insert_ngram_counter(nc, "a"), 1);
-        insert_ngram_counter(nc, "b");
-        insert_ngram_counter(nc, "c");
-        insert_ngram_counter(nc, "d");
-        insert_ngram_counter(nc, "e");
-        insert_ngram_counter(nc, "e");
-        insert_ngram_counter(nc, "e");
+        ck_assert_int_eq(insert_ngram_counter(nc, "b"), 1);
+        ck_assert_int_eq(insert_ngram_counter(nc, "c"), 1);
+        ck_assert_int_eq(insert_ngram_counter(nc, "d"), 1);
+        ck_assert_int_eq(insert_ngram_counter(nc, "e"), 1);
+        ck_assert_int_eq(insert_ngram_counter(nc, "e"), 0);
+        ck_assert_int_eq(insert_ngram_counter(nc, "e"), 0);
         print_ngram_counter(nc);
-//        clear_ngram_counter(nc);
-//        destroy_gram_counter(nc);
+        clear_ngram_counter(nc);
+        destroy_gram_counter(nc);
     }
 END_TEST;
 

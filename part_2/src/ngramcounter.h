@@ -3,7 +3,7 @@
 
 #include "hashfunctions.h"
 
-#define NC_STATIC_HASH_SIZE 4 // a big prime number todo choose optimal number
+#define NC_STATIC_HASH_SIZE 1099 // a big prime number todo choose optimal number
 #define NC_BUCKET_SIZE 4
 #define MURMUR_SEED 5
 
