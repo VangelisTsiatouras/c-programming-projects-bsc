@@ -1,7 +1,11 @@
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <errno.h>
 
 #include "hashfunctions.h"
 
-unsigned int murmurHash2(const void *key, int len, unsigned int seed) {
+uint32_t murmurHash2(const char *key, uint32_t len, uint32_t seed) {
     // 'm' and 'r' are mixing constants generated offline.
     // They're not really 'magic', they just happen to work well.
     const unsigned int m = 0x5bd1e995;
@@ -48,7 +52,7 @@ unsigned int murmurHash2(const void *key, int len, unsigned int seed) {
 }
 
 
-uint32_t murmurHash3 (const char *key, uint32_t len, uint32_t seed) {
+uint32_t murmurHash3(const char *key, uint32_t len, uint32_t seed) {
     uint32_t c1 = 0xcc9e2d51;
     uint32_t c2 = 0x1b873593;
     uint32_t r1 = 15;
