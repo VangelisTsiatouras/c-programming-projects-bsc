@@ -135,6 +135,53 @@ int add_line_query_results(QueryResults *queryResults, char *newLine) {
     return SUCCESS;
 }
 
+// Use this with bloom filter only
+int add_line_query_results_append(QueryResults *queryResults, char *newLine) {
+    int position = queryResults->elements;
+    size_t newLineSize = strlen(newLine) + 1;
+    // If there aren't any empty lines
+    if (position == queryResults->totalLines) {
+        queryResults->totalLines++;
+        queryResults->lines = realloc(queryResults->lines, queryResults->totalLines * sizeof(char *));
+        if (!queryResults->lines) {
+            printf("realloc error %s\n", strerror(errno));
+            exit(REALLOC_ERROR);
+        }
+        queryResults->lineSize = realloc(queryResults->lineSize, queryResults->totalLines * sizeof(size_t));
+        if (!queryResults->lineSize) {
+            printf("realloc error %s\n", strerror(errno));
+            exit(REALLOC_ERROR);
+        }
+        queryResults->lineSize[position] = newLineSize;
+        queryResults->lines[position] = malloc(newLineSize * sizeof(char));
+        if (!queryResults->lines[position]) {
+            printf("malloc error %s\n", strerror(errno));
+            exit(MALLOC_ERROR);
+        }
+        strcpy(queryResults->lines[position], newLine);
+        queryResults->elements++;
+        queryResults->lineSize[position] = newLineSize;
+        return SUCCESS;
+    }
+    size_t currentSize = queryResults->lineSize[position];
+    // If new line cant fit in existing space
+    if (newLineSize > currentSize) {
+        if (newLineSize < currentSize * 2) {
+            newLineSize = currentSize * 2;
+        }
+        queryResults->lines[position] = realloc(queryResults->lines[position], newLineSize * sizeof(char));
+        if (!queryResults->lines[position]) {
+            printf("realloc error %s\n", strerror(errno));
+            exit(REALLOC_ERROR);
+        }
+    }
+    strcpy(queryResults->lines[position], newLine);
+    queryResults->elements++;
+    queryResults->lineSize[position] = newLineSize;
+    return SUCCESS;
+}
+
+
 void clear_query_results(QueryResults *queryResults) {
     for (int i = 0; i < queryResults->totalLines; i++) {
         queryResults->lines[i][0] = '\0';
