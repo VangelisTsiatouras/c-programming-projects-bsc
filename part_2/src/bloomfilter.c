@@ -68,3 +68,10 @@ int bloom_filter_check_insert(BloomFilter *bloomFilter, char *ngram) {
         return BLOOM_FILTER_FOUND;
     }
 }
+
+void print_bit_vector(BloomFilter *bloomFilter) {
+    for(int i = 0; i < bloomFilter->bitVectorSize; i++) {
+        printf("%d ", bloomFilter->bitVector[i]);
+    }
+    printf("\n");
+}
