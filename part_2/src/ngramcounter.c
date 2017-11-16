@@ -141,7 +141,7 @@ void print_ngram_counter(NgramCounter *ngramCounter) {
 
 ///
 
-NgramArray *copy_to_ngram_array(NgramCounter *ngramCounter, unsigned int size) {
+NgramArray *copy_to_ngram_array(NgramCounter *ngramCounter, unsigned int size) { //todo refactor 1 argument mono
     NgramArray *ngramArray = malloc(sizeof(NgramArray));
     if (!ngramArray) {
         printf("malloc error %s\n", strerror(errno));
@@ -228,6 +228,16 @@ unsigned int quick_select(Pair *A, unsigned int left, unsigned int right, int k)
 }
 
 void sort_topk(NgramArray *ngramArray, unsigned int k) {
+    if (k > ngramArray->arraySize) {
+        printf("Top k given (%d) greater than the number of different ngrams\n", k);
+        printf("Changing its value to %d\n", ngramArray->arraySize);
+        k = ngramArray->arraySize;
+    }
     quick_select(ngramArray->array, 0, ngramArray->arraySize - 1, k);
     qsort(ngramArray->array, k, sizeof(Pair), pair_compare);
+    printf("Top: %s", ngramArray->array[0].ngram);
+    for (int i = 1; i < k; i++) {
+        printf("|%s", ngramArray->array[i].ngram);
+    }
+    printf("\n");
 }

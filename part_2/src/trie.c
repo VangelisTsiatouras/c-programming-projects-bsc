@@ -4,6 +4,7 @@
 #include <errno.h>
 
 #include "trie.h"
+#include "ngramcounter.h"
 
 Trie *trie_create() {
     Trie *trie = malloc(sizeof(Trie));
@@ -79,7 +80,7 @@ int trie_insert(Trie *trie, char *ngram) {
     return SUCCESS;
 }
 
-void trie_query(Trie *trie, char *ngram, BloomFilter *bloomFilter, QueryResults *queryResults) {
+void trie_query(Trie *trie, char *ngram, BloomFilter *bloomFilter, QueryResults *queryResults, NgramCounter *ngramCounter) {
     TrieNode *current;
     SearchResults result;
     int numberOfWords;
@@ -130,6 +131,7 @@ void trie_query(Trie *trie, char *ngram, BloomFilter *bloomFilter, QueryResults 
                 if (bloom_filter_check_insert(bloomFilter, resultsBuffer) == SUCCESS) {
                     add_line_query_results_append(queryResults, resultsBuffer);
                 }
+                insert_ngram_counter(ngramCounter, resultsBuffer);
                 resultsFound = 1;
             }
         }

@@ -43,8 +43,18 @@ START_TEST (unitTestNgramCounter)
         ck_assert_int_eq(insert_ngram_counter(nc, "e"), 1);
         ck_assert_int_eq(insert_ngram_counter(nc, "e"), 0);
         ck_assert_int_eq(insert_ngram_counter(nc, "e"), 0);
+        ck_assert_int_eq(insert_ngram_counter(nc, "a"), 0);
         print_ngram_counter(nc);
+        NgramArray *ngramArray = copy_to_ngram_array(nc, nc->elements);
+        print_ngram_array(ngramArray);
+        sort_topk(ngramArray, 4);
+        print_ngram_array(ngramArray);
+        destroy_ngram_array(ngramArray);
         clear_ngram_counter(nc);
+        ck_assert_int_eq(insert_ngram_counter(nc, "a"), 1);
+        ngramArray = copy_to_ngram_array(nc, nc->elements);
+        print_ngram_array(ngramArray);
+        destroy_ngram_array(ngramArray);
         destroy_gram_counter(nc);
     }
 END_TEST;
