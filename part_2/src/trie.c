@@ -6,7 +6,7 @@
 #include "trie.h"
 #include "ngramcounter.h"
 
-Trie *trie_create() {
+Trie *create_trie() {
     Trie *trie = malloc(sizeof(Trie));
     if (!trie) {
         printf("malloc error %s\n", strerror(errno));
@@ -17,18 +17,18 @@ Trie *trie_create() {
         printf("malloc error %s\n", strerror(errno));
         exit(MALLOC_ERROR);
     }
-    trie_node_create(trie->root);
+    create_trie_node(trie->root);
     return trie;
 }
 
-int trie_destroy(Trie *trie) {
-    trie_node_destroy(trie->root);
+int destroy_trie(Trie *trie) {
+    destroy_trie_node(trie->root);
     free(trie->root);
     free(trie);
     return SUCCESS;
 }
 
-int trie_insert(Trie *trie, char *ngram) {
+int insert_trie(Trie *trie, char *ngram) {
     TrieNode *current = trie->root;
     SearchResults result;
     char *word = strtok(ngram, " \n");
@@ -58,7 +58,7 @@ int trie_insert(Trie *trie, char *ngram) {
                 memmove(&current->children[position + 1], &current->children[position],
                         sizeof(TrieNode) * (current->occupiedPositions - position));
             }
-            trie_node_create(&current->children[position]);
+            create_trie_node(&current->children[position]);
             size_t newWordLength = strlen(word) + 1;
             if (newWordLength > WORD_SIZE) {
                 current->children[position].largeWord = malloc(newWordLength * sizeof(char));
@@ -80,7 +80,8 @@ int trie_insert(Trie *trie, char *ngram) {
     return SUCCESS;
 }
 
-void trie_query(Trie *trie, char *ngram, BloomFilter *bloomFilter, QueryResults *queryResults, NgramCounter *ngramCounter) {
+void query_trie(Trie *trie, char *ngram, BloomFilter *bloomFilter, QueryResults *queryResults,
+                NgramCounter *ngramCounter) {
     TrieNode *current;
     SearchResults result;
     int numberOfWords;
@@ -127,7 +128,7 @@ void trie_query(Trie *trie, char *ngram, BloomFilter *bloomFilter, QueryResults 
             }
             offset += snprintf(resultsBuffer + offset, sizeBuffer - offset, "%s", splitNgram[j]);
             if (current->isFinal == 1) {
-                if (bloom_filter_check_insert(bloomFilter, resultsBuffer) == SUCCESS) {
+                if (check_insert_bloom_filter(bloomFilter, resultsBuffer) == SUCCESS) {
                     add_line_query_results_append(queryResults, resultsBuffer);
                     resultsFound = 1;
                 }
@@ -142,7 +143,7 @@ void trie_query(Trie *trie, char *ngram, BloomFilter *bloomFilter, QueryResults 
     free(splitNgram);
 }
 
-int trie_delete_ngram(Trie *trie, char *ngram) {
+int delete_ngram_trie(Trie *trie, char *ngram) {
     TrieNode *current;
     SearchResults result;
     int numberOfWords;
@@ -194,7 +195,7 @@ int trie_delete_ngram(Trie *trie, char *ngram) {
 
         }
         current = parents[i];
-        trie_node_delete_word(current, positionArray[i]);
+        delete_word_trie_node(current, positionArray[i]);
     }
     free(positionArray);
     free(splitNgram);
@@ -202,7 +203,7 @@ int trie_delete_ngram(Trie *trie, char *ngram) {
     return SUCCESS;
 }
 
-int trie_node_create(TrieNode *trieNode) {
+int create_trie_node(TrieNode *trieNode) {
     if (trieNode == NULL) {
         return NOT_ALLOCATED_ERROR;
     }
@@ -219,9 +220,9 @@ int trie_node_create(TrieNode *trieNode) {
     return SUCCESS;
 }
 
-void trie_node_destroy(TrieNode *trieNode) {
+void destroy_trie_node(TrieNode *trieNode) {
     for (int i = 0; i < trieNode->occupiedPositions; i++) {
-        trie_node_destroy(&trieNode->children[i]);
+        destroy_trie_node(&trieNode->children[i]);
     }
     if (trieNode->largeWord != NULL) {
         free(trieNode->largeWord);
@@ -229,16 +230,16 @@ void trie_node_destroy(TrieNode *trieNode) {
     free(trieNode->children);
 }
 
-char *trie_node_get_word(TrieNode *trieNode) {
+char *get_word_trie_node(TrieNode *trieNode) {
     if (trieNode->largeWord == NULL) {
         return trieNode->word;
     }
     return trieNode->largeWord;
 }
 
-void trie_node_delete_word(TrieNode *trieNode, int position) {
+void delete_word_trie_node(TrieNode *trieNode, int position) {
     // Free the node
-    trie_node_destroy(&trieNode->children[position]);
+    destroy_trie_node(&trieNode->children[position]);
     // If this isn't the last element in the children array
     if (position < trieNode->occupiedPositions - 1) {
         // Shift elements to the left
@@ -248,13 +249,13 @@ void trie_node_delete_word(TrieNode *trieNode, int position) {
     trieNode->occupiedPositions--;
 }
 
-void trie_node_print(TrieNode *trieNode) {
-    char *word = trie_node_get_word(trieNode);
+void print_trie_node(TrieNode *trieNode) {
+    char *word = get_word_trie_node(trieNode);
     if (word != NULL) {
         printf("Node with word: %s\n", word);
     }
     for (int i = 0; i < trieNode->occupiedPositions; i++) {
-        word = trie_node_get_word(trieNode);
+        word = get_word_trie_node(trieNode);
         printf("child %d: %s\n", i, word);
     }
 }
@@ -277,7 +278,7 @@ SearchResults binary_search(TrieNode *childrenArray, char *word, int occupiedPos
     }
     while (left <= right) {
         middle = (left + right) / 2;
-        nodeWord = trie_node_get_word(&childrenArray[middle]);
+        nodeWord = get_word_trie_node(&childrenArray[middle]);
         strcmp_result = strcmp(nodeWord, word);
         if (strcmp_result < 0) {
             left = middle + 1;
@@ -326,7 +327,7 @@ char **split_ngram(char *ngram, int *numberOfWords) {
 }
 
 void trie_dfs_print(TrieNode *trieNode) {
-    char *word = trie_node_get_word(trieNode);
+    char *word = get_word_trie_node(trieNode);
     printf("%-20s ", word);
     if (trieNode->isFinal == 1) {
         printf("FINAL");

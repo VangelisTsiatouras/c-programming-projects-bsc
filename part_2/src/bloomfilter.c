@@ -7,7 +7,7 @@
 #include "bloomfilter.h"
 #include "defs.h"
 
-BloomFilter *bloom_filter_create() {
+BloomFilter *create_bloom_filter() {
     BloomFilter *bloomFilter = malloc(sizeof(BloomFilter));
     if (!bloomFilter) {
         printf("malloc error %s\n", strerror(errno));
@@ -30,16 +30,16 @@ BloomFilter *bloom_filter_create() {
     return bloomFilter;
 }
 
-void bloom_filter_destroy(BloomFilter *bloomFilter) {
+void destroy_bloom_filter(BloomFilter *bloomFilter) {
     free(bloomFilter->bitVector);
     free(bloomFilter);
 }
 
-void bloom_filter_set_to_zero(BloomFilter *bloomFilter) {
+void set_to_zero_bloom_filter(BloomFilter *bloomFilter) {
     memset(bloomFilter->bitVector, 0, bloomFilter->bitVectorSize);
 }
 
-int bloom_filter_check_insert(BloomFilter *bloomFilter, char *ngram) {
+int check_insert_bloom_filter(BloomFilter *bloomFilter, char *ngram) {
 
     int position, notFound = 0;
     uint32_t seed1 = 12345678, seed2 = 87654321;

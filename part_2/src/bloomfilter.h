@@ -14,10 +14,10 @@ typedef struct BloomFilter {
     double expectedProbFalsePositives;
 } BloomFilter;
 
-BloomFilter *bloom_filter_create();
-void bloom_filter_destroy(BloomFilter *bloomFilter);
-void bloom_filter_set_to_zero(BloomFilter *bloomFilter);
-int bloom_filter_check_insert(BloomFilter *bloomFilter,char *ngram);
+BloomFilter *create_bloom_filter();
+void destroy_bloom_filter(BloomFilter *bloomFilter);
+void set_to_zero_bloom_filter(BloomFilter *bloomFilter);
+int check_insert_bloom_filter(BloomFilter *bloomFilter, char *ngram);
 void print_bit_vector(BloomFilter *bloomFilter);
 
 #endif //BLOOMFILTER_H

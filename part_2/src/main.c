@@ -54,9 +54,9 @@ int main(int argc, char *argv[]) {
     if (error != 0) {
         exit(SUCCESS);
     }
-    Trie *trie = trie_create();
+    Trie *trie = create_trie();
     parser(trie, initFile, queryFile);
-    trie_destroy(trie);
+    destroy_trie(trie);
 
     clock_t end = clock();
     double timeSpent = (double) (end - begin) / CLOCKS_PER_SEC;

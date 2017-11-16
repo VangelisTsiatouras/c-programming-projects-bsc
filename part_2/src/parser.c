@@ -19,7 +19,7 @@ int parser(Trie *trie, char *initFile, char *queryFile) {
         printf("fopen error %s\n", strerror(errno));
         exit(FOPEN_ERROR);
     }
-    BloomFilter *bloomFilter = bloom_filter_create();
+    BloomFilter *bloomFilter = create_bloom_filter();
     QueryResults *queryResults = create_query_results(DEFAULT_LINES, DEFAULT_LINE_SIZE);
     NgramCounter* ngramCounter = create_ngram_counter();
     char *line = NULL;
@@ -27,20 +27,20 @@ int parser(Trie *trie, char *initFile, char *queryFile) {
     int topk = 3;
     size_t lineSize = 0;
     while (getline(&line, &lineSize, iFile) > 0) {
-        trie_insert(trie, line);
+        insert_trie(trie, line);
     }
     while (getline(&line, &lineSize, qFile) > 0) {
         switch (line[0]) {
             case 'Q':
-                bloom_filter_set_to_zero(bloomFilter);
-                trie_query(trie, &line[2], bloomFilter, queryResults, ngramCounter);
+                set_to_zero_bloom_filter(bloomFilter);
+                query_trie(trie, &line[2], bloomFilter, queryResults, ngramCounter);
                 copy_results_to_buffer_query_results(queryResults);
                 break;
             case 'A':
-                trie_insert(trie, &line[2]);
+                insert_trie(trie, &line[2]);
                 break;
             case 'D':
-                trie_delete_ngram(trie, &line[2]);
+                delete_ngram_trie(trie, &line[2]);
 
                 break;
             case 'F':
@@ -69,6 +69,6 @@ int parser(Trie *trie, char *initFile, char *queryFile) {
     fclose(iFile);
     fclose(qFile);
     destroy_query_results(queryResults);
-    bloom_filter_destroy(bloomFilter);
+    destroy_bloom_filter(bloomFilter);
     return SUCCESS;
 }

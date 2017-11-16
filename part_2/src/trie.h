@@ -30,19 +30,18 @@ typedef struct SearchResults {
     int position;
 } SearchResults;
 
-Trie *trie_create();
+Trie *create_trie();
+int destroy_trie(Trie *trie);
+int insert_trie(Trie *trie, char *ngram);
+void query_trie(Trie *trie, char *ngram, BloomFilter *bloomFilter, QueryResults *queryResults,
+                NgramCounter *ngramCounter);
+int delete_ngram_trie(Trie *trie, char *ngram);
 
-int trie_destroy(Trie *trie);
-int trie_insert(Trie *trie, char *ngram);
-void
-trie_query(Trie *trie, char *ngram, BloomFilter *bloomFilter, QueryResults *queryResults, NgramCounter *ngramCounter);
-int trie_delete_ngram(Trie *trie, char *ngram);
-
-int trie_node_create(TrieNode *trieNode);
-void trie_node_destroy(TrieNode *trieNode);
-char* trie_node_get_word(TrieNode *trieNode);
-void trie_node_delete_word(TrieNode *trieNode, int position);
-void trie_node_print(TrieNode *trieNode);
+int create_trie_node(TrieNode *trieNode);
+void destroy_trie_node(TrieNode *trieNode);
+char* get_word_trie_node(TrieNode *trieNode);
+void delete_word_trie_node(TrieNode *trieNode, int position);
+void print_trie_node(TrieNode *trieNode);
 
 SearchResults binary_search(TrieNode *childrenArray, char *word, int occupiedPositions);
 char **split_ngram(char *ngram, int *numberOfWords);
