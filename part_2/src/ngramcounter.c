@@ -98,6 +98,7 @@ NgramCounter *create_ngram_counter () {
         printf("malloc error %s\n", strerror(errno));
         exit(MALLOC_ERROR);
     }
+    ngramCounter->elements = 0;
     for (int i = 0; i < NC_STATIC_HASH_SIZE; i++) {
         allocate_ncbucket_array(&(ngramCounter->buckets[i]));
     }
@@ -115,10 +116,13 @@ int insert_ngram_counter(NgramCounter *ngramCounter, char *ngram) {
     //todo optimize ama 3eroume to length apo prin, na mpei trito argument gia na apofugoume thn strlen
     unsigned int length = (unsigned int)strlen(ngram) + 1;
     int position = hash_function(ngram, length);
-    return insertNCBucketArray(&(ngramCounter->buckets[position]), ngram, length);
+    int returnValue = insertNCBucketArray(&(ngramCounter->buckets[position]), ngram, length);
+    ngramCounter->elements += returnValue;
+    return returnValue;
 };
 
 int clear_ngram_counter(NgramCounter *ngramCounter) {
+    ngramCounter->elements = 0;
     for (int i = 0; i < NC_STATIC_HASH_SIZE; i++) {
         clear_ncbucket_array(&(ngramCounter->buckets[i]));
     }
@@ -129,8 +133,51 @@ unsigned int hash_function(char *ngram, unsigned int length) {
 };
 
 void print_ngram_counter(NgramCounter *ngramCounter) {
+    printf("Elements: %d\n", ngramCounter->elements);
     for (int i = 0; i < NC_STATIC_HASH_SIZE; i++) {
         printf("Bucket[%d]", i);
         print_ncbucket_array(&(ngramCounter->buckets[i]));
+    }
+}
+
+NgramArray *copy_to_ngram_array(NgramCounter *ngramCounter, unsigned int size) {
+    NgramArray *ngramArray = malloc(sizeof(NgramArray));
+    if (!ngramArray) {
+        printf("malloc error %s\n", strerror(errno));
+        exit(MALLOC_ERROR);
+    }
+    ngramArray->arraySize = size;
+    ngramArray->array = malloc(size * sizeof(Pair));
+    if (!ngramArray->array) {
+        printf("malloc error %s\n", strerror(errno));
+        exit(MALLOC_ERROR);
+    }
+    int k = 0;
+    for (int i = 0; i < NC_STATIC_HASH_SIZE; i++) {
+        NCBucket *ncBucket = &(ngramCounter->buckets[i]);
+        for (int j = 0; j < ncBucket->arraySize; j++) {
+            if (ncBucket->array[j].ngram != NULL) {
+                ngramArray->array[k]= ncBucket->array[j];
+                k++;
+                // To save time and memory, don't copy the strings from the static hash table,
+                // just their pointers. Make sure you call clear_ngram_counter AFTER you're done with
+                // the strings
+            } else {
+                break;
+            }
+        }
+    }
+    return ngramArray;
+}
+
+void destroy_ngram_array(NgramArray* ngramArray) {
+    free(ngramArray->array);
+    free(ngramArray);
+}
+
+void print_ngram_array(NgramArray* ngramArray) {
+    printf("Elements: %d\n", ngramArray->arraySize);
+    for (int i = 0; i < ngramArray->arraySize; i++) {
+        printf("%s:%d\n", ngramArray->array[i].ngram, ngramArray->array[i].counter);
     }
 }

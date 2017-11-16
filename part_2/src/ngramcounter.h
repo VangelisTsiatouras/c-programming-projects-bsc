@@ -19,7 +19,10 @@ typedef struct NCBucket {
 
 typedef struct NgramCounter {
     NCBucket buckets[NC_STATIC_HASH_SIZE];
+    unsigned int elements;
 } NgramCounter;
+
+typedef NCBucket NgramArray;
 
 void allocate_ncbucket_array(NCBucket *ncBucket);
 void expand_ncbucket_array(NCBucket *ncBucket);
@@ -34,6 +37,9 @@ int clear_ngram_counter(NgramCounter *ngramCounter);
 unsigned int hash_function(char *ngram, unsigned int length);
 void print_ngram_counter(NgramCounter *ngramCounter);
 
+NgramArray *copy_to_ngram_array(NgramCounter *ngramCounter, unsigned int size);
+void destroy_ngram_array(NgramArray* ngramArray);
+void print_ngram_array(NgramArray* ngramArray);
 
 
 
