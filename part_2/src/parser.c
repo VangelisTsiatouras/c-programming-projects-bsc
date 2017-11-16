@@ -28,9 +28,9 @@ int parser(Trie *trie, char *initFile, char *queryFile) {
     while (getline(&line, &lineSize, qFile) > 0) {
         switch (line[0]) {
             case 'Q':
+                bloom_filter_set_to_zero(bloomFilter);
                 trie_query(trie, &line[2], bloomFilter, queryResults);
                 copy_results_to_buffer_query_results(queryResults);
-                bloom_filter_set_to_zero(bloomFilter);
                 break;
             case 'A':
                 trie_insert(trie, &line[2]);
@@ -44,7 +44,6 @@ int parser(Trie *trie, char *initFile, char *queryFile) {
                 break;
             default:
                 printf("default\n");
-
         }
     }
     free(line);
