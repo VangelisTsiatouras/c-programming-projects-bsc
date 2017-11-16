@@ -9,7 +9,7 @@
 
 typedef struct BloomFilter {
     char *bitVector;
-    int bitVectorSize;
+    size_t bitVectorSize;
     int numberOfHashFunctions;
     double expectedProbFalsePositives;
 } BloomFilter;

@@ -20,8 +20,6 @@ BloomFilter *bloom_filter_create() {
         printf("malloc error %s\n", strerror(errno));
         exit(MALLOC_ERROR);
     }
-    // Set bit vector to 0
-    bloom_filter_set_to_zero(bloomFilter);
 
     // Calculate false positive probability p
     bloomFilter->expectedProbFalsePositives = pow(1.0 - pow(1.0 - (1.0 / (double) M), (double) K * (double) N),
@@ -38,9 +36,7 @@ void bloom_filter_destroy(BloomFilter *bloomFilter) {
 }
 
 void bloom_filter_set_to_zero(BloomFilter *bloomFilter) {
-    for (int i = 0; i < bloomFilter->bitVectorSize; i++) {
-        bloomFilter->bitVector[i] = 0;
-    }
+    memset(bloomFilter->bitVector, 0, bloomFilter->bitVectorSize);
 }
 
 int bloom_filter_check_insert(BloomFilter *bloomFilter, char *ngram) {
@@ -53,7 +49,7 @@ int bloom_filter_check_insert(BloomFilter *bloomFilter, char *ngram) {
     hashes[2] = hashes[0] + 2 * hashes[1]; // Kirsch-Mitzenmacher-Optimization
 
     for (int i = 0; i < 3; i++) {
-        position = hashes[i] % bloomFilter->bitVectorSize;
+        position = hashes[i] % (int)bloomFilter->bitVectorSize;
         //        printf("    murmur3(seed %d)=%u, position=%d\n", i, hash, position);
         if (bloomFilter->bitVector[position] == 0) {
             // Change bitVector[position] to 1

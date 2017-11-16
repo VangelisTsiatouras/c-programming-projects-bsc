@@ -127,9 +127,9 @@ void trie_query(Trie *trie, char *ngram, BloomFilter *bloomFilter, QueryResults 
             }
             offset += snprintf(resultsBuffer + offset, sizeBuffer - offset, "%s", splitNgram[j]);
             if (current->isFinal == 1) {
-//                add_line_query_results(queryResults, resultsBuffer);
                 if (bloom_filter_check_insert(bloomFilter, resultsBuffer) == SUCCESS) {
                     add_line_query_results_append(queryResults, resultsBuffer);
+                    resultsFound = 1;
                 }
                 insert_ngram_counter(ngramCounter, resultsBuffer);
                 resultsFound = 1;
