@@ -41,6 +41,12 @@ NgramArray *copy_to_ngram_array(NgramCounter *ngramCounter, unsigned int size);
 void destroy_ngram_array(NgramArray* ngramArray);
 void print_ngram_array(NgramArray* ngramArray);
 
+void swap(Pair *a, Pair *b);
+int pair_compare(const void *a, const void *b);
+unsigned int partition(Pair *A, unsigned int left, unsigned int right);
+unsigned int quick_select(Pair *A, unsigned int left, unsigned int right, int k);
+void sort_topk(NgramArray *ngramArray, unsigned int k);
+
 
 
 #endif //NGRAMCOUNTER_H

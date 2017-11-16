@@ -73,8 +73,7 @@ void clear_ncbucket_array(NCBucket *ncBucket) {
             free(ncBucket->array[i].ngram);
             ncBucket->array[i].ngram = NULL;
             ncBucket->array[i].counter = 0;
-        }
-        else {
+        } else {
             break;
         }
     }
@@ -92,7 +91,7 @@ void print_ncbucket_array(NCBucket *ncBucket) {
 
 ///
 
-NgramCounter *create_ngram_counter () {
+NgramCounter *create_ngram_counter() {
     NgramCounter *ngramCounter = malloc(sizeof(NgramCounter));
     if (!ngramCounter) {
         printf("malloc error %s\n", strerror(errno));
@@ -114,7 +113,7 @@ void destroy_gram_counter(NgramCounter *ngramCounter) {
 
 int insert_ngram_counter(NgramCounter *ngramCounter, char *ngram) {
     //todo optimize ama 3eroume to length apo prin, na mpei trito argument gia na apofugoume thn strlen
-    unsigned int length = (unsigned int)strlen(ngram) + 1;
+    unsigned int length = (unsigned int) strlen(ngram) + 1;
     int position = hash_function(ngram, length);
     int returnValue = insertNCBucketArray(&(ngramCounter->buckets[position]), ngram, length);
     ngramCounter->elements += returnValue;
@@ -140,6 +139,8 @@ void print_ngram_counter(NgramCounter *ngramCounter) {
     }
 }
 
+///
+
 NgramArray *copy_to_ngram_array(NgramCounter *ngramCounter, unsigned int size) {
     NgramArray *ngramArray = malloc(sizeof(NgramArray));
     if (!ngramArray) {
@@ -157,7 +158,7 @@ NgramArray *copy_to_ngram_array(NgramCounter *ngramCounter, unsigned int size) {
         NCBucket *ncBucket = &(ngramCounter->buckets[i]);
         for (int j = 0; j < ncBucket->arraySize; j++) {
             if (ncBucket->array[j].ngram != NULL) {
-                ngramArray->array[k]= ncBucket->array[j];
+                ngramArray->array[k] = ncBucket->array[j];
                 k++;
                 // To save time and memory, don't copy the strings from the static hash table,
                 // just their pointers. Make sure you call clear_ngram_counter AFTER you're done with
@@ -170,14 +171,63 @@ NgramArray *copy_to_ngram_array(NgramCounter *ngramCounter, unsigned int size) {
     return ngramArray;
 }
 
-void destroy_ngram_array(NgramArray* ngramArray) {
+void destroy_ngram_array(NgramArray *ngramArray) {
     free(ngramArray->array);
     free(ngramArray);
 }
 
-void print_ngram_array(NgramArray* ngramArray) {
+void print_ngram_array(NgramArray *ngramArray) {
     printf("Elements: %d\n", ngramArray->arraySize);
     for (int i = 0; i < ngramArray->arraySize; i++) {
         printf("%s:%d\n", ngramArray->array[i].ngram, ngramArray->array[i].counter);
     }
+}
+
+///
+
+void swap(Pair *a, Pair *b) {
+    Pair temp = *a;
+    *a = *b;
+    *b = temp;
+}
+
+int pair_compare(const void *a, const void *b) {
+    if (((Pair*)a)->counter > ((Pair*)b)->counter) {
+        return -1;
+    } else if (((Pair*)a)->counter < ((Pair*)b)->counter) {
+        return 1;
+    } else return strcmp(((Pair*)a)->ngram, ((Pair*)b)->ngram);
+}
+
+unsigned int partition(Pair *A, unsigned int left, unsigned int right) {
+    Pair pivot = A[right];
+    unsigned int i = left, x;
+    for (x = left; x < right; x++) {
+        if (pair_compare(&A[x], &pivot) < 0) { // A[x] >= pivot
+            swap(&A[i], &A[x]);
+            i++;
+        }
+    }
+    swap(&A[i], &A[right]);
+    return i;
+}
+
+unsigned int quick_select(Pair *A, unsigned int left, unsigned int right, int k) {
+    //p is position of pivot in the partitioned array
+    unsigned int p = partition(A, left, right);
+    //k equals pivot got lucky
+    if (p == k - 1) {
+        return p;
+    }
+    else if (k - 1 < p) { //k less than pivot
+        return quick_select(A, left, p - 1, k);
+    }
+    else { //k greater than pivot
+        return quick_select(A, p + 1, right, k);
+    }
+}
+
+void sort_topk(NgramArray *ngramArray, unsigned int k) {
+    quick_select(ngramArray->array, 0, ngramArray->arraySize - 1, k);
+    qsort(ngramArray->array, 3, sizeof(Pair), pair_compare);
 }
