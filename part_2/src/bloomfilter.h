@@ -15,13 +15,9 @@ typedef struct BloomFilter {
 } BloomFilter;
 
 BloomFilter *bloom_filter_create();
-
 void bloom_filter_destroy(BloomFilter *bloomFilter);
-
 void bloom_filter_set_to_zero(BloomFilter *bloomFilter);
-
 int bloom_filter_check_insert(BloomFilter *bloomFilter,char *ngram);
-
 void print_bit_vector(BloomFilter *bloomFilter);
 
 #endif //BLOOMFILTER_H
