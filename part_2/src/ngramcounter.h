@@ -37,7 +37,7 @@ int clear_ngram_counter(NgramCounter *ngramCounter);
 unsigned int hash_function(char *ngram, unsigned int length);
 void print_ngram_counter(NgramCounter *ngramCounter);
 
-NgramArray *copy_to_ngram_array(NgramCounter *ngramCounter, unsigned int size);
+NgramArray *copy_to_ngram_array(NgramCounter *ngramCounter);
 void destroy_ngram_array(NgramArray* ngramArray);
 void print_ngram_array(NgramArray* ngramArray);
 
@@ -46,6 +46,8 @@ int pair_compare(const void *a, const void *b);
 unsigned int partition(Pair *A, unsigned int left, unsigned int right);
 unsigned int quick_select(Pair *A, unsigned int left, unsigned int right, int k);
 void sort_topk(NgramArray *ngramArray, unsigned int k);
+
+void tester();
 
 
 

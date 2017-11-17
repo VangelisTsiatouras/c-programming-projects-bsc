@@ -30,6 +30,7 @@ int parser(Trie *trie, char *initFile, char *queryFile) {
         insert_trie(trie, line);
     }
     while (getline(&line, &lineSize, qFile) > 0) {
+        NgramArray *ngramArray = NULL;
         switch (line[0]) {
             case 'Q':
                 set_to_zero_bloom_filter(bloomFilter);
@@ -51,13 +52,15 @@ int parser(Trie *trie, char *initFile, char *queryFile) {
                         printf("Invalid top k given: %d\n", topk);
                         exit(-1); //todo swsto error code
                     }
-                    NgramArray *ngramArray = copy_to_ngram_array(ngramCounter, ngramCounter->elements);
+                    ngramArray = copy_to_ngram_array(ngramCounter);
+                }
+                flush_query_results(queryResults);
+                if (ngramArray != NULL) {
                     sort_topk(ngramArray, (unsigned int)topk);
-                    print_ngram_array(ngramArray);
+                    //print_ngram_array(ngramArray);
                     destroy_ngram_array(ngramArray);
                 }
                 clear_ngram_counter(ngramCounter);
-                flush_query_results(queryResults);
                 break;
             default:
                 printf("default\n");//todo na valoume swsto error message

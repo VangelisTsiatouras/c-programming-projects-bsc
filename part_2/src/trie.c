@@ -131,6 +131,7 @@ void query_trie(Trie *trie, char *ngram, BloomFilter *bloomFilter, QueryResults 
                 if (check_insert_bloom_filter(bloomFilter, resultsBuffer) == SUCCESS) {
                     add_line_query_results_append(queryResults, resultsBuffer);
                     resultsFound = 1;
+                    insert_ngram_counter(ngramCounter, resultsBuffer);
                 }
             }
         }

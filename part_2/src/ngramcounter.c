@@ -27,6 +27,10 @@ void expand_ncbucket_array(NCBucket *ncBucket) {
         printf("realloc error %s\n", strerror(errno));
         exit(REALLOC_ERROR);
     }
+    for (int i = ncBucket->arraySize / 2; i < ncBucket->arraySize; i++) {
+        ncBucket->array[i].ngram = NULL;
+        ncBucket->array[i].counter = 0;
+    }
 };
 
 void destroy_ncbucket_array(NCBucket *ncBucket) {
@@ -141,14 +145,14 @@ void print_ngram_counter(NgramCounter *ngramCounter) {
 
 ///
 
-NgramArray *copy_to_ngram_array(NgramCounter *ngramCounter, unsigned int size) { //todo refactor 1 argument mono
+NgramArray *copy_to_ngram_array(NgramCounter *ngramCounter) {
     NgramArray *ngramArray = malloc(sizeof(NgramArray));
     if (!ngramArray) {
         printf("malloc error %s\n", strerror(errno));
         exit(MALLOC_ERROR);
     }
-    ngramArray->arraySize = size;
-    ngramArray->array = malloc(size * sizeof(Pair));
+    ngramArray->arraySize = ngramCounter->elements;
+    ngramArray->array = malloc(ngramCounter->elements * sizeof(Pair));
     if (!ngramArray->array) {
         printf("malloc error %s\n", strerror(errno));
         exit(MALLOC_ERROR);
@@ -229,7 +233,7 @@ unsigned int quick_select(Pair *A, unsigned int left, unsigned int right, int k)
 
 void sort_topk(NgramArray *ngramArray, unsigned int k) {
     if (k > ngramArray->arraySize) {
-        printf("Top k given (%d) greater than the number of different ngrams\n", k);
+        printf("Top k given (%d) is greater than the number of different ngrams\n", k);
         printf("Changing its value to %d\n", ngramArray->arraySize);
         k = ngramArray->arraySize;
     }
@@ -240,4 +244,47 @@ void sort_topk(NgramArray *ngramArray, unsigned int k) {
         printf("|%s", ngramArray->array[i].ngram);
     }
     printf("\n");
+}
+
+void tester() {
+    NgramCounter* nc = create_ngram_counter();
+    char str[3] = "aa";
+    for (int i = 0; i < 10000; i++) {
+        //printf("i: %d\n", i);
+        int r = rand() % 26;
+        int r2 = rand() % 26;
+        str[0] += r;
+        str[1] += r2;
+        insert_ngram_counter(nc, str);
+        str[0] -= r;
+        str[1] -= r2;
+    }
+    NgramArray *na = copy_to_ngram_array(nc);
+    print_ngram_array(na);
+    sort_topk(na, nc->elements + 1);
+    print_ngram_array(na);
+    destroy_ngram_array(na);
+    //print_ngram_counter(nc);
+    destroy_gram_counter(nc);
+//    insert_ngram_counter(nc, "a");
+//    insert_ngram_counter(nc, "b");
+//    insert_ngram_counter(nc, "c");
+//    insert_ngram_counter(nc, "d");
+//    insert_ngram_counter(nc, "e");
+//    insert_ngram_counter(nc, "e");
+//    insert_ngram_counter(nc, "e");
+//    insert_ngram_counter(nc, "a");
+//    print_ngram_counter(nc);
+//    NgramArray *na = copy_to_ngram_array(nc, nc->elements);
+//    print_ngram_array(na);
+//    sort_topk(na, 4);
+//    print_ngram_array(na);
+//    destroy_ngram_array(na);
+//    clear_ngram_counter(nc);
+//    insert_ngram_counter(nc, "a");
+//    na = copy_to_ngram_array(nc, nc->elements);
+//    print_ngram_array(na);
+//    destroy_ngram_array(na);
+//    destroy_gram_counter(nc);
+    exit(0);
 }
