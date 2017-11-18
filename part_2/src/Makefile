@@ -6,15 +6,15 @@ HEADER     = trie.h parser.h queryresults.h defs.h bloomfilter.h hashfunctions.h
 OUT        = ngrams
 U_TEST_OUT = u_test_trie
 CC         = gcc
-FLAGS      = -g -O2
-# -g option enables debugging mode 
+FLAGS      = -g -O2 -lm
+# -g option enables debugging mode
 # -O2 option enables optimize mode
 
 all: $(OBJS)
 	$(CC) $(OBJS) $(FLAGS) -o $(OUT)
 
 u_test: unit_test.c
-	$(CC) unit_test.c $(TEST_SRC) $(FLAGS) -o $(U_TEST_OUT) -pthread -lcheck -lsubunit -lrt -lm 
+	$(CC) unit_test.c $(TEST_SRC) $(FLAGS) -o $(U_TEST_OUT) -pthread -lcheck -lsubunit -lrt -lm
 
 # clean house
 clean:
