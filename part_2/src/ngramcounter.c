@@ -237,6 +237,10 @@ void sort_topk(NgramArray *ngramArray, unsigned int k) {
         printf("Changing its value to %d\n", ngramArray->arraySize);
         k = ngramArray->arraySize;
     }
+    // If the ngramArray is empty  just return
+    if (ngramArray->arraySize == 0) {
+        return;
+    }
     quick_select(ngramArray->array, 0, ngramArray->arraySize - 1, k);
     qsort(ngramArray->array, k, sizeof(Pair), pair_compare);
     printf("Top: %s", ngramArray->array[0].ngram);
