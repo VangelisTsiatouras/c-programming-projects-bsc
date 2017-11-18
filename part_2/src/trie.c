@@ -93,6 +93,11 @@ void query_trie(Trie *trie, char *ngram, BloomFilter *bloomFilter, QueryResults 
         printf("malloc error %s\n", strerror(errno));
         exit(MALLOC_ERROR);
     }
+    // Calculate probality of false positive based on the incoming query
+    // If the probabilty is greater than 0.0002 the bit vector will be increased
+    probability_of_query_bloom_filter(bloomFilter, numberOfWords);
+    // Set to zero bit vector
+    set_to_zero_bloom_filter(bloomFilter);
     int resultsFound = 0;
     // Iterate the ngram word by word
     for (int i = 0; i < numberOfWords; i++) {

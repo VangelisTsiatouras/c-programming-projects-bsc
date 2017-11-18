@@ -33,7 +33,6 @@ int parser(Trie *trie, char *initFile, char *queryFile) {
         NgramArray *ngramArray = NULL;
         switch (line[0]) {
             case 'Q':
-                set_to_zero_bloom_filter(bloomFilter);
                 query_trie(trie, &line[2], bloomFilter, queryResults, ngramCounter);
                 copy_results_to_buffer_query_results(queryResults);
                 break;
