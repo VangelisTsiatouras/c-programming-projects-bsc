@@ -23,9 +23,9 @@ BloomFilter *create_bloom_filter() {
     }
 
     // Calculate starting false positive probability p
-    bloomFilter->expectedProbFalsePositives = pow(1.0 - exp(-(double) K * (double) STARTING_N / (double) STARTING_M), (double) K);
-    printf("Bit vector size: %d\nNumber of hash functions: %d\nExpected false positive probability for %d elements: %f%%\n",
-           STARTING_M, K, STARTING_N, (double) 100.0 * bloomFilter->expectedProbFalsePositives);
+//    bloomFilter->expectedProbFalsePositives = pow(1.0 - exp(-(double) K * (double) STARTING_N / (double) STARTING_M), (double) K);
+//    printf("Bit vector size: %d\nNumber of hash functions: %d\nExpected false positive probability for %d elements: %f%%\n",
+//           STARTING_M, K, STARTING_N, (double) 100.0 * bloomFilter->expectedProbFalsePositives);
 
     return bloomFilter;
 }
@@ -53,7 +53,7 @@ void probability_of_query_bloom_filter(BloomFilter *bloomFilter, int numberOfWor
     int partOfWords = (int) (percentage * numberOfWords);
     double prob = pow(1.0 - pow(1.0 - (1.0 / (double) bloomFilter->bitVectorSize), (double) K * (double) partOfWords),
                       (double) K);
-    // If the query's expected probality is bigger than 0.0002
+    // If the query's expected probality is bigger than 0.0001
     // Increase the size of the bit vector to a new size
     if(compare_double(prob, bloomFilter->acceptedProbability) > 0) {
         size_t newSize = (size_t)(-(partOfWords * log(bloomFilter->acceptedProbability)/pow(log(2), 2)));

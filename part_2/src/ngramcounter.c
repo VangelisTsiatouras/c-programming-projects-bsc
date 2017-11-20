@@ -233,8 +233,8 @@ unsigned int quick_select(Pair *A, unsigned int left, unsigned int right, int k)
 
 void sort_topk(NgramArray *ngramArray, unsigned int k) {
     if (k > ngramArray->arraySize) {
-        printf("Top k given (%d) is greater than the number of different ngrams\n", k);
-        printf("Changing its value to %d\n", ngramArray->arraySize);
+//        printf("Top k given (%d) is greater than the number of different ngrams\n", k); //todo na fugoun teleiws
+//        printf("Changing its value to %d\n", ngramArray->arraySize);
         k = ngramArray->arraySize;
     }
     // If the ngramArray is empty  just return

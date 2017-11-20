@@ -36,3 +36,8 @@
 # Ignore CLion's files
 *.idea/
 cmake-build-debug/
+
+# Ignore medium datasets
+*medium_*/
+*small_*/
+

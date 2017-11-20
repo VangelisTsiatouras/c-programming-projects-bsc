@@ -94,7 +94,7 @@ void query_trie(Trie *trie, char *ngram, BloomFilter *bloomFilter, QueryResults 
         exit(MALLOC_ERROR);
     }
     // Calculate probality of false positive based on the incoming query
-    // If the probabilty is greater than 0.0002 the bit vector will be increased
+    // If the probabilty is greater than 0.0001 the bit vector will be increased
     probability_of_query_bloom_filter(bloomFilter, numberOfWords);
     // Set to zero bit vector
     set_to_zero_bloom_filter(bloomFilter);
