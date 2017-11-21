@@ -5,13 +5,12 @@
 
 #define K 3                 // Number of hash functions
 #define STARTING_M 40099    // Starting bit vector size
-#define STARTING_N 1000     // Starting expected number of elements to be filtered
+#define SEED1 12345678
+#define SEED2 87654321
 
 typedef struct BloomFilter {
     char *bitVector;
     size_t bitVectorSize;
-    int numberOfHashFunctions;
-    double expectedProbFalsePositives;
     double acceptedProbability;
 } BloomFilter;
 

@@ -14,19 +14,12 @@ BloomFilter *create_bloom_filter() {
         exit(MALLOC_ERROR);
     }
     bloomFilter->bitVectorSize = STARTING_M;
-    bloomFilter->numberOfHashFunctions = K;
     bloomFilter->acceptedProbability = 0.0001;
     bloomFilter->bitVector = malloc(sizeof(short) * bloomFilter->bitVectorSize);
     if (!bloomFilter->bitVector) {
         printf("malloc error %s\n", strerror(errno));
         exit(MALLOC_ERROR);
     }
-
-    // Calculate starting false positive probability p
-//    bloomFilter->expectedProbFalsePositives = pow(1.0 - exp(-(double) K * (double) STARTING_N / (double) STARTING_M), (double) K);
-//    printf("Bit vector size: %d\nNumber of hash functions: %d\nExpected false positive probability for %d elements: %f%%\n",
-//           STARTING_M, K, STARTING_N, (double) 100.0 * bloomFilter->expectedProbFalsePositives);
-
     return bloomFilter;
 }
 
@@ -63,12 +56,14 @@ void probability_of_query_bloom_filter(BloomFilter *bloomFilter, int numberOfWor
 
 int check_insert_bloom_filter(BloomFilter *bloomFilter, char *ngram) {
     int position, notFound = 0;
-    uint32_t seed1 = 12345678, seed2 = 87654321;
-    uint32_t hashes[3];
-    hashes[0] = murmurHash3(ngram, (uint32_t) strlen(ngram), seed1);
-    hashes[1] = murmurHash3(ngram, (uint32_t) strlen(ngram), seed2);
+    // Use 3 hash functions
+    unsigned int hashes[3];
+    size_t length = strlen(ngram);
+    hashes[0] = murmurHash3(ngram, (unsigned int) length, SEED1);
+    hashes[1] = murmurHash3(ngram, (unsigned int) length, SEED2);
     // Kirsch-Mitzenmacher-Optimization
     hashes[2] = hashes[0] + 2 * hashes[1];
+    // For each hash function evaluate the position in bit vector
     for (int i = 0; i < 3; i++) {
         position = hashes[i] % (int) bloomFilter->bitVectorSize;
         if (bloomFilter->bitVector[position] == 0) {
