@@ -17,10 +17,10 @@ void allocate_ncbucket_array(NCBucket *ncBucket) {
         printf("malloc error %s\n", strerror(errno));
         exit(MALLOC_ERROR);
     }
-};
+}
 
 void expand_ncbucket_array(NCBucket *ncBucket) {
-    //printf("expanding from %d to %d\n", ncBucket->arraySize, ncBucket->arraySize*2); //todo remove print
+    //printf("expanding from %d to %d\n", ncBucket->capacity, ncBucket->capacity*2); //todo remove print
     ncBucket->arraySize *= 2;
     ncBucket->array = realloc(ncBucket->array, ncBucket->arraySize * sizeof(Pair));
     if (!ncBucket->array) {
@@ -31,7 +31,7 @@ void expand_ncbucket_array(NCBucket *ncBucket) {
         ncBucket->array[i].ngram = NULL;
         ncBucket->array[i].counter = 0;
     }
-};
+}
 
 void destroy_ncbucket_array(NCBucket *ncBucket) {
     for (int i = 0; i < ncBucket->arraySize; i++) {
@@ -42,7 +42,7 @@ void destroy_ncbucket_array(NCBucket *ncBucket) {
         }
     }
     free(ncBucket->array);
-};
+}
 
 int insertNCBucketArray(NCBucket *ncBucket, char *ngram, unsigned int length) {
     int i;
@@ -234,7 +234,7 @@ unsigned int quick_select(Pair *A, unsigned int left, unsigned int right, int k)
 void sort_topk(NgramArray *ngramArray, unsigned int k) {
     if (k > ngramArray->arraySize) {
 //        printf("Top k given (%d) is greater than the number of different ngrams\n", k); //todo na fugoun teleiws
-//        printf("Changing its value to %d\n", ngramArray->arraySize);
+//        printf("Changing its value to %d\n", ngramArray->capacity);
         k = ngramArray->arraySize;
     }
     // If the ngramArray is empty  just return
