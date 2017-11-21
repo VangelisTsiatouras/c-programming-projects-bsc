@@ -39,7 +39,9 @@ int delete_ngram_trie(Trie *trie, char *ngram);
 
 int create_trie_node(TrieNode *trieNode);
 void destroy_trie_node(TrieNode *trieNode);
+void store_word_trie_node(TrieNode *trieNode, char *word);
 char* get_word_trie_node(TrieNode *trieNode);
+int is_empty(TrieNode *trieNode);
 void delete_word_trie_node(TrieNode *trieNode, int position);
 void print_trie_node(TrieNode *trieNode);
 

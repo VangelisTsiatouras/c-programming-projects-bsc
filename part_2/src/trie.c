@@ -59,17 +59,7 @@ int insert_trie(Trie *trie, char *ngram) {
                         sizeof(TrieNode) * (current->occupiedPositions - position));
             }
             create_trie_node(&current->children[position]);
-            size_t newWordLength = strlen(word) + 1;
-            if (newWordLength > WORD_SIZE) {
-                current->children[position].largeWord = malloc(newWordLength * sizeof(char));
-                if (!current->children[position].largeWord) {
-                    printf("malloc error %s\n", strerror(errno));
-                    exit(MALLOC_ERROR);
-                }
-                strncpy(current->children[position].largeWord, word, newWordLength);
-            } else {
-                strncpy(current->children[position].word, word, WORD_SIZE);
-            }
+            store_word_trie_node(&current->children[position], word);
             current->occupiedPositions++;
         }
         current = &current->children[position];
@@ -226,6 +216,20 @@ int create_trie_node(TrieNode *trieNode) {
     return SUCCESS;
 }
 
+void store_word_trie_node(TrieNode *trieNode, char *word) {
+    size_t newWordLength = strlen(word) + 1;
+    if (newWordLength > WORD_SIZE) {
+        trieNode->largeWord = malloc(newWordLength * sizeof(char));
+        if (!trieNode->largeWord) {
+            printf("malloc error %s\n", strerror(errno));
+            exit(MALLOC_ERROR);
+        }
+        strncpy(trieNode->largeWord, word, newWordLength);
+    } else {
+        strncpy(trieNode->word, word, WORD_SIZE);
+    }
+}
+
 void destroy_trie_node(TrieNode *trieNode) {
     for (int i = 0; i < trieNode->occupiedPositions; i++) {
         destroy_trie_node(&trieNode->children[i]);
@@ -241,6 +245,13 @@ char *get_word_trie_node(TrieNode *trieNode) {
         return trieNode->word;
     }
     return trieNode->largeWord;
+}
+
+int is_empty(TrieNode *trieNode) {
+    if (trieNode->largeWord == NULL && trieNode->word[0] == '\0') {
+        return 1;
+    }
+    return 0;
 }
 
 void delete_word_trie_node(TrieNode *trieNode, int position) {
