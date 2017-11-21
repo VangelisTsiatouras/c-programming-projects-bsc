@@ -166,15 +166,13 @@ TrieNode *insert_LinearHash(LinearHash *linearHash, char *word) {
     int r = insert_word_LHBucket(linearHash->bucketArray[hash], word); // returns 1 if there was an overflow
     // If we need to split a bucket
     if (r == 1) {
-        printf("overflow!\n");
-        print_LinearHash(linearHash);
+//        printf("overflow!\n");
         int hashAgain;
         do {
             if (linearHash->bucketArray[linearHash->p] == NULL) {
                 linearHash->p += 1;
             }
             hashAgain = rehash_bucket_LinearHash(linearHash, linearHash->p);
-            print_LinearHash(linearHash);
             linearHash->p += 1;
             if (linearHash->p == linearHash->arraySize - 1) {
                 linearHash->p = 0;
@@ -218,7 +216,6 @@ int rehash_bucket_LinearHash(LinearHash *linearHash, int bucketPos) {
             }
             if (linearHash->bucketArray[hash] == NULL) {
                 linearHash->bucketArray[hash] = create_LHBucket();
-                print_LinearHash(linearHash);
             }
 //            for (int j = 0; j < current->occupiedPositions; j++) {
 //                printf("%p\n", current->nodeArray[i]);
@@ -236,6 +233,7 @@ int rehash_bucket_LinearHash(LinearHash *linearHash, int bucketPos) {
 
 void print_LinearHash(LinearHash *linearHash) {
     int s = 0;
+    int max = -1;
     for (int i = 0; i < linearHash->arraySize; i++) {
         if (linearHash->p == i) {
             printf("p->[%d]", i);
@@ -246,9 +244,15 @@ void print_LinearHash(LinearHash *linearHash) {
             printf("NULL\n");
             continue;
         }
-        s += print_LHBucket(linearHash->bucketArray[i]);
+        int temp = print_LHBucket(linearHash->bucketArray[i]);
+        s += temp;
+        if (max < temp) {
+            max = temp;
+        }
     }
     printf("Total elements %d\n", s);
+    printf("Max bucket %d\n", max);
+    printf("Average: %.1f\n", (float)s / linearHash->arraySize);
 }
 
 unsigned int old_h(LinearHash *linearHash, char *ngram, size_t length) {
@@ -266,12 +270,16 @@ unsigned int new_h(LinearHash *linearHash, char *ngram, size_t length) {
 void linearHashTester() {
     //srand(time(NULL));
     LinearHash *linearHash = create_LinearHash();
-    char string[20] = "aa";
-    for (int i = 0; i < 17000; i++) {
+    char string[20] = "aaaa";
+    for (int i = 0; i < 500000; i++) {
         char c = rand() % 26 + 'a';
         string[0] = c;
         c = rand() % 26 + 'a';
         string[1] = c;
+        c = rand() % 26 + 'a';
+        string[2] = c;
+        c = rand() % 26 + 'a';
+        string[3] = c;
         insert_LinearHash(linearHash, string);
     }
     print_LinearHash(linearHash);
