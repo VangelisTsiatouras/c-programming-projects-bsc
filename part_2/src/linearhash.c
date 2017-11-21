@@ -17,9 +17,9 @@ LHBucket *create_LHBucket() {
     }
     lhBucket->capacity = LH_BUCKET_SIZE;
     lhBucket->occupiedPositions = 0;
-    for (int i = 0; i < LH_BUCKET_SIZE; i++) {
-        create_trie_node(&lhBucket->nodeArray[i]);
-    }
+//    for (int i = 0; i < LH_BUCKET_SIZE; i++) {
+//        create_trie_node(&lhBucket->nodeArray[i]);
+//    }
     return lhBucket;
 }
 
@@ -64,7 +64,7 @@ int insert_LHBucket(LHBucket *lhBucket, char* word) {
 //            memmove(&lhBucket->nodeArray[position + 1], &lhBucket->nodeArray[position],
 //                    sizeof(TrieNode) * (lhBucket->occupiedPositions - position));
 //        }
-        //create_trie_node(&lhBucket->nodeArray[position]);
+        create_trie_node(&lhBucket->nodeArray[position]);
         store_word_trie_node(&lhBucket->nodeArray[position], word);
         lhBucket->occupiedPositions++;
         return SUCCESS;
@@ -134,11 +134,12 @@ void linearHashTester() {
     printf("%d\n", insert_LHBucket(lhBucket, "d"));
     printf("%d\n", insert_LHBucket(lhBucket, "c"));
     printf("%d\n", insert_LHBucket(lhBucket, "a"));
-//    printf("%d\n", insert_LHBucket(linearHash->bucketArray[0], "a"));
+    printf("%d\n", insert_LHBucket(lhBucket, "f"));
 //    printf("%d\n", insert_LHBucket(linearHash->bucketArray[0], "a"));
 //    printf("%d\n", insert_LHBucket(linearHash->bucketArray[0], "f"));
+    print_LHBucket(lhBucket);
     destroy_LHBucket(lhBucket);
-    //print_LHBucket(linearHash->bucketArray[0]);
+
     //destroy_LinearHash(linearHash);
     exit(0);
 }
