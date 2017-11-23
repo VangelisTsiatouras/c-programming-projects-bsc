@@ -194,7 +194,7 @@ TrieNode *lookup_LinearHash(LinearHash *linearHash, char *word) {
     LHBucket *bucket = linearHash->bucketArray[hash];
     SearchResults result;
     // Don't call binary_search if the bucket is empty
-    if (bucket->occupiedPositions == 0) {
+    if (bucket == NULL || bucket->occupiedPositions == 0) {
         return NULL;
     } else {
         result = binary_search(bucket->nodeArray, word, bucket->occupiedPositions);

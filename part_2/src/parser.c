@@ -5,6 +5,7 @@
 
 #include "queryresults.h"
 #include "ngramcounter.h"
+#include "linearhash.h"
 #include "parser.h"
 
 int parser(Trie *trie, char *initFile, char *queryFile) {
@@ -29,6 +30,7 @@ int parser(Trie *trie, char *initFile, char *queryFile) {
     while (getline(&line, &lineSize, iFile) > 0) {
         insert_trie(trie, line);
     }
+//    print_LinearHash(trie->linearHash);
     while (getline(&line, &lineSize, qFile) > 0) {
         NgramArray *ngramArray = NULL;
         switch (line[0]) {
@@ -40,7 +42,7 @@ int parser(Trie *trie, char *initFile, char *queryFile) {
                 insert_trie(trie, &line[2]);
                 break;
             case 'D':
-                delete_ngram_trie(trie, &line[2]);
+//                delete_ngram_trie(trie, &line[2]);
 
                 break;
             case 'F':

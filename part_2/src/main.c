@@ -4,9 +4,12 @@
 #include <time.h>
 
 #include "parser.h"
+#include "linearhash.h"
 
 
 int main(int argc, char *argv[]) {
+
+//    linearHashTester();
 
     clock_t begin = clock();
     int i, error = 0;

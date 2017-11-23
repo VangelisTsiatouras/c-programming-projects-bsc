@@ -31,9 +31,10 @@ int destroy_trie(Trie *trie) {
 }
 
 int insert_trie(Trie *trie, char *ngram) {
-    TrieNode *current = trie->root;
     SearchResults result;
     char *word = strtok(ngram, " \n");
+    insert_LinearHash(trie->linearHash, word);
+    TrieNode *current = lookup_LinearHash(trie->linearHash, word);
     while (word != NULL) {
         // Don't call binary_search if the children array is empty
         if (current->occupiedPositions == 0) {
@@ -93,10 +94,15 @@ void query_trie(Trie *trie, char *ngram, BloomFilter *bloomFilter, QueryResults 
     int resultsFound = 0;
     // Iterate the ngram word by word
     for (int i = 0; i < numberOfWords; i++) {
-        current = trie->root;
+        current = lookup_LinearHash(trie->linearHash, splitNgram[i]);
+        if(current == NULL) {
+            continue;
+        }
         offset = 0;
         resultsBuffer[0] = '\0';
-        for (int j = i; j < numberOfWords; j++) {
+//        for (int j = i; j < numberOfWords; j++) {
+        int j = i;
+        while(j < numberOfWords) {
             result = binary_search(current->children, splitNgram[j], current->occupiedPositions);
             if (result.found == 0) {
                 break;
@@ -131,6 +137,7 @@ void query_trie(Trie *trie, char *ngram, BloomFilter *bloomFilter, QueryResults 
                     insert_ngram_counter(ngramCounter, resultsBuffer);
                 }
             }
+            j++;
         }
     }
     if (resultsFound == 0) {
