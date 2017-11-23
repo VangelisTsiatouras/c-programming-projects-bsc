@@ -4,7 +4,7 @@
 #include <errno.h>
 
 #include "trie.h"
-#include "ngramcounter.h"
+#include "linearhash.h"
 
 Trie *create_trie() {
     Trie *trie = malloc(sizeof(Trie));
@@ -12,18 +12,20 @@ Trie *create_trie() {
         printf("malloc error %s\n", strerror(errno));
         exit(MALLOC_ERROR);
     }
-    trie->root = malloc(sizeof(TrieNode));
-    if (!trie->root) {
-        printf("malloc error %s\n", strerror(errno));
-        exit(MALLOC_ERROR);
-    }
-    create_trie_node(trie->root);
+//    trie->root = malloc(sizeof(TrieNode));
+//    if (!trie->root) {
+//        printf("malloc error %s\n", strerror(errno));
+//        exit(MALLOC_ERROR);
+//    }
+//    create_trie_node(trie->root);
+    trie->linearHash = create_LinearHash();
     return trie;
 }
 
 int destroy_trie(Trie *trie) {
-    destroy_trie_node(trie->root);
-    free(trie->root);
+//    destroy_trie_node(trie->root);
+//    free(trie->root);
+    destroy_LinearHash(trie->linearHash);
     free(trie);
     return SUCCESS;
 }
