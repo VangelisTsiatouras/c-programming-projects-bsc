@@ -37,7 +37,7 @@ int insert_word_LHBucket(LHBucket *lhBucket, char *word) {
     //TrieNode *current = lhBucket->nodeArray;
     int returnValue;
     SearchResults result;
-    // Don't call binary_search if the children array is empty
+    // Don't call binary_search if the bucket is empty
     if (lhBucket->occupiedPositions == 0) {
         result.position = 0;
         result.found = 0;
@@ -47,7 +47,7 @@ int insert_word_LHBucket(LHBucket *lhBucket, char *word) {
     int position = result.position;
     if (result.found == 0) {
         returnValue = expand_if_full_LHBucket(lhBucket);
-        // Shift elements to keep the children array sorted
+        // Shift elements to keep the node array sorted
         if (position < lhBucket->occupiedPositions) {
             memmove(&lhBucket->nodeArray[position + 1], &lhBucket->nodeArray[position],
                     sizeof(TrieNode) * (lhBucket->occupiedPositions - position));
@@ -64,7 +64,7 @@ int insert_trie_node_LHBucket(LHBucket *lhBucket, TrieNode *trieNode) {
     //TrieNode *current = lhBucket->nodeArray;
     int returnValue;
     SearchResults result;
-    // Don't call binary_search if the children array is empty
+    // Don't call binary_search if the node array is empty
     if (lhBucket->occupiedPositions == 0) {
         result.position = 0;
         result.found = 0;
@@ -185,6 +185,26 @@ TrieNode *insert_LinearHash(LinearHash *linearHash, char *word) {
     return NULL;
 }
 
+TrieNode *lookup_LinearHash(LinearHash *linearHash, char *word) {
+    size_t length = strlen(word);
+    int hash = old_h(linearHash, word, length);
+    if (hash < linearHash->p) {
+        hash = new_h(linearHash, word, length); // Hash using next round's function
+    }
+    LHBucket *bucket = linearHash->bucketArray[hash];
+    SearchResults result;
+    // Don't call binary_search if the bucket is empty
+    if (bucket->occupiedPositions == 0) {
+        return NULL;
+    } else {
+        result = binary_search(bucket->nodeArray, word, bucket->occupiedPositions);
+    }
+    if(result.found == 1) {
+        return (&bucket->nodeArray[result.position]);
+    }
+    return NULL;
+}
+
 int expand_LinearHash(LinearHash *linearHash) {
     linearHash->arraySize *= 2;
     linearHash->bucketArray = realloc(linearHash->bucketArray, linearHash->arraySize * sizeof(LHBucket));//todo
@@ -283,7 +303,14 @@ void linearHashTester() {
         insert_LinearHash(linearHash, string);
     }
     print_LinearHash(linearHash);
-
+    TrieNode *tn = lookup_LinearHash(linearHash, "bmcf");
+    if (tn != NULL){
+        printf("%s\n", tn->word);
+    }
+    tn = lookup_LinearHash(linearHash, "xxxxxxx");
+    if (tn != NULL){
+        printf("%s\n", tn->word);
+    }
 //    insert_LinearHash(linearHash, "vaggelis");
 //    insert_LinearHash(linearHash, "vaggelis1");
 //    insert_LinearHash(linearHash, "vaggelis2");

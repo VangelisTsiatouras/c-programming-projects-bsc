@@ -30,7 +30,8 @@ int print_LHBucket(LHBucket *lhBucket);
 
 LinearHash *create_LinearHash();
 void destroy_LinearHash(LinearHash *linearHash);
-TrieNode * insert_LinearHash(LinearHash *linearHash, char *word);
+TrieNode *insert_LinearHash(LinearHash *linearHash, char *word);
+TrieNode *lookup_LinearHash(LinearHash *linearHash, char *word);
 int expand_LinearHash(LinearHash *linearHash);
 int rehash_bucket_LinearHash(LinearHash *linearHash, int bucket);
 
