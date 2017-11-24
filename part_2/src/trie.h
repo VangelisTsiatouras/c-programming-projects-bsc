@@ -23,7 +23,6 @@ typedef struct TrieNode {
 } TrieNode;
 
 typedef struct Trie {
-//    TrieNode *root;
     LinearHash *linearHash;
 } Trie;
 

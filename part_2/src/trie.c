@@ -13,19 +13,11 @@ Trie *create_trie() {
         printf("malloc error %s\n", strerror(errno));
         exit(MALLOC_ERROR);
     }
-//    trie->root = malloc(sizeof(TrieNode));
-//    if (!trie->root) {
-//        printf("malloc error %s\n", strerror(errno));
-//        exit(MALLOC_ERROR);
-//    }
-//    create_trie_node(trie->root);
     trie->linearHash = create_LinearHash();
     return trie;
 }
 
 int destroy_trie(Trie *trie) {
-//    destroy_trie_node(trie->root);
-//    free(trie->root);
     destroy_LinearHash(trie->linearHash);
     free(trie);
     return SUCCESS;
@@ -153,23 +145,28 @@ void query_trie(Trie *trie, char *ngram, BloomFilter *bloomFilter, QueryResults 
 
 int delete_ngram_trie(Trie *trie, char *ngram) {
     TrieNode *current;
+    LookupStruct lookupResult;
     SearchResults result;
     int numberOfWords;
     char **splitNgram = split_ngram(ngram, &numberOfWords);
-    int *positionArray = malloc(numberOfWords * sizeof(int));
+    int *positionArray = malloc((numberOfWords-1)  * sizeof(int));
     if (!positionArray) {
         printf("malloc error %s\n", strerror(errno));
         exit(MALLOC_ERROR);
     }
-    TrieNode **parents = malloc(numberOfWords * sizeof(TrieNode *));
+    TrieNode **parents = malloc((numberOfWords-1)  * sizeof(TrieNode *));
     if (!parents) {
         printf("malloc error %s\n", strerror(errno));
         exit(MALLOC_ERROR);
     }
     // Iterate the trie from root and compare its words with the ngram given
-    current = trie->linearHash; //TODO AUTO NA ALLA3EI.
-    for (int i = 0; i < numberOfWords; i++) {
-        result = binary_search(current->children, splitNgram[i], current->occupiedPositions);
+    lookupResult = lookup_for_delete_LinearHash(trie->linearHash, splitNgram[0]);
+    current = lookupResult.trieNode;
+    if (current == NULL) {
+        return DELETE_NOT_FOUND;
+    }
+    for (int i = 0; i < numberOfWords-1; i++) {
+        result = binary_search(current->children, splitNgram[i+1], current->occupiedPositions);
         positionArray[i] = result.position;
         if (result.found == 0) {
             free(positionArray);
@@ -182,9 +179,9 @@ int delete_ngram_trie(Trie *trie, char *ngram) {
     }
     // If you are then the ngram was stored in the trie
     // Iterate the ngram bottom-up
-    for (int i = numberOfWords - 1; i >= 0; i--) {
+    for (int i = numberOfWords - 2; i >= 0; i--) {
         // If this is the last word of the ngram
-        if (i == numberOfWords - 1) {
+        if (i == numberOfWords - 2) {
             current->isFinal = 0;
             // If it has children
             if (current->occupiedPositions > 0) {
@@ -200,10 +197,16 @@ int delete_ngram_trie(Trie *trie, char *ngram) {
             free(splitNgram);
             free(parents);
             return SUCCESS;
-
         }
         current = parents[i];
         delete_word_trie_node(current, positionArray[i]);
+    }
+    if(numberOfWords == 1 && lookupResult.trieNode->children != 0) {
+        lookupResult.trieNode->isFinal = 0;
+    }
+    // Delete word inside the hashtable bucket
+    if (lookupResult.trieNode->isFinal == 0) {
+        delete_word_LHBucket(trie->linearHash->bucketArray[lookupResult.bucket], lookupResult.trieNode->word);
     }
     free(positionArray);
     free(splitNgram);
