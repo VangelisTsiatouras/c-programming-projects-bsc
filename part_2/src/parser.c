@@ -28,38 +28,28 @@ int parser(Trie *trie, char *initFile, char *queryFile) {
     char *word = NULL;
     int topk = 3;
     size_t lineSize = 0;
-    clock_t begin = clock();
+
     while (getline(&line, &lineSize, iFile) > 0) {
         insert_trie(trie, line);
     }
-    clock_t end = clock();
-    double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
-    printf("QUERY TIME: %f\n", time_spent);
-
-//    print_LinearHash(trie->linearHash);
-//    print_node_children_LinearHash(trie->linearHash);
 
     while (getline(&line, &lineSize, qFile) > 0) {
         NgramArray *ngramArray = NULL;
         switch (line[0]) {
             case 'Q':
-                begin = clock();
                 query_trie(trie, &line[2], bloomFilter, queryResults, ngramCounter);
                 copy_results_to_buffer_query_results(queryResults);
-                end = clock();
-                time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
-                printf("QUERY TIME: %f\n", time_spent);
                 break;
             case 'A':
                 insert_trie(trie, &line[2]);
                 break;
             case 'D':
-//                delete_ngram_trie(trie, &line[2]);
+                delete_ngram_trie(trie, &line[2]);
 
                 break;
             case 'F':
                 word = strtok(line + 1, " \n");
-                if (word != NULL ){
+                if (word != NULL) {
                     topk = atoi(word);
                     if (topk < 1) {
                         printf("Invalid top k given: %d\n", topk);
@@ -70,7 +60,7 @@ int parser(Trie *trie, char *initFile, char *queryFile) {
                 flush_query_results(queryResults);
                 if (ngramArray != NULL) {
                     sort_topk(ngramArray, (unsigned int)topk);
-                    //print_ngram_array(ngramArray);
+//                    print_ngram_array(ngramArray);
                     destroy_ngram_array(ngramArray);
                 }
                 clear_ngram_counter(ngramCounter);
