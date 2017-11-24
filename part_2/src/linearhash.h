@@ -20,6 +20,11 @@ typedef struct LinearHash {
     unsigned int p;
 } LinearHash;
 
+typedef struct LookupStruct {
+    TrieNode *trieNode;
+    unsigned int bucket;
+} LookupStruct;
+
 LHBucket *create_LHBucket();
 void destroy_LHBucket(LHBucket *lhBucket);
 int insert_word_LHBucket(LHBucket *lhBucket, char *word);
@@ -32,6 +37,7 @@ LinearHash *create_LinearHash();
 void destroy_LinearHash(LinearHash *linearHash);
 TrieNode *insert_LinearHash(LinearHash *linearHash, char *word);
 TrieNode *lookup_LinearHash(LinearHash *linearHash, char *word);
+LookupStruct lookup_for_delete_LinearHash(LinearHash *linearHash, char *word);
 int expand_LinearHash(LinearHash *linearHash);
 int rehash_bucket_LinearHash(LinearHash *linearHash, int bucket);
 

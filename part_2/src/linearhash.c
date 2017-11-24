@@ -3,7 +3,7 @@
 #include <string.h>
 #include <errno.h>
 #include <math.h>
-#include <time.h>
+
 #include "linearhash.h"
 
 LHBucket *create_LHBucket() {
@@ -90,8 +90,27 @@ int insert_trie_node_LHBucket(LHBucket *lhBucket, TrieNode *trieNode) {
     return 0;
 }
 
-void delete_word_LHBucket(LHBucket *lhBucket, char *word) {
-
+void delete_word_LHBucket(LHBucket *lhBucket, char* word) {
+    SearchResults result;
+    // Don't call binary_search if the node array is empty
+    if (lhBucket->occupiedPositions == 0) {
+        result.position = 0;
+        result.found = 0;
+    } else {
+        result = binary_search(lhBucket->nodeArray, word, lhBucket->occupiedPositions);
+    }
+    int position = result.position;
+    if(result.found == 1) {
+        if (lhBucket->nodeArray[position].occupiedPositions == 0) {
+            destroy_trie_node(&lhBucket->nodeArray[position]);
+            if (position < (lhBucket->occupiedPositions - 1)) {
+                // Shift elements to the left
+                memmove(&lhBucket->nodeArray[position], &lhBucket->nodeArray[position + 1],
+                        sizeof(TrieNode) * (lhBucket->occupiedPositions - position - 1));
+            }
+            lhBucket->occupiedPositions--;
+        }
+    }
 }
 
 int expand_if_full_LHBucket(LHBucket *lhBucket) {
@@ -185,7 +204,7 @@ TrieNode *insert_LinearHash(LinearHash *linearHash, char *word) {
 
 TrieNode *lookup_LinearHash(LinearHash *linearHash, char *word) {
     size_t length = strlen(word);
-    int hash = old_h(linearHash, word, length);
+    unsigned int hash = old_h(linearHash, word, length);
     if (hash < linearHash->p) {
         hash = new_h(linearHash, word, length); // Hash using next round's function
     }
@@ -201,6 +220,30 @@ TrieNode *lookup_LinearHash(LinearHash *linearHash, char *word) {
         return (&bucket->nodeArray[result.position]);
     }
     return NULL;
+}
+
+LookupStruct lookup_for_delete_LinearHash(LinearHash *linearHash, char *word) {
+    LookupStruct returnValue;
+    returnValue.trieNode = NULL;
+    size_t length = strlen(word);
+    unsigned int hash = old_h(linearHash, word, length);
+    if (hash < linearHash->p) {
+        hash = new_h(linearHash, word, length); // Hash using next round's function
+    }
+    LHBucket *bucket = linearHash->bucketArray[hash];
+    SearchResults result;
+    // Don't call binary_search if the bucket is empty
+    if (bucket == NULL || bucket->occupiedPositions == 0) {
+        return returnValue;
+    } else {
+        result = binary_search(bucket->nodeArray, word, bucket->occupiedPositions);
+    }
+    if(result.found == 1) {
+        returnValue.trieNode = &bucket->nodeArray[result.position];
+        returnValue.bucket = hash;
+        return returnValue;
+    }
+    return returnValue;
 }
 
 int expand_LinearHash(LinearHash *linearHash) {
@@ -324,6 +367,17 @@ void linearHashTester() {
     if (tn != NULL){
         printf("%s\n", tn->word);
     }
+
+    LookupStruct ls = lookup_for_delete_LinearHash(linearHash, "bmcf");
+    if (ls.trieNode != NULL){
+        printf("lookup for delete: %s\n", ls.trieNode->word);
+    }
+    ls = lookup_for_delete_LinearHash(linearHash, "xxxxxxx");
+    if (ls.trieNode != NULL){
+        printf("lookup for delete: %s\n", ls.trieNode->word);
+    }
+
+
 //    insert_LinearHash(linearHash, "vaggelis");
 //    insert_LinearHash(linearHash, "vaggelis1");
 //    insert_LinearHash(linearHash, "vaggelis2");
@@ -347,6 +401,13 @@ void bucketTester() {
     store_word_trie_node(&t, "vaggelis");
     insert_trie_node_LHBucket(lhBucket, &t);
     print_LHBucket(lhBucket);
+
+    delete_word_LHBucket(lhBucket,"f");
+    delete_word_LHBucket(lhBucket,"b");
+    delete_word_LHBucket(lhBucket,"vaggelis");
+    delete_word_LHBucket(lhBucket,"asdf");
+    print_LHBucket(lhBucket);
+
     destroy_LHBucket(lhBucket);
     exit(0);
 }
