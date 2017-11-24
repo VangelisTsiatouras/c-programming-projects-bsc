@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
+#include <time.h>
 
 #include "queryresults.h"
 #include "ngramcounter.h"
@@ -27,9 +28,14 @@ int parser(Trie *trie, char *initFile, char *queryFile) {
     char *word = NULL;
     int topk = 3;
     size_t lineSize = 0;
+    clock_t begin = clock();
     while (getline(&line, &lineSize, iFile) > 0) {
         insert_trie(trie, line);
     }
+    clock_t end = clock();
+    double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
+    printf("QUERY TIME: %f\n", time_spent);
+
 //    print_LinearHash(trie->linearHash);
 //    print_node_children_LinearHash(trie->linearHash);
 
@@ -37,8 +43,12 @@ int parser(Trie *trie, char *initFile, char *queryFile) {
         NgramArray *ngramArray = NULL;
         switch (line[0]) {
             case 'Q':
+                begin = clock();
                 query_trie(trie, &line[2], bloomFilter, queryResults, ngramCounter);
                 copy_results_to_buffer_query_results(queryResults);
+                end = clock();
+                time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
+                printf("QUERY TIME: %f\n", time_spent);
                 break;
             case 'A':
                 insert_trie(trie, &line[2]);

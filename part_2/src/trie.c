@@ -134,7 +134,7 @@ void query_trie(Trie *trie, char *ngram, BloomFilter *bloomFilter, QueryResults 
                 }
             }
             j++;
-            if( j < numberOfWords) {
+            if (j < numberOfWords) {
                 result = binary_search(current->children, splitNgram[j], current->occupiedPositions);
                 if (result.found == 0) {
                     break;
