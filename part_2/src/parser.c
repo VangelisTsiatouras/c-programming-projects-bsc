@@ -31,6 +31,8 @@ int parser(Trie *trie, char *initFile, char *queryFile) {
         insert_trie(trie, line);
     }
 //    print_LinearHash(trie->linearHash);
+//    print_node_children_LinearHash(trie->linearHash);
+
     while (getline(&line, &lineSize, qFile) > 0) {
         NgramArray *ngramArray = NULL;
         switch (line[0]) {

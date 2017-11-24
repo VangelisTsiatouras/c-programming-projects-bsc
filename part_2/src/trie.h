@@ -23,7 +23,7 @@ typedef struct TrieNode {
 } TrieNode;
 
 typedef struct Trie {
-    TrieNode *root;
+//    TrieNode *root;
     LinearHash *linearHash;
 } Trie;
 
@@ -50,6 +50,7 @@ void print_trie_node(TrieNode *trieNode);
 
 SearchResults binary_search(TrieNode *childrenArray, char *word, int occupiedPositions);
 char **split_ngram(char *ngram, int *numberOfWords);
+void expand_results_buffer(char *buffer); ///
 void trie_dfs_print(TrieNode *trieNode);
 
 #endif //TRIE_H

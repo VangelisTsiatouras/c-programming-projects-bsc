@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
+#include <time.h>
 
 #include "trie.h"
 #include "linearhash.h"
@@ -34,7 +35,8 @@ int insert_trie(Trie *trie, char *ngram) {
     SearchResults result;
     char *word = strtok(ngram, " \n");
     insert_LinearHash(trie->linearHash, word);
-    TrieNode *current = lookup_LinearHash(trie->linearHash, word);
+    TrieNode *current = lookup_LinearHash(trie->linearHash, word); // todo gt na kanoume insert kai meta lookup....
+    word = strtok(NULL, " \n");
     while (word != NULL) {
         // Don't call binary_search if the children array is empty
         if (current->occupiedPositions == 0) {
@@ -95,19 +97,13 @@ void query_trie(Trie *trie, char *ngram, BloomFilter *bloomFilter, QueryResults 
     // Iterate the ngram word by word
     for (int i = 0; i < numberOfWords; i++) {
         current = lookup_LinearHash(trie->linearHash, splitNgram[i]);
-        if(current == NULL) {
+        if (current == NULL) {
             continue;
         }
         offset = 0;
         resultsBuffer[0] = '\0';
-//        for (int j = i; j < numberOfWords; j++) {
         int j = i;
-        while(j < numberOfWords) {
-            result = binary_search(current->children, splitNgram[j], current->occupiedPositions);
-            if (result.found == 0) {
-                break;
-            }
-            current = &current->children[result.position];
+        do {
             // Check if next word fits in resultsBuffer
             // If not realloc buffer
             size_t wordSize = strlen(splitNgram[j]) + 1;
@@ -138,7 +134,12 @@ void query_trie(Trie *trie, char *ngram, BloomFilter *bloomFilter, QueryResults 
                 }
             }
             j++;
-        }
+            result = binary_search(current->children, splitNgram[j], current->occupiedPositions);
+            if (result.found == 0) {
+                break;
+            }
+            current = &current->children[result.position];
+        } while(j < numberOfWords);
     }
     if (resultsFound == 0) {
         sprintf(resultsBuffer, "-1");
@@ -164,7 +165,7 @@ int delete_ngram_trie(Trie *trie, char *ngram) {
         exit(MALLOC_ERROR);
     }
     // Iterate the trie from root and compare its words with the ngram given
-    current = trie->root;
+    current = trie->linearHash; //TODO AUTO NA ALLA3EI.
     for (int i = 0; i < numberOfWords; i++) {
         result = binary_search(current->children, splitNgram[i], current->occupiedPositions);
         positionArray[i] = result.position;

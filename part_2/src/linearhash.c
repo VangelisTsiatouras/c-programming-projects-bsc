@@ -90,7 +90,7 @@ int insert_trie_node_LHBucket(LHBucket *lhBucket, TrieNode *trieNode) {
     return 0;
 }
 
-void delete_LHBucket(LHBucket *lhBucket, char *word) {
+void delete_word_LHBucket(LHBucket *lhBucket, char *word) {
 
 }
 
@@ -179,8 +179,6 @@ TrieNode *insert_LinearHash(LinearHash *linearHash, char *word) {
                 linearHash->round++;
             }
         } while(hashAgain == 1);
-
-
     }
     return NULL;
 }
@@ -273,6 +271,21 @@ void print_LinearHash(LinearHash *linearHash) {
     printf("Total elements %d\n", s);
     printf("Max bucket %d\n", max);
     printf("Average: %.1f\n", (float)s / linearHash->arraySize);
+}
+
+void print_node_children_LinearHash(LinearHash *linearHash) {
+    for(int i = 0; i < linearHash->arraySize; i++) {
+        if (linearHash->bucketArray[i] == NULL) {
+            printf("NULL\n");
+            continue;
+        }
+        for(int j = 0; j < linearHash->bucketArray[i]->occupiedPositions; j++) {
+//            if (linearHash->bucketArray[i]->occupiedPositions == 0) {
+//                continue;
+//            }
+            trie_dfs_print(&linearHash->bucketArray[i]->nodeArray[j]);
+        }
+    }
 }
 
 unsigned int old_h(LinearHash *linearHash, char *ngram, size_t length) {
