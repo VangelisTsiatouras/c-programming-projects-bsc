@@ -134,9 +134,11 @@ void query_trie(Trie *trie, char *ngram, BloomFilter *bloomFilter, QueryResults 
                 }
             }
             j++;
-            result = binary_search(current->children, splitNgram[j], current->occupiedPositions);
-            if (result.found == 0) {
-                break;
+            if( j < numberOfWords) {
+                result = binary_search(current->children, splitNgram[j], current->occupiedPositions);
+                if (result.found == 0) {
+                    break;
+                }
             }
             current = &current->children[result.position];
         } while(j < numberOfWords);
