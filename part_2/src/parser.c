@@ -2,9 +2,11 @@
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
+#include <time.h>
 
 #include "queryresults.h"
 #include "ngramcounter.h"
+#include "linearhash.h"
 #include "parser.h"
 
 int parser(Trie *trie, char *initFile, char *queryFile) {
@@ -26,9 +28,11 @@ int parser(Trie *trie, char *initFile, char *queryFile) {
     char *word = NULL;
     int topk = 3;
     size_t lineSize = 0;
+
     while (getline(&line, &lineSize, iFile) > 0) {
         insert_trie(trie, line);
     }
+
     while (getline(&line, &lineSize, qFile) > 0) {
         NgramArray *ngramArray = NULL;
         switch (line[0]) {
@@ -45,7 +49,7 @@ int parser(Trie *trie, char *initFile, char *queryFile) {
                 break;
             case 'F':
                 word = strtok(line + 1, " \n");
-                if (word != NULL ){
+                if (word != NULL) {
                     topk = atoi(word);
                     if (topk < 1) {
                         printf("Invalid top k given: %d\n", topk);
@@ -56,7 +60,7 @@ int parser(Trie *trie, char *initFile, char *queryFile) {
                 flush_query_results(queryResults);
                 if (ngramArray != NULL) {
                     sort_topk(ngramArray, (unsigned int)topk);
-                    //print_ngram_array(ngramArray);
+//                    print_ngram_array(ngramArray);
                     destroy_ngram_array(ngramArray);
                 }
                 clear_ngram_counter(ngramCounter);

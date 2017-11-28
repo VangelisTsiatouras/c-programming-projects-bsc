@@ -3,7 +3,7 @@
 #include <string.h>
 #include <errno.h>
 #include <math.h>
-#include <time.h>
+
 #include "linearhash.h"
 
 LHBucket *create_LHBucket() {
@@ -90,8 +90,27 @@ int insert_trie_node_LHBucket(LHBucket *lhBucket, TrieNode *trieNode) {
     return 0;
 }
 
-void delete_LHBucket(LHBucket *lhBucket, char *word) {
-
+void delete_word_LHBucket(LHBucket *lhBucket, char* word) {
+    SearchResults result;
+    // Don't call binary_search if the node array is empty
+    if (lhBucket->occupiedPositions == 0) {
+        result.position = 0;
+        result.found = 0;
+    } else {
+        result = binary_search(lhBucket->nodeArray, word, lhBucket->occupiedPositions);
+    }
+    int position = result.position;
+    if(result.found == 1) {
+        if (lhBucket->nodeArray[position].occupiedPositions == 0) {
+            destroy_trie_node(&lhBucket->nodeArray[position]);
+            if (position < (lhBucket->occupiedPositions - 1)) {
+                // Shift elements to the left
+                memmove(&lhBucket->nodeArray[position], &lhBucket->nodeArray[position + 1],
+                        sizeof(TrieNode) * (lhBucket->occupiedPositions - position - 1));
+            }
+            lhBucket->occupiedPositions--;
+        }
+    }
 }
 
 int expand_if_full_LHBucket(LHBucket *lhBucket) {
@@ -179,22 +198,20 @@ TrieNode *insert_LinearHash(LinearHash *linearHash, char *word) {
                 linearHash->round++;
             }
         } while(hashAgain == 1);
-
-
     }
     return NULL;
 }
 
 TrieNode *lookup_LinearHash(LinearHash *linearHash, char *word) {
     size_t length = strlen(word);
-    int hash = old_h(linearHash, word, length);
+    unsigned int hash = old_h(linearHash, word, length);
     if (hash < linearHash->p) {
         hash = new_h(linearHash, word, length); // Hash using next round's function
     }
     LHBucket *bucket = linearHash->bucketArray[hash];
     SearchResults result;
     // Don't call binary_search if the bucket is empty
-    if (bucket->occupiedPositions == 0) {
+    if (bucket == NULL || bucket->occupiedPositions == 0) {
         return NULL;
     } else {
         result = binary_search(bucket->nodeArray, word, bucket->occupiedPositions);
@@ -203,6 +220,30 @@ TrieNode *lookup_LinearHash(LinearHash *linearHash, char *word) {
         return (&bucket->nodeArray[result.position]);
     }
     return NULL;
+}
+
+LookupStruct lookup_for_delete_LinearHash(LinearHash *linearHash, char *word) {
+    LookupStruct returnValue;
+    returnValue.trieNode = NULL;
+    size_t length = strlen(word);
+    unsigned int hash = old_h(linearHash, word, length);
+    if (hash < linearHash->p) {
+        hash = new_h(linearHash, word, length); // Hash using next round's function
+    }
+    LHBucket *bucket = linearHash->bucketArray[hash];
+    SearchResults result;
+    // Don't call binary_search if the bucket is empty
+    if (bucket == NULL || bucket->occupiedPositions == 0) {
+        return returnValue;
+    } else {
+        result = binary_search(bucket->nodeArray, word, bucket->occupiedPositions);
+    }
+    if(result.found == 1) {
+        returnValue.trieNode = &bucket->nodeArray[result.position];
+        returnValue.bucket = hash;
+        return returnValue;
+    }
+    return returnValue;
 }
 
 int expand_LinearHash(LinearHash *linearHash) {
@@ -275,6 +316,21 @@ void print_LinearHash(LinearHash *linearHash) {
     printf("Average: %.1f\n", (float)s / linearHash->arraySize);
 }
 
+void print_node_children_LinearHash(LinearHash *linearHash) {
+    for(int i = 0; i < linearHash->arraySize; i++) {
+        if (linearHash->bucketArray[i] == NULL) {
+            printf("NULL\n");
+            continue;
+        }
+        for(int j = 0; j < linearHash->bucketArray[i]->occupiedPositions; j++) {
+//            if (linearHash->bucketArray[i]->occupiedPositions == 0) {
+//                continue;
+//            }
+            trie_dfs_print(&linearHash->bucketArray[i]->nodeArray[j]);
+        }
+    }
+}
+
 unsigned int old_h(LinearHash *linearHash, char *ngram, size_t length) {
     int mod = ((int) pow(2.0, (double) (linearHash->round)) *
                LH_STARTING_SIZE); // kmod(2^i)*m, where i = current round and m = LH_STARTING_SIZE
@@ -286,76 +342,3 @@ unsigned int new_h(LinearHash *linearHash, char *ngram, size_t length) {
                LH_STARTING_SIZE); // kmod(2^(i+1))*m, where i = current round and m = LH_STARTING_SIZE
     return murmurHash3(ngram, (unsigned int) length, MURMUR_SEED) % mod;
 }
-
-void linearHashTester() {
-    //srand(time(NULL));
-    LinearHash *linearHash = create_LinearHash();
-    char string[20] = "aaaa";
-    for (int i = 0; i < 500000; i++) {
-        char c = rand() % 26 + 'a';
-        string[0] = c;
-        c = rand() % 26 + 'a';
-        string[1] = c;
-        c = rand() % 26 + 'a';
-        string[2] = c;
-        c = rand() % 26 + 'a';
-        string[3] = c;
-        insert_LinearHash(linearHash, string);
-    }
-    print_LinearHash(linearHash);
-    TrieNode *tn = lookup_LinearHash(linearHash, "bmcf");
-    if (tn != NULL){
-        printf("%s\n", tn->word);
-    }
-    tn = lookup_LinearHash(linearHash, "xxxxxxx");
-    if (tn != NULL){
-        printf("%s\n", tn->word);
-    }
-//    insert_LinearHash(linearHash, "vaggelis");
-//    insert_LinearHash(linearHash, "vaggelis1");
-//    insert_LinearHash(linearHash, "vaggelis2");
-
-
-
-    destroy_LinearHash(linearHash);
-    exit(0);
-}
-
-void bucketTester() {
-    LHBucket *lhBucket = create_LHBucket();
-    printf("%ld\n", sizeof(LHBucket));
-    printf("%d\n", insert_word_LHBucket(lhBucket, "d"));
-    printf("%d\n", insert_word_LHBucket(lhBucket, "c"));
-    printf("%d\n", insert_word_LHBucket(lhBucket, "a"));
-    printf("%d\n", insert_word_LHBucket(lhBucket, "f"));
-    printf("%d\n", insert_word_LHBucket(lhBucket, "b"));
-    TrieNode t;
-    create_trie_node(&t);
-    store_word_trie_node(&t, "vaggelis");
-    insert_trie_node_LHBucket(lhBucket, &t);
-    print_LHBucket(lhBucket);
-    destroy_LHBucket(lhBucket);
-    exit(0);
-}
-
-
-
-
-
-
-
-//    int position = -1; // Will point at first empty position
-//    for (int i = 0; i < lhBucket->capacity; i++) {
-//        if (isEmpty(&lhBucket->nodeArray[i])) {
-//            if (position == -1) {
-//                position = i;
-//            }
-//        }
-//        else {
-//            if (strcmp(word, get_word_trie_node(&lhBucket->nodeArray[i])) == 0){
-//                return 1;//todo
-//            }
-//        }
-//    }
-//    store_word_trie_node(&lhBucket->nodeArray[position], word);
-//    return SUCCESS;

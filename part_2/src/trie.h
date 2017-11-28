@@ -1,15 +1,17 @@
 #ifndef TRIE_H
 #define TRIE_H
 
+#include "defs.h"
 #include "bloomfilter.h"
 #include "queryresults.h"
-#include "defs.h"
 #include "ngramcounter.h"
 
 #define STARTING_SIZE_CHILD_ARRAY 4
 #define WORD_SIZE 20
 #define DEFAULT_NGRAM_WORDS 10
 #define DEFAULT_QUERY_BUFFER 20
+
+typedef struct LinearHash LinearHash;
 
 typedef struct TrieNode {
     char word[WORD_SIZE];
@@ -21,7 +23,7 @@ typedef struct TrieNode {
 } TrieNode;
 
 typedef struct Trie {
-    TrieNode *root;
+    LinearHash *linearHash;
 } Trie;
 
 // This structure is used from binary_search
@@ -47,6 +49,7 @@ void print_trie_node(TrieNode *trieNode);
 
 SearchResults binary_search(TrieNode *childrenArray, char *word, int occupiedPositions);
 char **split_ngram(char *ngram, int *numberOfWords);
+void expand_results_buffer(char *buffer); ///
 void trie_dfs_print(TrieNode *trieNode);
 
 #endif //TRIE_H
