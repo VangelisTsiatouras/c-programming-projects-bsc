@@ -1,8 +1,8 @@
 ######################################################################
-OBJS       = main.o trie.o parser.o queryresults.o bloomfilter.o hashfunctions.o ngramcounter.o
-SOURCE     = main.c trie.c parser.c queryresults.c bloomfilter.c hashfunctions.c ngramcounter.c
-TEST_SRC   = trie.c parser.c queryresults.c bloomfilter.c hashfunctions.c ngramcounter.c
-HEADER     = trie.h parser.h queryresults.h defs.h bloomfilter.h hashfunctions.h ngramcounter.h
+OBJS       = main.o trie.o linearhash.o parser.o queryresults.o bloomfilter.o hashfunctions.o ngramcounter.o
+SOURCE     = main.c trie.c linearhash.c parser.c queryresults.c bloomfilter.c hashfunctions.c ngramcounter.c
+TEST_SRC   = trie.c linearhash.c parser.c queryresults.c bloomfilter.c hashfunctions.c ngramcounter.c
+HEADER     = trie.h linearhash.h parser.h queryresults.h defs.h bloomfilter.h hashfunctions.h ngramcounter.h
 OUT        = ngrams
 U_TEST_OUT = u_test_trie
 CC         = gcc
