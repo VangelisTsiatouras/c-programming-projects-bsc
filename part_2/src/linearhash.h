@@ -47,7 +47,4 @@ void print_node_children_LinearHash(LinearHash *linearHash);
 unsigned int old_h(LinearHash *linearHash, char *ngram, size_t length);
 unsigned int new_h(LinearHash *linearHash, char *ngram, size_t length);
 
-void linearHashTester();
-void bucketTester();
-
 #endif //LINEARHASH_H
