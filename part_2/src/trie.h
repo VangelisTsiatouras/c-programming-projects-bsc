@@ -20,6 +20,8 @@ typedef struct TrieNode {
     int occupiedPositions;
     int capacity;
     char isFinal;
+    short *staticTrieWordOffsets;
+    unsigned int staticArraySize;
 } TrieNode;
 
 typedef struct Trie {
@@ -42,6 +44,7 @@ int delete_ngram_trie(Trie *trie, char *ngram);
 int create_trie_node(TrieNode *trieNode);
 void destroy_trie_node(TrieNode *trieNode);
 void store_word_trie_node(TrieNode *trieNode, char *word);
+void compress_trie_node(TrieNode *trieNode);
 char* get_word_trie_node(TrieNode *trieNode);
 int is_empty(TrieNode *trieNode);
 void delete_word_trie_node(TrieNode *trieNode, int position);
@@ -51,5 +54,7 @@ SearchResults binary_search(TrieNode *childrenArray, char *word, int occupiedPos
 char **split_ngram(char *ngram, int *numberOfWords);
 void expand_results_buffer(char *buffer); ///
 void trie_dfs_print(TrieNode *trieNode);
+
+void tester_compress();
 
 #endif //TRIE_H
