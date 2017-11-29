@@ -281,7 +281,7 @@ void compress_trie_node(TrieNode *trieNode) {
             }
             strncpy(current->largeWord, current->word, wordLength);
             current->word[0] = '\0';
-            current->staticTrieWordOffsets[0] = (short) (wordLength - 1);
+            current->staticTrieWordOffsets[0] = (short) wordLength - (short) 1;
             // Mark finals as negative values in the staticTrieWordOffsets array
             if (current->isFinal == 1) {
                 current->staticTrieWordOffsets[0] *= -1;
@@ -301,13 +301,13 @@ void compress_trie_node(TrieNode *trieNode) {
         }
         current->staticArraySize++;
         current->staticTrieWordOffsets = realloc(current->staticTrieWordOffsets,
-                                                 current->staticArraySize * sizeof(char));
+                                                 current->staticArraySize * sizeof(short));
         if (!current->staticTrieWordOffsets) {
             printf("realloc error %s\n", strerror(errno));
             exit(REALLOC_ERROR);
         }
         strncat(current->largeWord, childWord, wordLength);
-        current->staticTrieWordOffsets[current->staticArraySize - 1] = (short) (childWordLength - 1);
+        current->staticTrieWordOffsets[current->staticArraySize - 1] = (short) childWordLength - (short) 1;
         if (temp->isFinal == 1) {
             current->staticTrieWordOffsets[current->staticArraySize - 1] *= -1;
         }
@@ -328,13 +328,13 @@ void compress_trie_node(TrieNode *trieNode) {
 
     }
 //
-    if(current->staticTrieWordOffsets != NULL) {
-        printf("%s\n", current->largeWord);
-        for (int i = 0; i < current->staticArraySize; i++) {
-            printf("%d ", current->staticTrieWordOffsets[i]);
-        }
-        printf("\n");
-    }
+//    if(current->staticTrieWordOffsets != NULL) {
+//        printf("%s\n", current->largeWord);
+//        for (int i = 0; i < current->staticArraySize; i++) {
+//            printf("%d ", current->staticTrieWordOffsets[i]);
+//        }
+//        printf("\n");
+//    }
 
     // For each children of the compressed node do recursion
     for (int i = 0; i < current->occupiedPositions; i++) {
