@@ -133,7 +133,7 @@ void query_trie(Trie *trie, char *ngram, BloomFilter *bloomFilter, QueryResults 
                 }
             }
             current = &current->children[result.position];
-        } while(j < numberOfWords);
+        } while (j < numberOfWords);
     }
     if (resultsFound == 0) {
         sprintf(resultsBuffer, "-1");
@@ -143,18 +143,30 @@ void query_trie(Trie *trie, char *ngram, BloomFilter *bloomFilter, QueryResults 
     free(splitNgram);
 }
 
+void compress_trie(Trie *trie) {
+    for(int i = 0; i < trie->linearHash->arraySize; i++) {
+        LHBucket *lhBucket = trie->linearHash->bucketArray[i];
+        if (lhBucket != NULL) {
+            for (int j = 0; j < lhBucket->occupiedPositions; j++) {
+                TrieNode *trieNode = &lhBucket->nodeArray[j];
+                compress_trie_node(trieNode);
+            }
+        }
+    }
+}
+
 int delete_ngram_trie(Trie *trie, char *ngram) {
     TrieNode *current;
     LookupStruct lookupResult;
     SearchResults result;
     int numberOfWords;
     char **splitNgram = split_ngram(ngram, &numberOfWords);
-    int *positionArray = malloc((numberOfWords-1)  * sizeof(int));
+    int *positionArray = malloc((numberOfWords - 1) * sizeof(int));
     if (!positionArray) {
         printf("malloc error %s\n", strerror(errno));
         exit(MALLOC_ERROR);
     }
-    TrieNode **parents = malloc((numberOfWords-1)  * sizeof(TrieNode *));
+    TrieNode **parents = malloc((numberOfWords - 1) * sizeof(TrieNode *));
     if (!parents) {
         printf("malloc error %s\n", strerror(errno));
         exit(MALLOC_ERROR);
@@ -165,8 +177,8 @@ int delete_ngram_trie(Trie *trie, char *ngram) {
     if (current == NULL) {
         return DELETE_NOT_FOUND;
     }
-    for (int i = 0; i < numberOfWords-1; i++) {
-        result = binary_search(current->children, splitNgram[i+1], current->occupiedPositions);
+    for (int i = 0; i < numberOfWords - 1; i++) {
+        result = binary_search(current->children, splitNgram[i + 1], current->occupiedPositions);
         positionArray[i] = result.position;
         if (result.found == 0) {
             free(positionArray);
@@ -201,7 +213,7 @@ int delete_ngram_trie(Trie *trie, char *ngram) {
         current = parents[i];
         delete_word_trie_node(current, positionArray[i]);
     }
-    if(numberOfWords == 1 && lookupResult.trieNode->children != 0) {
+    if (numberOfWords == 1 && lookupResult.trieNode->children != 0) {
         lookupResult.trieNode->isFinal = 0;
     }
     // Delete word inside the hashtable bucket
@@ -229,6 +241,7 @@ int create_trie_node(TrieNode *trieNode) {
         exit(MALLOC_ERROR);
     }
     trieNode->staticTrieWordOffsets = NULL;
+    trieNode->occupiedPositions = 0;
     return SUCCESS;
 }
 
@@ -247,7 +260,6 @@ void store_word_trie_node(TrieNode *trieNode, char *word) {
 }
 
 void compress_trie_node(TrieNode *trieNode) {
-    printf("COMPRESS\n");
     TrieNode *current = trieNode;
     size_t wordLength = strlen(get_word_trie_node(current)) + 1;
     while (current->occupiedPositions == 1) {
@@ -261,7 +273,7 @@ void compress_trie_node(TrieNode *trieNode) {
                 exit(MALLOC_ERROR);
             }
         }
-        if (current->largeWord == NULL){
+        if (current->largeWord == NULL) {
             current->largeWord = malloc(wordLength * sizeof(char));
             if (!current->largeWord) {
                 printf("malloc error %s\n", strerror(errno));
@@ -269,7 +281,7 @@ void compress_trie_node(TrieNode *trieNode) {
             }
             strncpy(current->largeWord, current->word, wordLength);
             current->word[0] = '\0';
-            current->staticTrieWordOffsets[0] = (short)(wordLength-1);
+            current->staticTrieWordOffsets[0] = (short) (wordLength - 1);
             // Mark finals as negative values in the staticTrieWordOffsets array
             if (current->isFinal == 1) {
                 current->staticTrieWordOffsets[0] *= -1;
@@ -279,7 +291,7 @@ void compress_trie_node(TrieNode *trieNode) {
         // Go to child and copy the word to the parent
         char *childWord = get_word_trie_node(&current->children[0]);
         TrieNode *temp = &current->children[0];
-        size_t childWordLength = strlen(childWord);
+        size_t childWordLength = strlen(childWord) + 1;
         // Realloc parent's largeword
         wordLength += childWordLength;
         current->largeWord = realloc(current->largeWord, wordLength * sizeof(char));
@@ -288,15 +300,16 @@ void compress_trie_node(TrieNode *trieNode) {
             exit(REALLOC_ERROR);
         }
         current->staticArraySize++;
-        current->staticTrieWordOffsets = realloc(current->staticTrieWordOffsets,current->staticArraySize * sizeof(char));
+        current->staticTrieWordOffsets = realloc(current->staticTrieWordOffsets,
+                                                 current->staticArraySize * sizeof(char));
         if (!current->staticTrieWordOffsets) {
             printf("realloc error %s\n", strerror(errno));
             exit(REALLOC_ERROR);
         }
         strncat(current->largeWord, childWord, wordLength);
-        current->staticTrieWordOffsets[current->staticArraySize-1] = (short)childWordLength;
+        current->staticTrieWordOffsets[current->staticArraySize - 1] = (short) (childWordLength - 1);
         if (temp->isFinal == 1) {
-            current->staticTrieWordOffsets[current->staticArraySize-1] *= -1;
+            current->staticTrieWordOffsets[current->staticArraySize - 1] *= -1;
         }
 
         // Copy the children of the child to the parent
@@ -314,11 +327,15 @@ void compress_trie_node(TrieNode *trieNode) {
         free(temp);
 
     }
-    printf("%s\n", current->largeWord);
-    for(int i = 0; i < current->staticArraySize; i++) {
-        printf("%d ", current->staticTrieWordOffsets[i]);
+//
+    if(current->staticTrieWordOffsets != NULL) {
+        printf("%s\n", current->largeWord);
+        for (int i = 0; i < current->staticArraySize; i++) {
+            printf("%d ", current->staticTrieWordOffsets[i]);
+        }
+        printf("\n");
     }
-    printf("\n");
+
     // For each children of the compressed node do recursion
     for (int i = 0; i < current->occupiedPositions; i++) {
         compress_trie_node(&current->children[i]);

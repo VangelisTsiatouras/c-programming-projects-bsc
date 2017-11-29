@@ -39,6 +39,7 @@ int destroy_trie(Trie *trie);
 int insert_trie(Trie *trie, char *ngram);
 void query_trie(Trie *trie, char *ngram, BloomFilter *bloomFilter, QueryResults *queryResults,
                 NgramCounter *ngramCounter);
+void compress_trie(Trie *trie);
 int delete_ngram_trie(Trie *trie, char *ngram);
 
 int create_trie_node(TrieNode *trieNode);
