@@ -37,7 +37,9 @@ typedef struct SearchResults {
 Trie *create_trie();
 int destroy_trie(Trie *trie);
 int insert_trie(Trie *trie, char *ngram);
-void query_trie(Trie *trie, char *ngram, BloomFilter *bloomFilter, QueryResults *queryResults,
+void query_trie_dynamic(Trie *trie, char *ngram, BloomFilter *bloomFilter, QueryResults *queryResults,
+                        NgramCounter *ngramCounter);
+void query_trie_static(Trie *trie, char *ngram, BloomFilter *bloomFilter, QueryResults *queryResults,
                 NgramCounter *ngramCounter);
 void compress_trie(Trie *trie);
 int delete_ngram_trie(Trie *trie, char *ngram);

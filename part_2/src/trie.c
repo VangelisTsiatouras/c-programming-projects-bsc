@@ -67,8 +67,8 @@ int insert_trie(Trie *trie, char *ngram) {
     return SUCCESS;
 }
 
-void query_trie(Trie *trie, char *ngram, BloomFilter *bloomFilter, QueryResults *queryResults,
-                NgramCounter *ngramCounter) {
+void query_trie_dynamic(Trie *trie, char *ngram, BloomFilter *bloomFilter, QueryResults *queryResults,
+                        NgramCounter *ngramCounter) {
     TrieNode *current;
     SearchResults result;
     int numberOfWords;
@@ -134,6 +134,133 @@ void query_trie(Trie *trie, char *ngram, BloomFilter *bloomFilter, QueryResults 
             }
             current = &current->children[result.position];
         } while (j < numberOfWords);
+    }
+    if (resultsFound == 0) {
+        sprintf(resultsBuffer, "-1");
+        add_line_query_results_append(queryResults, resultsBuffer);
+    }
+    free(resultsBuffer);
+    free(splitNgram);
+}
+
+void query_trie_static(Trie *trie, char *ngram, BloomFilter *bloomFilter, QueryResults *queryResults,
+                        NgramCounter *ngramCounter) {
+    static int counter = 0;
+//    printf("QUERY: %d\n", counter++);
+//    if (counter == 201) {
+//        printf("ASD\n");
+//    }
+    TrieNode *current;
+    SearchResults result;
+    int numberOfWords;
+    char **splitNgram = split_ngram(ngram, &numberOfWords);
+    int offset;
+    size_t sizeBuffer = DEFAULT_QUERY_BUFFER;
+    char *resultsBuffer = malloc(sizeBuffer * sizeof(char));
+    if (!resultsBuffer) {
+        printf("malloc error %s\n", strerror(errno));
+        exit(MALLOC_ERROR);
+    }
+    // Calculate probality of false positive based on the incoming query
+    // If the probabilty is greater than 0.0001 the bit vector will be increased
+    probability_of_query_bloom_filter(bloomFilter, numberOfWords);
+    // Set to zero bit vector
+    set_to_zero_bloom_filter(bloomFilter);
+    int resultsFound = 0;
+    // Iterate the ngram word by word
+    for (int i = 0; i < numberOfWords; i++) {
+//        printf("   %s\n", splitNgram[i]);
+//        if (!strcmp(splitNgram[i], "intracardiac")) {
+//            printf("asd\n");
+//        }
+        current = lookup_LinearHash(trie->linearHash, splitNgram[i]);
+        if (current == NULL) {
+            continue;
+        }
+        offset = 0;
+        resultsBuffer[0] = '\0';
+        int j = i;
+        do {
+            // Check if next word fits in resultsBuffer
+            // If not realloc buffer
+            size_t wordSize = strlen(splitNgram[j]) + 1;
+            size_t newSize = offset + wordSize + 1;
+            if (newSize > sizeBuffer) {
+                sizeBuffer *= 2;
+                if (newSize > sizeBuffer) {
+                    sizeBuffer = newSize;
+                }
+                resultsBuffer = realloc(resultsBuffer, sizeBuffer * sizeof(char));
+                if (!resultsBuffer) {
+                    printf("realloc error %s\n", strerror(errno));
+                    exit(REALLOC_ERROR);
+                }
+            }
+            // Avoid overflows with offset
+            // If this is not the first, add a space to separate words
+            if (j != i) {
+                offset += snprintf(resultsBuffer + offset, sizeBuffer - offset, " ");
+            }
+            offset += snprintf(resultsBuffer + offset, sizeBuffer - offset, "%s", splitNgram[j]);
+            j++;
+            short compressedOffset = 0;
+            for (int k = 1; k < current->staticArraySize; k++) {
+                compressedOffset += abs(current->staticTrieWordOffsets[k - 1]);
+                if (j >= numberOfWords) {
+                    break;
+                }
+                if(strncmp(current->largeWord + compressedOffset, splitNgram[j], (size_t) abs(current->staticTrieWordOffsets[k])) != 0) {
+                    goto breakLabel;
+                }
+                wordSize = strlen(splitNgram[j]) + 1;
+                newSize = offset + wordSize + 1;
+                if (newSize > sizeBuffer) {
+                    sizeBuffer *= 2;
+                    if (newSize > sizeBuffer) {
+                        sizeBuffer = newSize;
+                    }
+                    resultsBuffer = realloc(resultsBuffer, sizeBuffer * sizeof(char));
+                    if (!resultsBuffer) {
+                        printf("realloc error %s\n", strerror(errno));
+                        exit(REALLOC_ERROR);
+                    }
+                }
+
+                if (j != i) {
+                    offset += snprintf(resultsBuffer + offset, sizeBuffer - offset, " ");
+                }
+                offset += snprintf(resultsBuffer + offset, sizeBuffer - offset, "%s", splitNgram[j]);
+                if(current->staticTrieWordOffsets[k] < 0){
+                    //final
+                    if (check_insert_bloom_filter(bloomFilter, resultsBuffer) == SUCCESS) {
+                        add_line_query_results_append(queryResults, resultsBuffer);
+                        resultsFound = 1;
+                        insert_ngram_counter(ngramCounter, resultsBuffer);
+                    }
+                }
+                j++;
+            }
+            if (current->isFinal == 1) {
+                if (check_insert_bloom_filter(bloomFilter, resultsBuffer) == SUCCESS) {
+                    add_line_query_results_append(queryResults, resultsBuffer);
+                    resultsFound = 1;
+                    insert_ngram_counter(ngramCounter, resultsBuffer);
+                }
+            }
+
+            if (j < numberOfWords) {
+//                if (current->occupiedPositions == 0) {
+//                    printf("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAa\n");
+//                    break;
+//                }
+                result = binary_search(current->children, splitNgram[j], current->occupiedPositions);
+                if (result.found == 0) {
+                    break;
+                }
+            }
+            current = &current->children[result.position];
+        } while (j < numberOfWords);
+        breakLabel:;
     }
     if (resultsFound == 0) {
         sprintf(resultsBuffer, "-1");
@@ -241,7 +368,7 @@ int create_trie_node(TrieNode *trieNode) {
         exit(MALLOC_ERROR);
     }
     trieNode->staticTrieWordOffsets = NULL;
-    trieNode->occupiedPositions = 0;
+    trieNode->staticArraySize = 0;
     return SUCCESS;
 }
 
@@ -264,6 +391,7 @@ void compress_trie_node(TrieNode *trieNode) {
     size_t wordLength = strlen(get_word_trie_node(current)) + 1;
     while (current->occupiedPositions == 1) {
 //        printf("%s", get_word_trie_node(&current->children[0]));
+        current->isFinal = 0;
         // Copy parent's word to largeword
         if (current->staticTrieWordOffsets == NULL) {
             current->staticArraySize = 1;
@@ -411,7 +539,32 @@ SearchResults binary_search(TrieNode *childrenArray, char *word, int occupiedPos
     while (left <= right) {
         middle = (left + right) / 2;
         nodeWord = get_word_trie_node(&childrenArray[middle]);
-        strcmp_result = strcmp(nodeWord, word);
+        // If node is compressed
+        if (childrenArray[middle].staticArraySize > 0){
+//        if (childrenArray[middle].staticTrieWordOffsets != NULL) {
+            size_t storedWordLength = (size_t)childrenArray[middle].staticTrieWordOffsets[0];
+            if(storedWordLength < 0){
+                storedWordLength *= -1;
+            }
+            char *tempNodeWord = malloc((storedWordLength + 1) *  sizeof(char));
+            if (!tempNodeWord) {
+                printf("malloc error %s\n", strerror(errno));
+                exit(MALLOC_ERROR);
+            }
+            strncpy(tempNodeWord, nodeWord, storedWordLength+1);
+            tempNodeWord[storedWordLength] = '\0';
+
+            strcmp_result = strcmp(tempNodeWord, word);
+//            if (strcmp_result == 0 && word[storedWordLength] == '\0') {
+//                strcmp_result = 0;
+//            } else {
+//                strcmp_result = 1;
+//            }
+            free(tempNodeWord);
+        // If node is not compressed
+        } else {
+            strcmp_result = strcmp(nodeWord, word);
+        }
         if (strcmp_result < 0) {
             left = middle + 1;
             continue;
