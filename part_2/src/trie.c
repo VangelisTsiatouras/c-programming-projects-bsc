@@ -170,10 +170,16 @@ void query_trie_static(Trie *trie, char *ngram, BloomFilter *bloomFilter, QueryR
     // Iterate the ngram word by word
     for (int i = 0; i < numberOfWords; i++) {
 //        printf("   %s\n", splitNgram[i]);
-//        if (!strcmp(splitNgram[i], "intracardiac")) {
-//            printf("asd\n");
-//        }
+
         current = lookup_LinearHash(trie->linearHash, splitNgram[i]);
+//        if (!strcmp(splitNgram[i], "5") && !strcmp(splitNgram[i + 1], "6")) {
+//            printf("asd\n");
+//            for (int j = 0; j < current->staticArraySize; j++) {
+//                printf("%d ", current->staticTrieWordOffsets[j]);
+//            }
+//            printf("\n");
+//        }
+
         if (current == NULL) {
             continue;
         }
@@ -204,12 +210,25 @@ void query_trie_static(Trie *trie, char *ngram, BloomFilter *bloomFilter, QueryR
             offset += snprintf(resultsBuffer + offset, sizeBuffer - offset, "%s", splitNgram[j]);
             j++;
             short compressedOffset = 0;
+
+            if (current->isFinal == 1 || (current->staticArraySize && current->staticTrieWordOffsets[0] < 0)) {
+                if (check_insert_bloom_filter(bloomFilter, resultsBuffer) == SUCCESS) {
+                    add_line_query_results_append(queryResults, resultsBuffer);
+                    resultsFound = 1;
+                    insert_ngram_counter(ngramCounter, resultsBuffer);
+                }
+            }
             for (int k = 1; k < current->staticArraySize; k++) {
                 compressedOffset += abs(current->staticTrieWordOffsets[k - 1]);
                 if (j >= numberOfWords) {
                     break;
                 }
-                if(strncmp(current->largeWord + compressedOffset, splitNgram[j], (size_t) abs(current->staticTrieWordOffsets[k])) != 0) {
+                char tempNodeWord[abs(current->staticTrieWordOffsets[k])+1]; //todo na ginei se sunarthsh(uparxei idios kwdikas kai sth binary search)
+                strncpy(tempNodeWord, current->largeWord + compressedOffset, (size_t)abs(current->staticTrieWordOffsets[k]));
+                tempNodeWord[abs(current->staticTrieWordOffsets[k])] = '\0';
+
+//                strcmp_result = strcmp(tempNodeWord, word);
+                if(strcmp(tempNodeWord, splitNgram[j]) != 0) {
                     goto breakLabel;
                 }
                 wordSize = strlen(splitNgram[j]) + 1;
@@ -240,14 +259,6 @@ void query_trie_static(Trie *trie, char *ngram, BloomFilter *bloomFilter, QueryR
                 }
                 j++;
             }
-            if (current->isFinal == 1) {
-                if (check_insert_bloom_filter(bloomFilter, resultsBuffer) == SUCCESS) {
-                    add_line_query_results_append(queryResults, resultsBuffer);
-                    resultsFound = 1;
-                    insert_ngram_counter(ngramCounter, resultsBuffer);
-                }
-            }
-
             if (j < numberOfWords) {
 //                if (current->occupiedPositions == 0) {
 //                    printf("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAa\n");
@@ -392,7 +403,6 @@ void compress_trie_node(TrieNode *trieNode) {
     int firstWordFlag = 1;
     while (current->occupiedPositions == 1) {
 //        printf("%s", get_word_trie_node(&current->children[0]));
-        current->isFinal = 0;
         // Copy parent's word to largeword
         if (current->staticTrieWordOffsets == NULL) {
             current->staticArraySize = 1;
@@ -419,6 +429,7 @@ void compress_trie_node(TrieNode *trieNode) {
             if (current->isFinal == 1) {
                 current->staticTrieWordOffsets[0] *= -1;
             }
+            current->isFinal = 0;
         }
 
         // Go to child and copy the word to the parent
