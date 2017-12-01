@@ -389,6 +389,7 @@ void store_word_trie_node(TrieNode *trieNode, char *word) {
 void compress_trie_node(TrieNode *trieNode) {
     TrieNode *current = trieNode;
     size_t wordLength = strlen(get_word_trie_node(current)) + 1;
+    int firstWordFlag = 1;
     while (current->occupiedPositions == 1) {
 //        printf("%s", get_word_trie_node(&current->children[0]));
         current->isFinal = 0;
@@ -409,7 +410,11 @@ void compress_trie_node(TrieNode *trieNode) {
             }
             strncpy(current->largeWord, current->word, wordLength);
             current->word[0] = '\0';
-            current->staticTrieWordOffsets[0] = (short) wordLength - (short) 1;
+
+        }
+
+        if (firstWordFlag == 1) {
+            current->staticTrieWordOffsets[0] = (short) (wordLength - 1);
             // Mark finals as negative values in the staticTrieWordOffsets array
             if (current->isFinal == 1) {
                 current->staticTrieWordOffsets[0] *= -1;
@@ -453,7 +458,7 @@ void compress_trie_node(TrieNode *trieNode) {
             free(temp->staticTrieWordOffsets);
         }
         free(temp);
-
+        firstWordFlag = 0;
     }
 //
 //    if(current->staticTrieWordOffsets != NULL) {
@@ -542,15 +547,15 @@ SearchResults binary_search(TrieNode *childrenArray, char *word, int occupiedPos
         // If node is compressed
         if (childrenArray[middle].staticArraySize > 0){
 //        if (childrenArray[middle].staticTrieWordOffsets != NULL) {
-            size_t storedWordLength = (size_t)childrenArray[middle].staticTrieWordOffsets[0];
-            if(storedWordLength < 0){
-                storedWordLength *= -1;
-            }
-            char *tempNodeWord = malloc((storedWordLength + 1) *  sizeof(char));
-            if (!tempNodeWord) {
-                printf("malloc error %s\n", strerror(errno));
-                exit(MALLOC_ERROR);
-            }
+            size_t storedWordLength = (size_t) abs(childrenArray[middle].staticTrieWordOffsets[0]);
+
+//            printf("malloc gia: %ld\n", (storedWordLength + 1) *  sizeof(char));
+//            char *tempNodeWord = malloc((storedWordLength + 1) *  sizeof(char));
+//            if (!tempNodeWord) {
+//                printf("malloc1 error %s\n", strerror(errno));
+//                exit(MALLOC_ERROR);
+//            }
+            char tempNodeWord[storedWordLength+1];//todo
             strncpy(tempNodeWord, nodeWord, storedWordLength+1);
             tempNodeWord[storedWordLength] = '\0';
 
@@ -560,7 +565,7 @@ SearchResults binary_search(TrieNode *childrenArray, char *word, int occupiedPos
 //            } else {
 //                strcmp_result = 1;
 //            }
-            free(tempNodeWord);
+//            free(tempNodeWord);
         // If node is not compressed
         } else {
             strcmp_result = strcmp(nodeWord, word);
