@@ -5,7 +5,6 @@
 
 #define LH_BUCKET_SIZE 4
 #define LH_STARTING_SIZE 4
-#define LH_SPLIT_CONDITION 1
 
 typedef struct LHBucket {
     TrieNode *nodeArray;

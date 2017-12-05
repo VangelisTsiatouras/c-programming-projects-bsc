@@ -20,7 +20,6 @@ void allocate_ncbucket_array(NCBucket *ncBucket) {
 }
 
 void expand_ncbucket_array(NCBucket *ncBucket) {
-    //printf("expanding from %d to %d\n", ncBucket->capacity, ncBucket->capacity*2); //todo remove print
     ncBucket->arraySize *= 2;
     ncBucket->array = realloc(ncBucket->array, ncBucket->arraySize * sizeof(Pair));
     if (!ncBucket->array) {
@@ -115,11 +114,11 @@ void destroy_gram_counter(NgramCounter *ngramCounter) {
     free(ngramCounter);
 }
 
-int insert_ngram_counter(NgramCounter *ngramCounter, char *ngram) {
-    //todo optimize ama 3eroume to length apo prin, na mpei trito argument gia na apofugoume thn strlen
-    unsigned int length = (unsigned int) strlen(ngram) + 1;
-    int position = hash_function(ngram, length);
-    int returnValue = insertNCBucketArray(&(ngramCounter->buckets[position]), ngram, length);
+int insert_ngram_counter(NgramCounter *ngramCounter, char *ngram, unsigned int ngramLength) {
+    // Increase ngram length to fit '\0'
+    ngramLength++;
+    int position = hash_function(ngram, ngramLength);
+    int returnValue = insertNCBucketArray(&(ngramCounter->buckets[position]), ngram, ngramLength);
     ngramCounter->elements += returnValue;
     return returnValue;
 }
@@ -233,8 +232,6 @@ unsigned int quick_select(Pair *A, unsigned int left, unsigned int right, int k)
 
 void sort_topk(NgramArray *ngramArray, unsigned int k) {
     if (k > ngramArray->arraySize) {
-//        printf("Top k given (%d) is greater than the number of different ngrams\n", k); //todo na fugoun teleiws
-//        printf("Changing its value to %d\n", ngramArray->capacity);
         k = ngramArray->arraySize;
     }
     // If the ngramArray is empty  just return
@@ -259,7 +256,7 @@ void tester() {
         int r2 = rand() % 26;
         str[0] += r;
         str[1] += r2;
-        insert_ngram_counter(nc, str);
+        insert_ngram_counter(nc, str, 0);
         str[0] -= r;
         str[1] -= r2;
     }

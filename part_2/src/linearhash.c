@@ -81,10 +81,6 @@ int insert_trie_node_LHBucket(LHBucket *lhBucket, TrieNode *trieNode) {
         }
         memmove(&lhBucket->nodeArray[position], trieNode, sizeof(TrieNode));
         lhBucket->occupiedPositions++;
-        float load = lhBucket->occupiedPositions / (float) lhBucket->capacity; //todo na ginei swsta
-        if (load > LH_SPLIT_CONDITION) {
-            returnValue = 1;
-        }
         return returnValue;
     }
     return 0;
@@ -248,11 +244,12 @@ LookupStruct lookup_for_delete_LinearHash(LinearHash *linearHash, char *word) {
 
 int expand_LinearHash(LinearHash *linearHash) {
     linearHash->arraySize *= 2;
-    linearHash->bucketArray = realloc(linearHash->bucketArray, linearHash->arraySize * sizeof(LHBucket));//todo
+    linearHash->bucketArray = realloc(linearHash->bucketArray, linearHash->arraySize * sizeof(LHBucket));
     if (linearHash->bucketArray == NULL) {
         printf("realloc error %s\n", strerror(errno));
         exit(REALLOC_ERROR);
     }
+    // Set to NULL from the middle till the end of the reallocated hashtable
     for (int i = linearHash->arraySize / 2; i < linearHash->arraySize; i++) {
         linearHash->bucketArray[i] = NULL;
     }

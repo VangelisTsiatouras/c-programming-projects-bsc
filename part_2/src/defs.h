@@ -8,6 +8,8 @@
 #define DELETE_NOT_FOUND 2
 #define ADD_LINE_FOUND 1
 #define BLOOM_FILTER_FOUND 3
+#define WRONG_F_VALUE 4
 #define SUCCESS 0
+
 
 #endif //DEFS_H

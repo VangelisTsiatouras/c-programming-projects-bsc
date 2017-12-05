@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
-#include <time.h>
+#include <ctype.h>
 
 #include "queryresults.h"
 #include "ngramcounter.h"
@@ -45,9 +45,11 @@ int dynamic_parser(Trie *trie, FILE *iFile, FILE *qFile) {
     size_t lineSize = 0;
 
     while (getline(&line, &lineSize, iFile) > 0) {
+        if(check_whitespace(line)){
+            continue;
+        }
         insert_trie(trie, line);
     }
-
     while (getline(&line, &lineSize, qFile) > 0) {
         NgramArray *ngramArray = NULL;
         switch (line[0]) {
@@ -68,21 +70,20 @@ int dynamic_parser(Trie *trie, FILE *iFile, FILE *qFile) {
                     topk = atoi(word);
                     if (topk < 1) {
                         printf("Invalid top k given: %d\n", topk);
-                        exit(-1); //todo swsto error code
+                        exit(WRONG_F_VALUE);
                     }
                     ngramArray = copy_to_ngram_array(ngramCounter);
+
                 }
                 flush_query_results(queryResults);
                 if (ngramArray != NULL) {
                     sort_topk(ngramArray, (unsigned int) topk);
-//                    print_ngram_array(ngramArray);
                     destroy_ngram_array(ngramArray);
                 }
                 clear_ngram_counter(ngramCounter);
                 break;
             default:
-                printf("default\n");//todo na valoume swsto error message
-
+                printf("Unknown Command\n");
         }
     }
     destroy_gram_counter(ngramCounter);
@@ -102,6 +103,9 @@ int static_parser(Trie *trie, FILE *iFile, FILE *qFile) {
     size_t lineSize = 0;
 
     while (getline(&line, &lineSize, iFile) > 0) {
+        if(check_whitespace(line)){
+            continue;
+        }
         insert_trie(trie, line);
     }
     compress_trie(trie);
@@ -120,21 +124,19 @@ int static_parser(Trie *trie, FILE *iFile, FILE *qFile) {
                     topk = atoi(word);
                     if (topk < 1) {
                         printf("Invalid top k given: %d\n", topk);
-                        exit(-1); //todo swsto error code
+                        exit(WRONG_F_VALUE);
                     }
                     ngramArray = copy_to_ngram_array(ngramCounter);
                 }
                 flush_query_results(queryResults);
                 if (ngramArray != NULL) {
                     sort_topk(ngramArray, (unsigned int) topk);
-//                    print_ngram_array(ngramArray);
                     destroy_ngram_array(ngramArray);
                 }
                 clear_ngram_counter(ngramCounter);
                 break;
             default:
-                printf("default\n");//todo na valoume swsto error message
-
+                printf("Unknown Command\n");
         }
     }
     destroy_gram_counter(ngramCounter);
@@ -144,4 +146,11 @@ int static_parser(Trie *trie, FILE *iFile, FILE *qFile) {
     return SUCCESS;
 }
 
-// todo na mhn krasarei ama exei kenh grammh sto telos tou arxeiou
+int check_whitespace(char *line) {
+    while (*line != '\0') {
+        if (!isspace((unsigned char)*line))
+            return 0;
+        line++;
+    }
+    return 1;
+}

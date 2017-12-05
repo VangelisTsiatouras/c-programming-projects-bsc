@@ -7,6 +7,8 @@
 
 int main(int argc, char *argv[]) {
 
+//    tester_compress();
+
     clock_t begin = clock();
     int i, error = 0;
     char *initFile = NULL, *queryFile = NULL;
