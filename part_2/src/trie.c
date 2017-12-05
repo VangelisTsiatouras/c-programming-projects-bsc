@@ -27,7 +27,7 @@ int insert_trie(Trie *trie, char *ngram) {
     SearchResults result;
     char *word = strtok(ngram, " \n");
     insert_LinearHash(trie->linearHash, word);
-    TrieNode *current = lookup_LinearHash(trie->linearHash, word); // todo gt na kanoume insert kai meta lookup....
+    TrieNode *current = lookup_LinearHash(trie->linearHash, word);
     word = strtok(NULL, " \n");
     while (word != NULL) {
         // Don't call binary_search if the children array is empty
@@ -100,18 +100,7 @@ void query_trie_dynamic(Trie *trie, char *ngram, BloomFilter *bloomFilter, Query
             // If not realloc buffer
             size_t wordSize = strlen(splitNgram[j]) + 1;
             size_t newSize = offset + wordSize + 1;
-            if (newSize > sizeBuffer) {
-                sizeBuffer *= 2;
-                if (newSize > sizeBuffer) {
-                    sizeBuffer = newSize;
-                }
-                resultsBuffer = realloc(resultsBuffer, sizeBuffer * sizeof(char));
-                if (!resultsBuffer) {
-                    printf("realloc error %s\n", strerror(errno));
-                    exit(REALLOC_ERROR);
-                }
-
-            }
+            realloc_buffer(&resultsBuffer, &sizeBuffer, newSize);
             // Avoid overflows with offset
             // If this is not the first, add a space to separate words
             if (j != i) {
@@ -145,11 +134,6 @@ void query_trie_dynamic(Trie *trie, char *ngram, BloomFilter *bloomFilter, Query
 
 void query_trie_static(Trie *trie, char *ngram, BloomFilter *bloomFilter, QueryResults *queryResults,
                        NgramCounter *ngramCounter) {
-    static int counter = 0;
-//    printf("QUERY: %d\n", counter++);
-//    if (counter == 201) {
-//        printf("ASD\n");
-//    }
     TrieNode *current;
     SearchResults result;
     int numberOfWords;
@@ -169,17 +153,7 @@ void query_trie_static(Trie *trie, char *ngram, BloomFilter *bloomFilter, QueryR
     int resultsFound = 0;
     // Iterate the ngram word by word
     for (int i = 0; i < numberOfWords; i++) {
-//        printf("   %s\n", splitNgram[i]);
-
         current = lookup_LinearHash(trie->linearHash, splitNgram[i]);
-//        if (!strcmp(splitNgram[i], "5") && !strcmp(splitNgram[i + 1], "6")) {
-//            printf("asd\n");
-//            for (int j = 0; j < current->staticArraySize; j++) {
-//                printf("%d ", current->staticTrieWordOffsets[j]);
-//            }
-//            printf("\n");
-//        }
-
         if (current == NULL) {
             continue;
         }
@@ -191,17 +165,7 @@ void query_trie_static(Trie *trie, char *ngram, BloomFilter *bloomFilter, QueryR
             // If not realloc buffer
             size_t wordSize = strlen(splitNgram[j]) + 1;
             size_t newSize = offset + wordSize + 1;
-            if (newSize > sizeBuffer) {
-                sizeBuffer *= 2;
-                if (newSize > sizeBuffer) {
-                    sizeBuffer = newSize;
-                }
-                resultsBuffer = realloc(resultsBuffer, sizeBuffer * sizeof(char));
-                if (!resultsBuffer) {
-                    printf("realloc error %s\n", strerror(errno));
-                    exit(REALLOC_ERROR);
-                }
-            }
+            realloc_buffer(&resultsBuffer, &sizeBuffer, newSize);
             // Avoid overflows with offset
             // If this is not the first, add a space to separate words
             if (j != i) {
@@ -223,36 +187,22 @@ void query_trie_static(Trie *trie, char *ngram, BloomFilter *bloomFilter, QueryR
                 if (j >= numberOfWords) {
                     break;
                 }
-                char tempNodeWord[abs(current->staticTrieWordOffsets[k]) +
-                                  1]; //todo na ginei se sunarthsh(uparxei idios kwdikas kai sth binary search)
-                strncpy(tempNodeWord, current->largeWord + compressedOffset,
-                        (size_t) abs(current->staticTrieWordOffsets[k]));
-                tempNodeWord[abs(current->staticTrieWordOffsets[k])] = '\0';
-
-//                strcmp_result = strcmp(tempNodeWord, word);
-                if (strcmp(tempNodeWord, splitNgram[j]) != 0) {
+                if(compare_n_chars(current->largeWord + compressedOffset, splitNgram[j], abs(current->staticTrieWordOffsets[k])) != 0) {
                     goto breakLabel;
                 }
+
+                // Check if next word fits in resultsBuffer
+                // If not realloc buffer
                 wordSize = strlen(splitNgram[j]) + 1;
                 newSize = offset + wordSize + 1;
-                if (newSize > sizeBuffer) {
-                    sizeBuffer *= 2;
-                    if (newSize > sizeBuffer) {
-                        sizeBuffer = newSize;
-                    }
-                    resultsBuffer = realloc(resultsBuffer, sizeBuffer * sizeof(char));
-                    if (!resultsBuffer) {
-                        printf("realloc error %s\n", strerror(errno));
-                        exit(REALLOC_ERROR);
-                    }
-                }
+                realloc_buffer(&resultsBuffer, &sizeBuffer, newSize);
 
                 if (j != i) {
                     offset += snprintf(resultsBuffer + offset, sizeBuffer - offset, " ");
                 }
                 offset += snprintf(resultsBuffer + offset, sizeBuffer - offset, "%s", splitNgram[j]);
                 if (current->staticTrieWordOffsets[k] < 0) {
-                    //final
+                    // Final
                     if (check_insert_bloom_filter(bloomFilter, resultsBuffer) == SUCCESS) {
                         add_line_query_results_append(queryResults, resultsBuffer);
                         resultsFound = 1;
@@ -400,7 +350,6 @@ void compress_trie_node(TrieNode *trieNode) {
     size_t wordLength = strlen(get_word_trie_node(current)) + 1;
     int firstWordFlag = 1;
     while (current->occupiedPositions == 1) {
-//        printf("%s", get_word_trie_node(&current->children[0]));
         // Copy parent's word to largeword
         if (current->staticTrieWordOffsets == NULL) {
             current->staticArraySize = 1;
@@ -455,11 +404,10 @@ void compress_trie_node(TrieNode *trieNode) {
         }
 
         // Copy the children of the child to the parent
-//        printf("%s\n", get_word_trie_node(temp));
-        // delete(
         current->children = temp->children;
         current->occupiedPositions = temp->occupiedPositions;
 
+        // Delete child node
         if (temp->largeWord != NULL) {
             free(temp->largeWord);
         }
@@ -469,14 +417,6 @@ void compress_trie_node(TrieNode *trieNode) {
         free(temp);
         firstWordFlag = 0;
     }
-//
-//    if(current->staticTrieWordOffsets != NULL) {
-//        printf("%s\n", current->largeWord);
-//        for (int i = 0; i < current->staticArraySize; i++) {
-//            printf("%d ", current->staticTrieWordOffsets[i]);
-//        }
-//        printf("\n");
-//    }
 
     // For each children of the compressed node do recursion
     for (int i = 0; i < current->occupiedPositions; i++) {
@@ -504,7 +444,7 @@ char *get_word_trie_node(TrieNode *trieNode) {
     return trieNode->largeWord;
 }
 
-int is_empty(TrieNode *trieNode) {
+int is_empty_trie_node(TrieNode *trieNode) {
     if (trieNode->largeWord == NULL && trieNode->word[0] == '\0') {
         return 1;
     }
@@ -555,26 +495,7 @@ SearchResults binary_search(TrieNode *childrenArray, char *word, int occupiedPos
         nodeWord = get_word_trie_node(&childrenArray[middle]);
         // If node is compressed
         if (childrenArray[middle].staticArraySize > 0) {
-//        if (childrenArray[middle].staticTrieWordOffsets != NULL) {
-            size_t storedWordLength = (size_t) abs(childrenArray[middle].staticTrieWordOffsets[0]);
-
-//            printf("malloc gia: %ld\n", (storedWordLength + 1) *  sizeof(char));
-//            char *tempNodeWord = malloc((storedWordLength + 1) *  sizeof(char));
-//            if (!tempNodeWord) {
-//                printf("malloc1 error %s\n", strerror(errno));
-//                exit(MALLOC_ERROR);
-//            }
-            char tempNodeWord[storedWordLength + 1];//todo
-            strncpy(tempNodeWord, nodeWord, storedWordLength + 1);
-            tempNodeWord[storedWordLength] = '\0';
-
-            strcmp_result = strcmp(tempNodeWord, word);
-//            if (strcmp_result == 0 && word[storedWordLength] == '\0') {
-//                strcmp_result = 0;
-//            } else {
-//                strcmp_result = 1;
-//            }
-//            free(tempNodeWord);
+            strcmp_result = compare_n_chars(nodeWord, word, abs(childrenArray[middle].staticTrieWordOffsets[0]));
             // If node is not compressed
         } else {
             strcmp_result = strcmp(nodeWord, word);
@@ -623,6 +544,34 @@ char **split_ngram(char *ngram, int *numberOfWords) {
         word = strtok(NULL, " \n");
     }
     return splitNgram;
+}
+
+void realloc_buffer(char **buffer, size_t *sizeBuffer, size_t newSize) {
+    if (newSize > *sizeBuffer) {
+        *sizeBuffer *= 2;
+        if (newSize > *sizeBuffer) {
+            *sizeBuffer = newSize;
+        }
+        *buffer = realloc(*buffer, *sizeBuffer * sizeof(char));
+        if (!*buffer) {
+            printf("realloc error %s\n", strerror(errno));
+            exit(REALLOC_ERROR);
+        }
+    }
+}
+
+int compare_n_chars(char *buffer1, char *buffer2, int n) {
+//    size_t storedWordLength = (size_t) abs(childrenArray[middle].staticTrieWordOffsets[0]);
+    char *tempNodeWord = malloc((n + 1) *  sizeof(char));
+    if (!tempNodeWord) {
+        printf("malloc error %s\n", strerror(errno));
+        exit(MALLOC_ERROR);
+    }
+    strncpy(tempNodeWord, buffer1, (size_t) n + 1);
+    tempNodeWord[n] = '\0';
+    int strcmp_result = strcmp(tempNodeWord, buffer2);
+    free(tempNodeWord);
+    return strcmp_result;
 }
 
 void trie_dfs_print(TrieNode *trieNode) {

@@ -49,13 +49,14 @@ void destroy_trie_node(TrieNode *trieNode);
 void store_word_trie_node(TrieNode *trieNode, char *word);
 void compress_trie_node(TrieNode *trieNode);
 char* get_word_trie_node(TrieNode *trieNode);
-int is_empty(TrieNode *trieNode);
+int is_empty_trie_node(TrieNode *trieNode);
 void delete_word_trie_node(TrieNode *trieNode, int position);
 void print_trie_node(TrieNode *trieNode);
 
 SearchResults binary_search(TrieNode *childrenArray, char *word, int occupiedPositions);
 char **split_ngram(char *ngram, int *numberOfWords);
-void expand_results_buffer(char *buffer); ///
+void realloc_buffer(char **buffer, size_t *sizeBuffer , size_t newSize);
+int compare_n_chars(char *buffer1, char *buffer2, int n);
 void trie_dfs_print(TrieNode *trieNode);
 
 void tester_compress();
