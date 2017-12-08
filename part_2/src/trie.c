@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
-#include <time.h>
 
 #include "trie.h"
 #include "linearhash.h"
@@ -561,7 +560,6 @@ void realloc_buffer(char **buffer, size_t *sizeBuffer, size_t newSize) {
 }
 
 int compare_n_chars(char *buffer1, char *buffer2, int n) {
-//    size_t storedWordLength = (size_t) abs(childrenArray[middle].staticTrieWordOffsets[0]);
     char *tempNodeWord = malloc((n + 1) *  sizeof(char));
     if (!tempNodeWord) {
         printf("malloc error %s\n", strerror(errno));

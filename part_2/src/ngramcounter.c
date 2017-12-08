@@ -4,7 +4,6 @@
 #include <errno.h>
 #include "defs.h"
 #include "ngramcounter.h"
-#include "hashfunctions.h"
 
 void allocate_ncbucket_array(NCBucket *ncBucket) {
     ncBucket->arraySize = NC_BUCKET_SIZE;
@@ -247,7 +246,7 @@ void sort_topk(NgramArray *ngramArray, unsigned int k) {
     printf("\n");
 }
 
-void tester() {
+void tester_ngram_counter() {
     NgramCounter* nc = create_ngram_counter();
     char str[3] = "aa";
     for (int i = 0; i < 10000; i++) {
@@ -265,27 +264,6 @@ void tester() {
     sort_topk(na, nc->elements + 1);
     print_ngram_array(na);
     destroy_ngram_array(na);
-    //print_ngram_counter(nc);
     destroy_gram_counter(nc);
-//    insert_ngram_counter(nc, "a");
-//    insert_ngram_counter(nc, "b");
-//    insert_ngram_counter(nc, "c");
-//    insert_ngram_counter(nc, "d");
-//    insert_ngram_counter(nc, "e");
-//    insert_ngram_counter(nc, "e");
-//    insert_ngram_counter(nc, "e");
-//    insert_ngram_counter(nc, "a");
-//    print_ngram_counter(nc);
-//    NgramArray *na = copy_to_ngram_array(nc, nc->elements);
-//    print_ngram_array(na);
-//    sort_topk(na, 4);
-//    print_ngram_array(na);
-//    destroy_ngram_array(na);
-//    clear_ngram_counter(nc);
-//    insert_ngram_counter(nc, "a");
-//    na = copy_to_ngram_array(nc, nc->elements);
-//    print_ngram_array(na);
-//    destroy_ngram_array(na);
-//    destroy_gram_counter(nc);
     exit(0);
 }

@@ -19,9 +19,6 @@ LHBucket *create_LHBucket() {
     }
     lhBucket->capacity = LH_BUCKET_SIZE;
     lhBucket->occupiedPositions = 0;
-//    for (int i = 0; i < LH_BUCKET_SIZE; i++) {
-//        create_trie_node(&lhBucket->nodeArray[i]);
-//    }
     return lhBucket;
 }
 
@@ -34,7 +31,7 @@ void destroy_LHBucket(LHBucket *lhBucket) {
 }
 
 int insert_word_LHBucket(LHBucket *lhBucket, char *word) {
-    //TrieNode *current = lhBucket->nodeArray;
+
     int returnValue;
     SearchResults result;
     // Don't call binary_search if the bucket is empty
@@ -61,7 +58,6 @@ int insert_word_LHBucket(LHBucket *lhBucket, char *word) {
 }
 
 int insert_trie_node_LHBucket(LHBucket *lhBucket, TrieNode *trieNode) {
-    //TrieNode *current = lhBucket->nodeArray;
     int returnValue;
     SearchResults result;
     // Don't call binary_search if the node array is empty
@@ -178,10 +174,9 @@ TrieNode *insert_LinearHash(LinearHash *linearHash, char *word) {
     if (linearHash->bucketArray[hash] == NULL) {
         linearHash->bucketArray[hash] = create_LHBucket();
     }
-    int r = insert_word_LHBucket(linearHash->bucketArray[hash], word); // returns 1 if there was an overflow
+    int r = insert_word_LHBucket(linearHash->bucketArray[hash], word); // Returns 1 if there was an overflow
     // If we need to split a bucket
     if (r == 1) {
-//        printf("overflow!\n");
         int hashAgain;
         do {
             if (linearHash->bucketArray[linearHash->p] == NULL) {
@@ -275,15 +270,10 @@ int rehash_bucket_LinearHash(LinearHash *linearHash, int bucketPos) {
             if (linearHash->bucketArray[hash] == NULL) {
                 linearHash->bucketArray[hash] = create_LHBucket();
             }
-//            for (int j = 0; j < current->occupiedPositions; j++) {
-//                printf("%p\n", current->nodeArray[i]);
-//            }
             if (insert_trie_node_LHBucket(linearHash->bucketArray[hash], &current->nodeArray[i])) {
                 againOverflow = 1;
             }
-//            current->occupiedPositions--;
         }
-        //current->occupiedPositions = firstEmptyPosition;
     }
     current->occupiedPositions = firstEmptyPosition;
     return againOverflow;
@@ -320,9 +310,6 @@ void print_node_children_LinearHash(LinearHash *linearHash) {
             continue;
         }
         for(int j = 0; j < linearHash->bucketArray[i]->occupiedPositions; j++) {
-//            if (linearHash->bucketArray[i]->occupiedPositions == 0) {
-//                continue;
-//            }
             trie_dfs_print(&linearHash->bucketArray[i]->nodeArray[j]);
         }
     }

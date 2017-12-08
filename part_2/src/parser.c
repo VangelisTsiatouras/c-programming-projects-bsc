@@ -109,8 +109,6 @@ int static_parser(Trie *trie, FILE *iFile, FILE *qFile) {
         insert_trie(trie, line);
     }
     compress_trie(trie);
-    //print_node_children_LinearHash(trie->linearHash);
-
     while (getline(&line, &lineSize, qFile) > 0) {
         NgramArray *ngramArray = NULL;
         switch (line[0]) {

@@ -47,7 +47,7 @@ unsigned int partition(Pair *A, unsigned int left, unsigned int right);
 unsigned int quick_select(Pair *A, unsigned int left, unsigned int right, int k);
 void sort_topk(NgramArray *ngramArray, unsigned int k);
 
-void tester();
+void tester_ngram_counter();
 
 
 
