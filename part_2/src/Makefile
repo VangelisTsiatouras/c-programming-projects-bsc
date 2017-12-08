@@ -6,7 +6,7 @@ HEADER     = trie.h linearhash.h parser.h queryresults.h defs.h bloomfilter.h ha
 OUT        = ngrams
 U_TEST_OUT = u_test_trie
 CC         = gcc
-FLAGS      = -g -O2 -lm
+FLAGS      = -g -O3 -lm
 # -g option enables debugging mode
 # -O2 option enables optimize mode
 

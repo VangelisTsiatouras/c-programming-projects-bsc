@@ -50,7 +50,6 @@ END_TEST;
 
 START_TEST (unitTestNgramCounter)
     {
-        // Na to tsekarei o Nikos an einai swsta ta parakatw
         // gt sto copy_to_ngram_array eixe alla3ei to def
         NgramCounter* nc = create_ngram_counter();
         ck_assert_int_eq(insert_ngram_counter(nc, "a"), 1);
@@ -103,19 +102,6 @@ START_TEST(unitLinearHash)
         // Test hashtable
         LinearHash *linearHash = create_LinearHash();
 
-//        char string[20] = "aaaa";
-//        for (int i = 0; i < 500000; i++) {
-//            char c = rand() % 26 + 'a';
-//            string[0] = c;
-//            c = rand() % 26 + 'a';
-//            string[1] = c;
-//            c = rand() % 26 + 'a';
-//            string[2] = c;
-//            c = rand() % 26 + 'a';
-//            string[3] = c;
-//            insert_LinearHash(linearHash, string);
-//        }
-
         insert_LinearHash(linearHash, "test1");
         insert_LinearHash(linearHash, "test2");
         insert_LinearHash(linearHash, "test3");
@@ -143,6 +129,9 @@ START_TEST(unitTestTrie)
         char tNgram2[100] = "test ngram";
         char tNgram3[100] = "test ngram";
         char tNgram4[100] = "test ngram2";
+        char tNgram5[100] = "this should be compressed to one node";
+        char tNgram6[100] = "this should be compressed to another node";
+
         // TRIENODE CHECK
         TrieNode *trieNode = NULL;
         // Create node with unallocated space
@@ -157,13 +146,14 @@ START_TEST(unitTestTrie)
         // Create the trie
         Trie *trie = create_trie();
         ck_assert_ptr_ne(trie, NULL);
+
+        // Check compress
+        ck_assert_int_eq(insert_trie(trie, tNgram5), SUCCESS);
+        ck_assert_int_eq(insert_trie(trie, tNgram6), SUCCESS);
+        compress_trie_node(&trie->linearHash->bucketArray[0]->nodeArray[0]);
+
         // Insert an ngram
         ck_assert_int_eq(insert_trie(trie, tNgram), SUCCESS);
-
-        // TODO to parakatw den douleuei
-        // Check if binary search finds its first word
-//        SearchResults se = binary_search(trie->root->children, "test", trie->root->occupiedPositions);
-//        ck_assert_int_eq(se.found, 1);
 
         // These are already unit tested
         QueryResults *queryResults = create_query_results(DEFAULT_LINES, DEFAULT_LINE_SIZE);
