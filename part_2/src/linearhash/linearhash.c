@@ -106,10 +106,10 @@ void delete_word_LHBucket(LHBucket *lhBucket, char* word) {
 }
 
 int expand_if_full_LHBucket(LHBucket *lhBucket) {
-    // Reallocate space if the children array is full
+    // Reallocate space if the bucket array is full
     if (lhBucket->occupiedPositions == lhBucket->capacity) {
-        // The new size will be the double of the old size
-        lhBucket->capacity *= 2;
+        // The new size will be increased by 4 positions
+        lhBucket->capacity += LH_BUCKET_SIZE;
         TrieNode *tempArray = realloc(lhBucket->nodeArray, lhBucket->capacity * sizeof(TrieNode));
         if (tempArray == NULL) {
             printf("realloc error %s\n", strerror(errno));

@@ -1,11 +1,8 @@
 #ifndef NGRAMCOUNTER_H
 #define NGRAMCOUNTER_H
 
-#include "hashfunctions.h"
-
-#define NC_STATIC_HASH_SIZE 4999
-#define NC_BUCKET_SIZE 4
-#define MURMUR_SEED 5
+#include "../hashfunctions/hashfunctions.h"
+#include "../definitions.h"
 
 typedef struct Pair {
     char* ngram;

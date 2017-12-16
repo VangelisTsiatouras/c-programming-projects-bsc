@@ -4,9 +4,9 @@
 #include <errno.h>
 #include <ctype.h>
 
-#include "queryresults.h"
-#include "ngramcounter.h"
-#include "linearhash.h"
+#include "../queryresults/queryresults.h"
+#include "../ngramcounter/ngramcounter.h"
+#include "../linearhash/linearhash.h"
 #include "parser.h"
 
 int parser(Trie *trie, char *initFile, char *queryFile) {

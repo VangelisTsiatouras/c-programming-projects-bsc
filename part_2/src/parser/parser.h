@@ -1,7 +1,7 @@
 #ifndef PARSER_H
 #define PARSER_H
 
-#include "trie.h"
+#include "../trie/trie.h"
 
 int parser(Trie *trie, char *initFile, char *queryFile);
 int dynamic_parser(Trie *trie, FILE *iFile, FILE *qFile);

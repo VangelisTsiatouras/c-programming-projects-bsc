@@ -1,10 +1,10 @@
 #ifndef LINEARHASH_H
 #define LINEARHASH_H
 
-#include "trie.h"
+#include "../trie/trie.h"
 
-#define LH_BUCKET_SIZE 4
-#define LH_STARTING_SIZE 4
+#define LH_BUCKET_SIZE 8
+#define LH_STARTING_SIZE 32
 
 typedef struct LHBucket {
     TrieNode *nodeArray;

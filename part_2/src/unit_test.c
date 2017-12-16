@@ -7,12 +7,12 @@
 #include <check.h>
 #include <stdint.h>
 
-#include "trie.h"
-#include "queryresults.h"
-#include "ngramcounter.h"
-#include "bloomfilter.h"
-#include "linearhash.h"
-#include "defs.h"
+#include "trie/trie.h"
+#include "queryresults/queryresults.h"
+#include "ngramcounter/ngramcounter.h"
+#include "bloomfilter/bloomfilter.h"
+#include "linearhash/linearhash.h"
+#include "definitions.h"
 
 START_TEST (unitTestQueryResults)
     {

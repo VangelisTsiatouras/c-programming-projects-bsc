@@ -1,8 +1,8 @@
 ######################################################################
-OBJS       = main.o trie.o linearhash.o parser.o queryresults.o bloomfilter.o hashfunctions.o ngramcounter.o
-SOURCE     = main.c trie.c linearhash.c parser.c queryresults.c bloomfilter.c hashfunctions.c ngramcounter.c
-TEST_SRC   = trie.c linearhash.c parser.c queryresults.c bloomfilter.c hashfunctions.c ngramcounter.c
-HEADER     = trie.h linearhash.h parser.h queryresults.h defs.h bloomfilter.h hashfunctions.h ngramcounter.h
+OBJS       = main.o trie/trie.o linearhash/linearhash.o parser/parser.o queryresults/queryresults.o bloomfilter/bloomfilter.o hashfunctions/hashfunctions.o ngramcounter/ngramcounter.o
+SOURCE     = main.c trie/trie.c linearhash/linearhash.c parser/parser.c queryresults/queryresults.c bloomfilter/bloomfilter.c hashfunctions/hashfunctions.c ngramcounter/ngramcounter.c
+TEST_SRC   = trie/trie.c linearhash/linearhash.c parser/parser.c queryresults/queryresults.c bloomfilter/bloomfilter.c hashfunctions/hashfunctions.c ngramcounter/ngramcounter.c
+HEADER     = trie/trie.h linearhash/linearhash.h parser/parser.h queryresults/queryresults.h defs.h bloomfilter/bloomfilter.h hashfunctions/hashfunctions.h ngramcounter/ngramcounter.h
 OUT        = ngrams
 U_TEST_OUT = u_test_trie
 CC         = gcc
@@ -18,7 +18,7 @@ u_test: unit_test.c
 
 # clean house
 clean:
-	rm -f $(OBJS) $(OUT) $(U_TEST_OUT)
+	rm -rf $(OBJS) $(OUT) $(U_TEST_OUT)
 
 # do a bit of accounting
 count:

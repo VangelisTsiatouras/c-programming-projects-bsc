@@ -5,7 +5,6 @@
 #include <math.h>
 
 #include "bloomfilter.h"
-#include "defs.h"
 
 BloomFilter *create_bloom_filter() {
     BloomFilter *bloomFilter = malloc(sizeof(BloomFilter));

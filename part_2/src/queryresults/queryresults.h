@@ -1,11 +1,7 @@
 #ifndef QUERYRESULTS_H
 #define QUERYRESULTS_H
 
-#include "defs.h"
-
-#define DEFAULT_LINES 8
-#define DEFAULT_LINE_SIZE 64
-#define DEFAULT_PRINT_BUFFER 1024
+#include "../definitions.h"
 
 typedef struct QueryResults {
     char **lines;

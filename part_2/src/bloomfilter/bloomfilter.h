@@ -1,12 +1,8 @@
 #ifndef BLOOMFILTER_H
 #define BLOOMFILTER_H
 
-#include "hashfunctions.h"
-
-#define K 3                 // Number of hash functions
-#define STARTING_M 40099    // Starting bit vector size
-#define SEED1 12345678
-#define SEED2 87654321
+#include "../hashfunctions/hashfunctions.h"
+#include "../definitions.h"
 
 typedef struct BloomFilter {
     char *bitVector;

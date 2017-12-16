@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
-#include "defs.h"
+
 #include "ngramcounter.h"
 
 void allocate_ncbucket_array(NCBucket *ncBucket) {
