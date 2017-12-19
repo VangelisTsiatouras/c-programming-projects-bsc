@@ -316,13 +316,19 @@ void print_node_children_LinearHash(LinearHash *linearHash) {
 }
 
 unsigned int old_h(LinearHash *linearHash, char *ngram, size_t length) {
-    int mod = ((int) pow(2.0, (double) (linearHash->round)) *
-               LH_STARTING_SIZE); // kmod(2^i)*m, where i = current round and m = LH_STARTING_SIZE
+//    int mod = ((int) pow(2.0, (double) (linearHash->round)) *
+//               LH_STARTING_SIZE); // kmod(2^i)*m, where i = current round and m = LH_STARTING_SIZE
+    int powAmount = (linearHash->round);
+    int mod = 1 << powAmount;
+    mod *= LH_STARTING_SIZE;
     return murmurHash3(ngram, (unsigned int) length, MURMUR_SEED) % mod;
 }
 
 unsigned int new_h(LinearHash *linearHash, char *ngram, size_t length) {
-    int mod = ((int) pow(2.0, (double) (linearHash->round + 1)) *
-               LH_STARTING_SIZE); // kmod(2^(i+1))*m, where i = current round and m = LH_STARTING_SIZE
+//    int mod = ((int) pow(2.0, (double) (linearHash->round + 1)) *
+//               LH_STARTING_SIZE); // kmod(2^(i+1))*m, where i = current round and m = LH_STARTING_SIZE
+    int powAmount = (linearHash->round + 1);
+    int mod = 1 << powAmount;
+    mod *= LH_STARTING_SIZE;
     return murmurHash3(ngram, (unsigned int) length, MURMUR_SEED) % mod;
 }
