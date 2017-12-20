@@ -52,14 +52,14 @@ START_TEST (unitTestNgramCounter)
     {
         // gt sto copy_to_ngram_array eixe alla3ei to def
         NgramCounter* nc = create_ngram_counter();
-        ck_assert_int_eq(insert_ngram_counter(nc, "a"), 1);
-        ck_assert_int_eq(insert_ngram_counter(nc, "b"), 1);
-        ck_assert_int_eq(insert_ngram_counter(nc, "c"), 1);
-        ck_assert_int_eq(insert_ngram_counter(nc, "d"), 1);
-        ck_assert_int_eq(insert_ngram_counter(nc, "e"), 1);
-        ck_assert_int_eq(insert_ngram_counter(nc, "e"), 0);
-        ck_assert_int_eq(insert_ngram_counter(nc, "e"), 0);
-        ck_assert_int_eq(insert_ngram_counter(nc, "a"), 0);
+        ck_assert_int_eq(insert_ngram_counter(nc, "a", 1), 1);
+        ck_assert_int_eq(insert_ngram_counter(nc, "b", 1), 1);
+        ck_assert_int_eq(insert_ngram_counter(nc, "c", 1), 1);
+        ck_assert_int_eq(insert_ngram_counter(nc, "d", 1), 1);
+        ck_assert_int_eq(insert_ngram_counter(nc, "e", 1), 1);
+        ck_assert_int_eq(insert_ngram_counter(nc, "e", 1), 0);
+        ck_assert_int_eq(insert_ngram_counter(nc, "e", 1), 0);
+        ck_assert_int_eq(insert_ngram_counter(nc, "a", 1), 0);
         print_ngram_counter(nc);
         NgramArray *ngramArray = copy_to_ngram_array(nc);
         print_ngram_array(ngramArray);
@@ -67,7 +67,7 @@ START_TEST (unitTestNgramCounter)
         print_ngram_array(ngramArray);
         destroy_ngram_array(ngramArray);
         clear_ngram_counter(nc);
-        ck_assert_int_eq(insert_ngram_counter(nc, "a"), 1);
+        ck_assert_int_eq(insert_ngram_counter(nc, "a", 1), 1);
         ngramArray = copy_to_ngram_array(nc);
         print_ngram_array(ngramArray);
         destroy_ngram_array(ngramArray);
@@ -160,7 +160,7 @@ START_TEST(unitTestTrie)
         BloomFilter *bloomFilter = create_bloom_filter();
         NgramCounter *ngramCounter = create_ngram_counter();
 
-        query_trie(trie, tNgram2, bloomFilter, queryResults, ngramCounter);
+        query_trie_dynamic(trie, tNgram2, bloomFilter, queryResults, ngramCounter);
         copy_results_to_buffer_query_results(queryResults);
         flush_query_results(queryResults);
         // Check delete trie
