@@ -237,7 +237,7 @@ LookupStruct lookup_for_delete_LinearHash(LinearHash *linearHash, char *word) {
     return returnValue;
 }
 
-int expand_LinearHash(LinearHash *linearHash) {
+void expand_LinearHash(LinearHash *linearHash) {
     linearHash->arraySize *= 2;
     linearHash->bucketArray = realloc(linearHash->bucketArray, linearHash->arraySize * sizeof(LHBucket));
     if (linearHash->bucketArray == NULL) {

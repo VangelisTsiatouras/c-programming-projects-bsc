@@ -42,6 +42,7 @@ void destroy_ncbucket_array(NCBucket *ncBucket) {
     free(ncBucket->array);
 }
 
+// TODO den exei dhlw8ei sto .h
 int insertNCBucketArray(NCBucket *ncBucket, char *ngram, unsigned int length) {
     int i;
     for (i = 0; i < ncBucket->arraySize; i++) {
@@ -122,7 +123,7 @@ int insert_ngram_counter(NgramCounter *ngramCounter, char *ngram, unsigned int n
     return returnValue;
 }
 
-int clear_ngram_counter(NgramCounter *ngramCounter) {
+void clear_ngram_counter(NgramCounter *ngramCounter) {
     ngramCounter->elements = 0;
     for (int i = 0; i < NC_STATIC_HASH_SIZE; i++) {
         clear_ncbucket_array(&(ngramCounter->buckets[i]));

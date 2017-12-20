@@ -37,7 +37,7 @@ void destroy_LinearHash(LinearHash *linearHash);
 TrieNode *insert_LinearHash(LinearHash *linearHash, char *word);
 TrieNode *lookup_LinearHash(LinearHash *linearHash, char *word);
 LookupStruct lookup_for_delete_LinearHash(LinearHash *linearHash, char *word);
-int expand_LinearHash(LinearHash *linearHash);
+void expand_LinearHash(LinearHash *linearHash);
 int rehash_bucket_LinearHash(LinearHash *linearHash, int bucket);
 
 void print_LinearHash(LinearHash *linearHash);

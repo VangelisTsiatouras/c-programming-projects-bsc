@@ -30,7 +30,7 @@ void print_ncbucket_array(NCBucket *ncBucket);
 NgramCounter *create_ngram_counter();
 void destroy_gram_counter(NgramCounter *ngramCounter);
 int insert_ngram_counter(NgramCounter *ngramCounter, char *ngram, unsigned int ngramLength);
-int clear_ngram_counter(NgramCounter *ngramCounter);
+void clear_ngram_counter(NgramCounter *ngramCounter);
 unsigned int hash_function(char *ngram, unsigned int length);
 void print_ngram_counter(NgramCounter *ngramCounter);
 

@@ -9,7 +9,7 @@
 #include "../linearhash/linearhash.h"
 #include "parser.h"
 
-int parser(Trie *trie, char *initFile, char *queryFile) {
+void parser(Trie *trie, char *initFile, char *queryFile) {
     FILE *iFile, *qFile;
     iFile = fopen(initFile, "r");
     if (iFile == NULL) {
@@ -24,11 +24,12 @@ int parser(Trie *trie, char *initFile, char *queryFile) {
 
     char *firstLine = NULL;
     size_t lineSize = 0;
-    getline(&firstLine, &lineSize, iFile);
-    if (strncmp(firstLine, "DYNAMIC\n", 8) == 0) {
-        dynamic_parser(trie, iFile, qFile);
-    } else if (strncmp(firstLine, "STATIC\n", 7) == 0) {
-        static_parser(trie, iFile, qFile);
+    if (getline(&firstLine, &lineSize, iFile) > 0) {
+        if (strncmp(firstLine, "DYNAMIC\n", 8) == 0) {
+            dynamic_parser(trie, iFile, qFile);
+        } else if (strncmp(firstLine, "STATIC\n", 7) == 0) {
+            static_parser(trie, iFile, qFile);
+        }
     }
     fclose(iFile);
     fclose(qFile);
