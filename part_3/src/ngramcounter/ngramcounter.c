@@ -42,8 +42,7 @@ void destroy_ncbucket_array(NCBucket *ncBucket) {
     free(ncBucket->array);
 }
 
-// TODO den exei dhlw8ei sto .h
-int insertNCBucketArray(NCBucket *ncBucket, char *ngram, unsigned int length) {
+int insert_ncbucket_array(NCBucket *ncBucket, char *ngram, unsigned int length) {
     int i;
     for (i = 0; i < ncBucket->arraySize; i++) {
         if (ncBucket->array[i].ngram == NULL) {
@@ -118,7 +117,7 @@ int insert_ngram_counter(NgramCounter *ngramCounter, char *ngram, unsigned int n
     // Increase ngram length to fit '\0'
     ngramLength++;
     int position = hash_function(ngram, ngramLength);
-    int returnValue = insertNCBucketArray(&(ngramCounter->buckets[position]), ngram, ngramLength);
+    int returnValue = insert_ncbucket_array(&(ngramCounter->buckets[position]), ngram, ngramLength);
     ngramCounter->elements += returnValue;
     return returnValue;
 }

@@ -24,6 +24,7 @@ typedef NCBucket NgramArray;
 void allocate_ncbucket_array(NCBucket *ncBucket);
 void expand_ncbucket_array(NCBucket *ncBucket);
 void destroy_ncbucket_array(NCBucket *ncBucket);
+int insert_ncbucket_array(NCBucket *ncBucket, char *ngram, unsigned int length);
 void clear_ncbucket_array(NCBucket *ncBucket);
 void print_ncbucket_array(NCBucket *ncBucket);
 
