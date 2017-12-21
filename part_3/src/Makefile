@@ -8,8 +8,7 @@ OUT        = ngrams
 U_TEST_OUT = u_test_ngrams
 
 CC         = gcc
-FLAGS      = -lm
-
+FLAGS      = -pthread -lm -Wall
 
 all: FLAGS += -O2
 all: executable
@@ -23,7 +22,7 @@ executable: $(OBJS)
 %.o: %.c
 	$(CC) -c $(FLAGS) -o $@ $<
 
-u_test: FLAGS += -pthread -lcheck -lsubunit -lrt -lm
+u_test: FLAGS += -lcheck -lsubunit -lrt
 u_test: unit_test.c
 	$(CC) unit_test.c $(TEST_SRC) $(FLAGS) -o $(U_TEST_OUT)
 

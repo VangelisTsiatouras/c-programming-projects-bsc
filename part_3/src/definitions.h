@@ -30,6 +30,9 @@
 #define DEFAULT_NGRAM_WORDS 10
 #define DEFAULT_QUERY_BUFFER 20
 
+// Threads
+#define NUMBER_OF_THREADS 4
+
 
 //////////////////////////////////////
 //        ERROR DEFINES
