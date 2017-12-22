@@ -13,7 +13,7 @@ BloomFilter *create_bloom_filter() {
         exit(MALLOC_ERROR);
     }
     bloomFilter->bitVectorSize = STARTING_M;
-    bloomFilter->acceptedProbability = 0.0001;
+    bloomFilter->acceptedProbability = PROBABILITY;
     bloomFilter->bitVector = malloc(sizeof(short) * bloomFilter->bitVectorSize);
     if (!bloomFilter->bitVector) {
         printf("malloc error %s\n", strerror(errno));
