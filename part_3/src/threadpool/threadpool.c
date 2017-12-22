@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
-#include <unistd.h>
 #include "threadpool.h"
 
 #include "../definitions.h"
@@ -16,6 +15,7 @@ Queue* create_queue() {
     queue->elements = 0;
     queue->head = NULL;
     queue->tail = NULL;
+    return queue;
 }
 
 void destroy_queue(Queue* queue) {
@@ -56,10 +56,6 @@ void *pop_queue(Queue* queue) {
     while (queue->elements == 0) {
         pthread_cond_wait(&queueNotEmpty, &queueMutex);
     }
-    if (queue->elements == 0) {
-        printf("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAa"); //TODO na fugei olo to if ama paizei swsta
-        return NULL;
-    }
     QueueNode* temp = queue->head;
     void* returnValue = temp->job;
     if (queue->elements == 1) {
@@ -77,6 +73,125 @@ void *pop_queue(Queue* queue) {
     return returnValue;
 }
 
+JobScheduler *create_scheduler(unsigned int numberOfThreads) {
+    JobScheduler *jobScheduler = malloc(sizeof(JobScheduler));
+    if (!jobScheduler) {
+        printf("malloc error %s\n", strerror(errno));
+        exit(MALLOC_ERROR);
+    }
+    jobScheduler->threadIds = malloc(sizeof(pthread_t) * numberOfThreads);
+    if (!jobScheduler->threadIds) {
+        printf("malloc error %s\n", strerror(errno));
+        exit(MALLOC_ERROR);
+    }
+    jobScheduler->queue = create_queue();
+    jobScheduler->numberOfThreads = numberOfThreads;
+    pthread_mutex_init(&queueMutex, 0);
+    pthread_cond_init(&queueNotEmpty, 0);
+    for (int i = 0; i < jobScheduler->numberOfThreads; i++) {
+        pthread_create(&jobScheduler->threadIds[i], NULL, (void *) worker_scheduler, jobScheduler->queue);
+    }
+    return jobScheduler;
+}
+
+void destroy_scheduler(JobScheduler *jobScheduler) {
+    printf("Waiting for kids to exit\n");
+    for (int i = 0; i < jobScheduler->numberOfThreads; i++) {
+        pthread_join(jobScheduler->threadIds[i], 0);
+    }
+    pthread_mutex_destroy(&queueMutex);
+    pthread_cond_destroy(&queueNotEmpty);
+    destroy_queue(jobScheduler->queue);
+    free(jobScheduler->threadIds);
+    free(jobScheduler);
+}
+
+void submit_scheduler(JobScheduler *jobScheduler, void *job) {
+    push_queue(jobScheduler->queue, job);
+}
+
+void worker_scheduler(Queue *queue) {
+    printf("I am thread\n");
+    fflush(stdout);
+    while(1) {
+        Job *job = pop_queue(queue);
+        if (job == NULL) {
+            printf("exiting...\n");
+            fflush(stdout);
+            break;
+        }
+        function_caller_scheduler(job);
+    }
+}
+
+void terminate_threads_scheduler(JobScheduler *jobScheduler) {
+    printf("Telling kids to exit\n");
+
+    for (int i = 0; i < jobScheduler->numberOfThreads; i++) {
+        submit_scheduler(jobScheduler, NULL);
+    }
+}
+
+void function_caller_scheduler(Job *job) {
+    void * (*function) ()= job->pointerToFunction;
+    switch (job->numberOfArgs) {
+        case 0:
+            function();
+            break;
+        case 1:
+            function(job->args[0]);
+            break;
+        case 2:
+            function(job->args[0], job->args[1]);
+            break;
+        case 3:
+            function(job->args[0], job->args[1], job->args[2]);
+            break;
+        case 4:
+            function(job->args[0], job->args[1], job->args[2], job->args[3]);
+            break;
+        case 5:
+            function(job->args[0], job->args[1], job->args[2], job->args[3], job->args[4]);
+            break;
+        case 6:
+            function(job->args[0], job->args[1], job->args[2], job->args[3], job->args[4], job->args[5]);
+            break;
+        case 7:
+            function(job->args[0], job->args[1], job->args[2], job->args[3], job->args[4], job->args[5], job->args[6]);
+            break;
+        case 8:
+            function(job->args[0], job->args[1], job->args[2], job->args[3], job->args[4], job->args[5], job->args[6], job->args[7]);
+            break;
+        case 9:
+            function(job->args[0], job->args[1], job->args[2], job->args[3], job->args[4], job->args[5], job->args[6], job->args[7], job->args[8]);
+            break;
+        case 10:
+            function(job->args[0], job->args[1], job->args[2], job->args[3], job->args[4], job->args[5], job->args[6], job->args[7], job->args[8], job->args[9]);
+            break;
+    }
+    destroy_job(job);
+}
+
+Job *create_job(int numberOfArgs) {
+    Job *job = malloc(sizeof(Job));
+    if (!job) {
+        printf("malloc error %s\n", strerror(errno));
+        exit(MALLOC_ERROR);
+    }
+    job->args = malloc(sizeof(void*) * numberOfArgs);
+    if (!job->args) {
+        printf("malloc error %s\n", strerror(errno));
+        exit(MALLOC_ERROR);
+    }
+    job->numberOfArgs = numberOfArgs;
+    return job;
+}
+
+void destroy_job(Job *job) {
+    free(job->args);
+    free(job);
+}
+
 void queue_tester() {
     int reps = 100;
     Queue* queue = create_queue();
@@ -84,9 +199,6 @@ void queue_tester() {
         Job* p = malloc(sizeof(Job));
         p->args = malloc(sizeof(int));
         *(int*)p->args = i;
-//        int *p2;
-//        p2 = p->args;
-//        *p2 = i;
         push_queue(queue, p);
     }
     for (int i = 0; i < reps + 2; i++) {
@@ -103,96 +215,37 @@ void queue_tester() {
     exit(0);
 }
 
-JobScheduler *create_job_scheduler(unsigned int numberOfThreads) {
-    JobScheduler *jobScheduler = malloc(sizeof(JobScheduler));
-    if (!jobScheduler) {
-        printf("malloc error %s\n", strerror(errno));
-        exit(MALLOC_ERROR);
-    }
-    jobScheduler->threadIds = malloc(sizeof(pthread_t) * numberOfThreads);
-    if (!jobScheduler->threadIds) {
-        printf("malloc error %s\n", strerror(errno));
-        exit(MALLOC_ERROR);
-    }
-    jobScheduler->queue = create_queue();
-    jobScheduler->numberOfThreads = numberOfThreads;
-    pthread_mutex_init(&queueMutex, 0);
-    pthread_cond_init(&queueNotEmpty, 0);
-    for (int i = 0; i < jobScheduler->numberOfThreads; i++) {
-        pthread_create(&jobScheduler->threadIds[i], NULL, worker, jobScheduler->queue);
-    }
-    return jobScheduler;
-}
-
-void destroy_job_scheduler(JobScheduler *jobScheduler) {
-    printf("Waiting for kids to exit\n");
-    for (int i = 0; i < jobScheduler->numberOfThreads; i++) {
-        pthread_join(jobScheduler->threadIds[i], 0);
-    }
-    pthread_mutex_destroy(&queueMutex);
-    pthread_cond_destroy(&queueNotEmpty);
-    destroy_queue(jobScheduler->queue);
-    free(jobScheduler->threadIds);
-    free(jobScheduler);
-}
-
-void submit_job_scheduler(JobScheduler *jobScheduler, void *job) {
-    push_queue(jobScheduler->queue, job);
-}
-
-void worker(Queue *queue) {
-    printf("I am thread\n");
-    fflush(stdout);
-    void * (*function) ();
-    while(1) {
-        Job *job = pop_queue(queue);
-        if (job->args == NULL) {
-            printf("exiting...\n");
-            fflush(stdout);
-            break;
-        }
-        function = job->pointerToFunction;
-        function(*(int*)job->args);
-    }
-}
-
-void tell_threads_to_exit(JobScheduler *jobScheduler) {
-    printf("Telling kids to exit\n");
-    for (int i = 0; i < jobScheduler->numberOfThreads; i++) {
-        Job *nullJob = malloc(sizeof(Job));
-        if (!nullJob) {
-            printf("malloc error %s\n", strerror(errno));
-            exit(MALLOC_ERROR);
-        }
-        nullJob->pointerToFunction = NULL;
-        nullJob->args = NULL;
-//        Job *nullJob = NULL;
-        submit_job_scheduler(jobScheduler, nullJob);
-//        push_queue(jobScheduler->queue, nullJob);
-    }
-}
-
 void thread_tester() {
-    JobScheduler *jobScheduler = create_job_scheduler(NUMBER_OF_THREADS);
+    JobScheduler *jobScheduler = create_scheduler(NUMBER_OF_THREADS);
     int reps = 10;
     for (int i = 0; i < reps; i++) {
-        Job* p = malloc(sizeof(Job));
-        p->pointerToFunction = hello;
-        p->args = malloc(sizeof(int));
-        *(int*)p->args = i;
-//        int *p2;
-//        p2 = p->args;
-//        *p2 = i;
-        submit_job_scheduler(jobScheduler, p);
+        Job *job = create_job(1);
+        job->pointerToFunction = hello;
+        job->args[0] = malloc(sizeof(int));
+        *(int*)job->args[0] = i;
+        submit_scheduler(jobScheduler, job);
     }
-//    usleep(100);
-    tell_threads_to_exit(jobScheduler);
-    destroy_job_scheduler(jobScheduler);
-
+    for (int i = 0; i < reps; i++) {
+        Job *job = create_job(2);
+        job->pointerToFunction = hello2;
+        job->args[0] = malloc(sizeof(int));
+        job->args[1] = malloc(sizeof(int));
+        *(int*)job->args[0] = i;
+        *(int*)job->args[1] = i * i;
+        submit_scheduler(jobScheduler, job);
+    }
+    terminate_threads_scheduler(jobScheduler);
+    destroy_scheduler(jobScheduler);
     exit(0);
 }
 
-void *hello(int x){
-    printf("hello %d\n", x);
+void *hello(int *x){
+    printf("hello %d\n", *x);
     return NULL;
 }
+
+void *hello2(int *x, int *y){
+    printf("hello2 %d %d\n", *x, *y);
+    return NULL;
+}
+

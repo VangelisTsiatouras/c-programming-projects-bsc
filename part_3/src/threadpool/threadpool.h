@@ -18,13 +18,6 @@ typedef struct QueueNode {
     struct Job* job;
 } QueueNode;
 
-Queue* create_queue();
-void destroy_queue(Queue* queue);
-void push_queue(Queue* queue, void* job);
-void* pop_queue(Queue* queue);
-void queue_tester();
-
-
 typedef struct JobScheduler {
     int numberOfThreads;       // number of execution threads
     Queue* queue;              // a queue that holds submitted jobs / tasks
@@ -34,16 +27,29 @@ typedef struct JobScheduler {
 
 typedef struct Job {
     void *pointerToFunction;
-    void *args;
+    void **args;
+    int numberOfArgs;
 } Job;
 
-JobScheduler *create_job_scheduler(unsigned int numberOfThreads);
-void destroy_job_scheduler(JobScheduler *jobScheduler);
-void submit_job_scheduler(JobScheduler *jobScheduler, void *job);
-void worker(Queue *queue);
+Queue* create_queue();
+void destroy_queue(Queue* queue);
+void push_queue(Queue* queue, void* job);
+void* pop_queue(Queue* queue);
 
+JobScheduler *create_scheduler(unsigned int numberOfThreads);
+void destroy_scheduler(JobScheduler *jobScheduler);
+void submit_scheduler(JobScheduler *jobScheduler, void *job);
+void worker_scheduler(Queue *queue);
+void terminate_threads_scheduler(JobScheduler *jobScheduler);
+void function_caller_scheduler(Job *job);
+
+Job *create_job(int numberOfArgs);
+void destroy_job(Job *job);
+
+void queue_tester();
 void thread_tester();
 
-void *hello(int x);
+void *hello(int *x);
+void *hello2(int *x, int *y);
 
 #endif // THREADPOOL_H
