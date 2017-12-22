@@ -3,7 +3,6 @@
 #include <string.h>
 #include <errno.h>
 #include "threadpool.h"
-
 #include "../definitions.h"
 
 Queue* create_queue() {
@@ -22,8 +21,9 @@ void destroy_queue(Queue* queue) {
     QueueNode* iterator = queue->head;
     while (iterator != NULL) {
         QueueNode* temp = iterator;
+        iterator = iterator->next; // todo mallon einai fixed
         free(temp);
-        iterator = iterator->next;
+
     }
     free(queue);
 }

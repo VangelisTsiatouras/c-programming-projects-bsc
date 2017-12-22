@@ -8,6 +8,7 @@
 #include "../ngramcounter/ngramcounter.h"
 #include "../linearhash/linearhash.h"
 #include "parser.h"
+#include "../querylist/querylist.h"
 
 void parser(Trie *trie, char *initFile, char *queryFile) {
     FILE *iFile, *qFile;
@@ -66,6 +67,7 @@ int dynamic_parser(Trie *trie, FILE *iFile, FILE *qFile) {
 
                 break;
             case 'F':
+
                 word = strtok(line + 1, " \n");
                 if (word != NULL) {
                     topk = atoi(word);
@@ -98,9 +100,10 @@ int static_parser(Trie *trie, FILE *iFile, FILE *qFile) {
     BloomFilter *bloomFilter = create_bloom_filter();
     QueryResults *queryResults = create_query_results(DEFAULT_LINES, DEFAULT_LINE_SIZE);
     NgramCounter *ngramCounter = create_ngram_counter();
+    QueryList *queryList = create_querylist();
     char *line = NULL;
     char *word = NULL;
-    int topk = 3;
+    int topk;
     size_t lineSize = 0;
 
     while (getline(&line, &lineSize, iFile) > 0) {
@@ -109,11 +112,15 @@ int static_parser(Trie *trie, FILE *iFile, FILE *qFile) {
         }
         insert_trie(trie, line);
     }
+    free(line);
     compress_trie(trie);
+    lineSize = 0;
     while (getline(&line, &lineSize, qFile) > 0) {
+        lineSize = 0;
         NgramArray *ngramArray = NULL;
         switch (line[0]) {
             case 'Q':
+                insert_querylist(queryList, line, 0, 0);
                 query_trie_static(trie, &line[2], bloomFilter, queryResults, ngramCounter);
                 copy_results_to_buffer_query_results(queryResults);
                 break;
@@ -133,13 +140,17 @@ int static_parser(Trie *trie, FILE *iFile, FILE *qFile) {
                     destroy_ngram_array(ngramArray);
                 }
                 clear_ngram_counter(ngramCounter);
+                free(line);
                 break;
             default:
+                free(line);
                 printf("Unknown Command\n");
         }
     }
+    free(line); //todo an vgei error mallon ftaei auto. einai ok gia ta arxeia eisodou
     destroy_gram_counter(ngramCounter);
-    free(line);
+    destroy_querylist(queryList);
+
     destroy_query_results(queryResults);
     destroy_bloom_filter(bloomFilter);
     return SUCCESS;
