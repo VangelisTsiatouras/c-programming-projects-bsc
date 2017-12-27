@@ -10,12 +10,14 @@ typedef struct Pair {
 } Pair;
 
 typedef struct NCBucket {
+    pthread_mutex_t bucketMutex;
     Pair *array;
     unsigned int arraySize;
 } NCBucket;
 
 typedef struct NgramCounter {
     NCBucket buckets[NC_STATIC_HASH_SIZE];
+    pthread_mutex_t elementsMutex;
     unsigned int elements;
 } NgramCounter;
 

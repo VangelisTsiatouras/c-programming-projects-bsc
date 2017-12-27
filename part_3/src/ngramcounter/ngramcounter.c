@@ -2,10 +2,12 @@
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
+#include <pthread.h>
 
 #include "ngramcounter.h"
 
 void allocate_ncbucket_array(NCBucket *ncBucket) {
+    pthread_mutex_init(&ncBucket->bucketMutex, 0);
     ncBucket->arraySize = NC_BUCKET_SIZE;
     ncBucket->array = malloc(NC_BUCKET_SIZE * sizeof(Pair));
     for (int i = 0; i < NC_BUCKET_SIZE; i++) {
@@ -19,6 +21,8 @@ void allocate_ncbucket_array(NCBucket *ncBucket) {
 }
 
 void expand_ncbucket_array(NCBucket *ncBucket) {
+    // No need to lock mutexes as this get called only from insert_ncbucket_array
+    //pthread_mutex_lock(&ncBucket->bucketMutex);
     ncBucket->arraySize *= 2;
     ncBucket->array = realloc(ncBucket->array, ncBucket->arraySize * sizeof(Pair));
     if (!ncBucket->array) {
@@ -29,6 +33,7 @@ void expand_ncbucket_array(NCBucket *ncBucket) {
         ncBucket->array[i].ngram = NULL;
         ncBucket->array[i].counter = 0;
     }
+    //pthread_mutex_unlock(&ncBucket->bucketMutex);
 }
 
 void destroy_ncbucket_array(NCBucket *ncBucket) {
@@ -39,10 +44,12 @@ void destroy_ncbucket_array(NCBucket *ncBucket) {
             free(ncBucket->array[i].ngram);
         }
     }
+    pthread_mutex_destroy(&ncBucket->bucketMutex);
     free(ncBucket->array);
 }
 
 int insert_ncbucket_array(NCBucket *ncBucket, char *ngram, unsigned int length) {
+    pthread_mutex_lock(&ncBucket->bucketMutex);
     int i;
     for (i = 0; i < ncBucket->arraySize; i++) {
         if (ncBucket->array[i].ngram == NULL) {
@@ -50,6 +57,7 @@ int insert_ncbucket_array(NCBucket *ncBucket, char *ngram, unsigned int length) 
         }
         if (strcmp(ngram, ncBucket->array[i].ngram) == 0) {
             ncBucket->array[i].counter++;
+            pthread_mutex_unlock(&ncBucket->bucketMutex);
             return 0;
         }
     }
@@ -66,6 +74,7 @@ int insert_ncbucket_array(NCBucket *ncBucket, char *ngram, unsigned int length) 
     }
     strcpy(ncBucket->array[i].ngram, ngram);
     ncBucket->array[i].counter = 1;
+    pthread_mutex_unlock(&ncBucket->bucketMutex);
     return 1;
 }
 
@@ -82,6 +91,7 @@ void clear_ncbucket_array(NCBucket *ncBucket) {
 }
 
 void print_ncbucket_array(NCBucket *ncBucket) {
+    pthread_mutex_lock(&ncBucket->bucketMutex);
     for (int i = 0; i < ncBucket->arraySize; i++) {
         if (ncBucket->array[i].ngram == NULL) {
             break;
@@ -89,6 +99,7 @@ void print_ncbucket_array(NCBucket *ncBucket) {
         printf("|%s:%d", ncBucket->array[i].ngram, ncBucket->array[i].counter);
     }
     printf("\n");
+    pthread_mutex_unlock(&ncBucket->bucketMutex);
 }
 
 ///
@@ -103,6 +114,7 @@ NgramCounter *create_ngram_counter() {
     for (int i = 0; i < NC_STATIC_HASH_SIZE; i++) {
         allocate_ncbucket_array(&(ngramCounter->buckets[i]));
     }
+    pthread_mutex_init(&ngramCounter->elementsMutex, 0);
     return ngramCounter;
 }
 
@@ -110,6 +122,7 @@ void destroy_gram_counter(NgramCounter *ngramCounter) {
     for (int i = 0; i < NC_STATIC_HASH_SIZE; i++) {
         destroy_ncbucket_array(&(ngramCounter->buckets[i]));
     }
+    pthread_mutex_destroy(&ngramCounter->elementsMutex);
     free(ngramCounter);
 }
 
@@ -118,7 +131,9 @@ int insert_ngram_counter(NgramCounter *ngramCounter, char *ngram, unsigned int n
     ngramLength++;
     int position = hash_function(ngram, ngramLength);
     int returnValue = insert_ncbucket_array(&(ngramCounter->buckets[position]), ngram, ngramLength);
-    ngramCounter->elements += returnValue;
+    pthread_mutex_lock(&ngramCounter->elementsMutex);
+    ngramCounter->elements += returnValue;//todo na mpei mutex
+    pthread_mutex_unlock(&ngramCounter->elementsMutex);
     return returnValue;
 }
 
@@ -250,7 +265,7 @@ void tester_ngram_counter() {
     NgramCounter* nc = create_ngram_counter();
     char str[3] = "aa";
     for (int i = 0; i < 10000; i++) {
-        //printf("i: %d\n", i);
+        printf("i: %d\n", i);
         int r = rand() % 26;
         int r2 = rand() % 26;
         str[0] += r;

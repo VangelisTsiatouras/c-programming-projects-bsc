@@ -24,6 +24,7 @@ BFStorage *create_bf_storage(int numberOfBloomFilters) {
         bfStorage->bloomFilterArray[i].bloomFilterObtained = 0;
         bfStorage->bloomFilterArray[i].bloomFilterID = i;
     }
+    pthread_mutex_init(&storageMutex, 0);
     return bfStorage;
 }
 
@@ -31,6 +32,7 @@ void destroy_bf_storage(BFStorage *bfStorage) {
     for (int i = 0; i < bfStorage->numberOfBloomFilters; i++) {
         destroy_bloom_filter(bfStorage->bloomFilterArray[i].bloomFilter);
     }
+    pthread_mutex_destroy(&storageMutex);
     free(bfStorage->bloomFilterArray);
     free(bfStorage);
 }
