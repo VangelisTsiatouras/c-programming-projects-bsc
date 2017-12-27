@@ -27,6 +27,17 @@ void destroy_querylist(QueryList *qlist) {
     free(qlist);
 }
 
+void empty_querylist(QueryList *qlist) {
+    ListNode* iterator = qlist->start;
+    qlist->elements = 0;
+    while (iterator != NULL) {
+        ListNode* temp = iterator;
+        iterator = iterator->next;
+        free(temp->query);
+        free(temp);
+    }
+}
+
 void insert_querylist(QueryList *qlist, char *query, int query_ID, int version) {
 
     ListNode* listNode = malloc(sizeof(ListNode));

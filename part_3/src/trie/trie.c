@@ -5,6 +5,7 @@
 
 #include "trie.h"
 #include "../linearhash/linearhash.h"
+#include "../bloomfilterstorage/bfstorage.h"
 
 Trie *create_trie() {
     Trie *trie = malloc(sizeof(Trie));
@@ -131,10 +132,13 @@ void query_trie_dynamic(Trie *trie, char *ngram, BloomFilter *bloomFilter, Query
     free(splitNgram);
 }
 
-void query_trie_static(Trie *trie, char *ngram, BloomFilter *bloomFilter, QueryResults *queryResults,
-                       NgramCounter *ngramCounter, int queryID) {
+void query_trie_static(Trie *trie, char *ngram, BFStorage *bloomFilterStorage, QueryResults *queryResults,
+                       NgramCounter *ngramCounter, int *queryID, int *totalQueries) {
+    printf("qlist elem %d\n", *totalQueries);
     TrieNode *current;
     SearchResults result;
+    BloomFilterArrayElement *bloomFilterArrayElement = obtain_filter_bf_storage(bloomFilterStorage);
+    BloomFilter *bloomFilter = bloomFilterArrayElement->bloomFilter;
     int numberOfWords;
     char **splitNgram = split_ngram(ngram, &numberOfWords);
     int offset;
@@ -176,7 +180,7 @@ void query_trie_static(Trie *trie, char *ngram, BloomFilter *bloomFilter, QueryR
 
             if (current->isFinal == 1 || (current->staticArraySize && current->staticTrieWordOffsets[0] < 0)) {
                 if (check_insert_bloom_filter(bloomFilter, resultsBuffer) == SUCCESS) {
-                    add_line_query_results_append(queryResults, resultsBuffer, queryID);
+                    add_line_query_results_append(queryResults, resultsBuffer, *queryID);
                     resultsFound = 1;
                     insert_ngram_counter(ngramCounter, resultsBuffer, (unsigned int) offset);
                 }
@@ -204,7 +208,7 @@ void query_trie_static(Trie *trie, char *ngram, BloomFilter *bloomFilter, QueryR
                 if (current->staticTrieWordOffsets[k] < 0) {
                     // Final
                     if (check_insert_bloom_filter(bloomFilter, resultsBuffer) == SUCCESS) {
-                        add_line_query_results_append(queryResults, resultsBuffer, queryID);
+                        add_line_query_results_append(queryResults, resultsBuffer, *queryID);
                         resultsFound = 1;
                         insert_ngram_counter(ngramCounter, resultsBuffer, (unsigned int) offset);
                     }
@@ -223,11 +227,12 @@ void query_trie_static(Trie *trie, char *ngram, BloomFilter *bloomFilter, QueryR
     }
     if (resultsFound == 0) {
         sprintf(resultsBuffer, "-1");
-        add_line_query_results_append(queryResults, resultsBuffer, queryID);
+        add_line_query_results_append(queryResults, resultsBuffer, *queryID);
     }
+    release_filter_bf_storage(bloomFilterStorage, bloomFilterArrayElement->bloomFilterID);
     free(resultsBuffer);
     free(splitNgram);
-
+    wake_main_thread(queryResults, *totalQueries);
 }
 
 void compress_trie(Trie *trie) {
@@ -532,7 +537,8 @@ char **split_ngram(char *ngram, int *numberOfWords) {
         printf("malloc error %s\n", strerror(errno));
         exit(MALLOC_ERROR);
     }
-    char *word = strtok(ngram, " \n");
+    char *saveptr;
+    char *word = strtok_r(ngram, " \n", &saveptr);
     while (word != NULL) {
         (*numberOfWords)++;
         if (*numberOfWords == maxSize) {
@@ -544,7 +550,7 @@ char **split_ngram(char *ngram, int *numberOfWords) {
             }
         }
         splitNgram[*numberOfWords - 1] = word;
-        word = strtok(NULL, " \n");
+        word = strtok_r(NULL, " \n", &saveptr);
     }
     return splitNgram;
 }

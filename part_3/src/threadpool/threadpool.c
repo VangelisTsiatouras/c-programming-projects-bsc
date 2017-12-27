@@ -115,6 +115,8 @@ void worker_scheduler(Queue *queue) {
     fflush(stdout);
     while(1) {
         Job *job = pop_queue(queue);
+        printf("got job\n");
+        fflush(stdout);
         if (job == NULL) {
             printf("exiting...\n");
             fflush(stdout);

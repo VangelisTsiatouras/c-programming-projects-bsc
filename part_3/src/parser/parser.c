@@ -11,6 +11,7 @@
 #include "parser.h"
 #include "../querylist/querylist.h"
 #include "../queryresults/queryresults.h"
+#include "../threadpool/threadpool.h"
 
 void parser(Trie *trie, char *initFile, char *queryFile) {
     FILE *iFile, *qFile;
@@ -49,7 +50,7 @@ int dynamic_parser(Trie *trie, FILE *iFile, FILE *qFile) {
     size_t lineSize = 0;
 
     while (getline(&line, &lineSize, iFile) > 0) {
-        if(check_whitespace(line)){
+        if (check_whitespace(line)) {
             continue;
         }
         insert_trie(trie, line);
@@ -99,7 +100,9 @@ int dynamic_parser(Trie *trie, FILE *iFile, FILE *qFile) {
 }
 
 int static_parser(Trie *trie, FILE *iFile, FILE *qFile) {
-    BloomFilter *bloomFilter = create_bloom_filter();
+    JobScheduler *jobScheduler = create_scheduler(NUMBER_OF_THREADS);
+//    BloomFilter *bloomFilter = create_bloom_filter();
+    BFStorage *bfStorage = create_bf_storage(NUMBER_OF_THREADS);
     QueryResults *queryResults = create_query_results(1000, DEFAULT_LINE_SIZE);
     NgramCounter *ngramCounter = create_ngram_counter();
     QueryList *queryList = create_querylist();
@@ -109,7 +112,7 @@ int static_parser(Trie *trie, FILE *iFile, FILE *qFile) {
     size_t lineSize = 0;
 
     while (getline(&line, &lineSize, iFile) > 0) {
-        if(check_whitespace(line)){
+        if (check_whitespace(line)) {
             continue;
         }
         insert_trie(trie, line);
@@ -118,18 +121,60 @@ int static_parser(Trie *trie, FILE *iFile, FILE *qFile) {
     compress_trie(trie);
     lineSize = 0;
     int queryID = 0;
+    ListNode *iterator;
     while (getline(&line, &lineSize, qFile) > 0) {
         lineSize = 0;
         NgramArray *ngramArray = NULL;
         switch (line[0]) {
             case 'Q':
-                insert_querylist(queryList, line, 0, 0);
-                query_trie_static(trie, &line[2], bloomFilter, queryResults, ngramCounter, queryID);
+                insert_querylist(queryList, line, queryID, 0);
+
+//                query_trie_static(trie, &line[2], bfStorage, queryResults, ngramCounter, queryID);
                 queryID++;
 //                copy_results_to_buffer_query_results(queryResults);
 //                print_query_results(queryResults);
                 break;
             case 'F':
+                iterator = queryList->start;
+                while (iterator != NULL) {
+                    printf("%s", iterator->query);
+                    iterator = iterator->next;
+                }
+
+                iterator = queryList->start;
+                while (iterator != NULL) {
+                    Job *job = create_job(7);
+                    job->pointerToFunction = query_trie_static;
+                    job->args[0] = trie;
+                    job->args[1] = iterator->query;
+                    if ((int)iterator->query < 10000) {
+                        printf("skata\n");
+                    }
+                    job->args[2] = bfStorage;
+                    job->args[3] = queryResults;
+                    job->args[4] = ngramCounter;
+//                    job->args[5] = malloc(sizeof(int));
+//                    *(int *) job->args[5] = queryID;
+                    job->args[5] = &iterator->query_ID;
+                    printf("qlist1 elem %d\n", queryList->elements);
+                    job->args[6] = &queryList->elements;
+
+                    submit_scheduler(jobScheduler, job);
+
+                    iterator = iterator->next;
+                }
+                pthread_mutex_lock(&mainThreadLock);
+                while (queryResults->finished != queryID) {
+                    pthread_cond_wait(&mainThreadSleep, &mainThreadLock);
+                }
+                pthread_mutex_unlock(&mainThreadLock);
+
+//                pthread_mutex_lock(&mainThreadLock);
+//                printf("asdasd\n");
+//                pthread_mutex_unlock(&mainThreadLock);
+//                printf("asdasd\n");
+
+                empty_querylist(queryList);
                 queryID = 0;
                 word = strtok(line + 1, " \n");
                 if (word != NULL) {
@@ -158,13 +203,16 @@ int static_parser(Trie *trie, FILE *iFile, FILE *qFile) {
     destroy_querylist(queryList);
 
     destroy_query_results(queryResults);
-    destroy_bloom_filter(bloomFilter);
+//    destroy_bloom_filter(bloomFilter);
+    destroy_bf_storage(bfStorage);
+    terminate_threads_scheduler(jobScheduler);
+    destroy_scheduler(jobScheduler);
     return SUCCESS;
 }
 
 int check_whitespace(char *line) {
     while (*line != '\0') {
-        if (!isspace((unsigned char)*line))
+        if (!isspace((unsigned char) *line))
             return 0;
         line++;
     }

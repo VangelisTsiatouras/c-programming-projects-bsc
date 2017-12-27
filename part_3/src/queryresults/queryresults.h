@@ -5,6 +5,7 @@
 
 pthread_mutex_t finishedMutex;
 pthread_mutex_t mainThreadLock;
+pthread_cond_t mainThreadSleep;
 
 typedef struct QueryResults {
     char **lines;

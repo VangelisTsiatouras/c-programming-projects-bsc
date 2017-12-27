@@ -8,6 +8,8 @@
 
 QueryResults *create_query_results(int lines, size_t lineSize) {
     pthread_mutex_init(&finishedMutex, 0);
+    pthread_mutex_init(&mainThreadLock, 0);
+    pthread_cond_init(&mainThreadSleep, 0);
     QueryResults *queryResults = malloc(sizeof(QueryResults));
     if (!queryResults) {
         printf("malloc error %s\n", strerror(errno));
@@ -49,6 +51,8 @@ void destroy_query_results(QueryResults *queryResults) {
         free(queryResults->lines[i]);
     }
     pthread_mutex_destroy(&finishedMutex);
+    pthread_mutex_destroy(&mainThreadLock);
+    pthread_cond_destroy(&mainThreadSleep);
     free(queryResults->lines);
     free(queryResults->lineSize);
     free(queryResults->offsets);
@@ -134,9 +138,13 @@ void clear_query_results(QueryResults *queryResults) {
 }
 
 void wake_main_thread(QueryResults *queryResults, int totalQueries) {
+    printf("time to wake\n");
     pthread_mutex_lock(&finishedMutex);
     queryResults->finished++;
     if (queryResults->finished == totalQueries) {
+        printf("time to really wake\n");
+        pthread_cond_signal(&mainThreadSleep);
+        //pthread_mutex_unlock(&mainThreadLock);
         // wake main thread
     }
     pthread_mutex_unlock(&finishedMutex);

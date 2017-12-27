@@ -5,6 +5,7 @@
 #include "../bloomfilter/bloomfilter.h"
 #include "../queryresults/queryresults.h"
 #include "../ngramcounter/ngramcounter.h"
+#include "../bloomfilterstorage/bfstorage.h"
 
 typedef struct LinearHash LinearHash;
 
@@ -34,8 +35,8 @@ int destroy_trie(Trie *trie);
 int insert_trie(Trie *trie, char *ngram);
 void query_trie_dynamic(Trie *trie, char *ngram, BloomFilter *bloomFilter, QueryResults *queryResults,
                         NgramCounter *ngramCounter, int queryID);
-void query_trie_static(Trie *trie, char *ngram, BloomFilter *bloomFilter, QueryResults *queryResults,
-                       NgramCounter *ngramCounter, int queryID);
+void query_trie_static(Trie *trie, char *ngram, BFStorage *bloomFilterStorage, QueryResults *queryResults,
+                       NgramCounter *ngramCounter, int *queryID, int *totalQueries);
 void compress_trie(Trie *trie);
 int delete_ngram_trie(Trie *trie, char *ngram);
 
