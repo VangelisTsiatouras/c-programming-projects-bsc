@@ -67,7 +67,7 @@ int insert_trie(Trie *trie, char *ngram) {
 }
 
 void query_trie_dynamic(Trie *trie, char *ngram, BloomFilter *bloomFilter, QueryResults *queryResults,
-                        NgramCounter *ngramCounter) {
+                        NgramCounter *ngramCounter, int queryID) {
     TrieNode *current;
     SearchResults result;
     int numberOfWords;
@@ -108,7 +108,7 @@ void query_trie_dynamic(Trie *trie, char *ngram, BloomFilter *bloomFilter, Query
             offset += snprintf(resultsBuffer + offset, sizeBuffer - offset, "%s", splitNgram[j]);
             if (current->isFinal == 1) {
                 if (check_insert_bloom_filter(bloomFilter, resultsBuffer) == SUCCESS) {
-                    add_line_query_results_append_old(queryResults, resultsBuffer);
+                    add_line_query_results_append(queryResults, resultsBuffer, queryID);
                     resultsFound = 1;
                     insert_ngram_counter(ngramCounter, resultsBuffer, (unsigned int) offset);
                 }
@@ -125,14 +125,14 @@ void query_trie_dynamic(Trie *trie, char *ngram, BloomFilter *bloomFilter, Query
     }
     if (resultsFound == 0) {
         sprintf(resultsBuffer, "-1");
-        add_line_query_results_append_old(queryResults, resultsBuffer);
+        add_line_query_results_append(queryResults, resultsBuffer, queryID);
     }
     free(resultsBuffer);
     free(splitNgram);
 }
 
 void query_trie_static(Trie *trie, char *ngram, BloomFilter *bloomFilter, QueryResults *queryResults,
-                       NgramCounter *ngramCounter) {
+                       NgramCounter *ngramCounter, int queryID) {
     TrieNode *current;
     SearchResults result;
     int numberOfWords;
@@ -176,7 +176,7 @@ void query_trie_static(Trie *trie, char *ngram, BloomFilter *bloomFilter, QueryR
 
             if (current->isFinal == 1 || (current->staticArraySize && current->staticTrieWordOffsets[0] < 0)) {
                 if (check_insert_bloom_filter(bloomFilter, resultsBuffer) == SUCCESS) {
-                    add_line_query_results_append_old(queryResults, resultsBuffer);
+                    add_line_query_results_append(queryResults, resultsBuffer, queryID);
                     resultsFound = 1;
                     insert_ngram_counter(ngramCounter, resultsBuffer, (unsigned int) offset);
                 }
@@ -204,7 +204,7 @@ void query_trie_static(Trie *trie, char *ngram, BloomFilter *bloomFilter, QueryR
                 if (current->staticTrieWordOffsets[k] < 0) {
                     // Final
                     if (check_insert_bloom_filter(bloomFilter, resultsBuffer) == SUCCESS) {
-                        add_line_query_results_append_old(queryResults, resultsBuffer);
+                        add_line_query_results_append(queryResults, resultsBuffer, queryID);
                         resultsFound = 1;
                         insert_ngram_counter(ngramCounter, resultsBuffer, (unsigned int) offset);
                     }
@@ -223,7 +223,7 @@ void query_trie_static(Trie *trie, char *ngram, BloomFilter *bloomFilter, QueryR
     }
     if (resultsFound == 0) {
         sprintf(resultsBuffer, "-1");
-        add_line_query_results_append_old(queryResults, resultsBuffer);
+        add_line_query_results_append(queryResults, resultsBuffer, queryID);
     }
     free(resultsBuffer);
     free(splitNgram);

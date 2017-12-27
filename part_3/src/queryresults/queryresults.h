@@ -4,6 +4,7 @@
 #include "../definitions.h"
 
 pthread_mutex_t finishedMutex;
+pthread_mutex_t mainThreadLock;
 
 typedef struct QueryResults {
     char **lines;
