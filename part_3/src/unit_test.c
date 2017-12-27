@@ -8,7 +8,7 @@
 #include <stdint.h>
 
 #include "trie/trie.h"
-#include "queryresults/queryresults.h"
+#include "queryresults/oldqueryresults.h"
 #include "ngramcounter/ngramcounter.h"
 #include "bloomfilter/bloomfilter.h"
 #include "linearhash/linearhash.h"

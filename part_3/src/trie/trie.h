@@ -3,7 +3,7 @@
 
 #include "../definitions.h"
 #include "../bloomfilter/bloomfilter.h"
-#include "../queryresults/queryresults.h"
+#include "../oldqueryresults/oldqueryresults.h"
 #include "../ngramcounter/ngramcounter.h"
 
 typedef struct LinearHash LinearHash;

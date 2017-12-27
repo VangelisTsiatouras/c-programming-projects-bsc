@@ -38,3 +38,5 @@ cmake-build-debug/
 
 # Ignore medium datasets
 *medium_*/
+*large_*/
+

@@ -4,7 +4,7 @@
 #include <errno.h>
 #include <ctype.h>
 
-#include "../queryresults/queryresults.h"
+#include "../oldqueryresults/oldqueryresults.h"
 #include "../ngramcounter/ngramcounter.h"
 #include "../linearhash/linearhash.h"
 #include "parser.h"
@@ -39,7 +39,7 @@ void parser(Trie *trie, char *initFile, char *queryFile) {
 
 int dynamic_parser(Trie *trie, FILE *iFile, FILE *qFile) {
     BloomFilter *bloomFilter = create_bloom_filter();
-    QueryResults *queryResults = create_query_results(DEFAULT_LINES, DEFAULT_LINE_SIZE);
+    QueryResults *queryResults = create_query_results_old(DEFAULT_LINES, DEFAULT_LINE_SIZE);
     NgramCounter *ngramCounter = create_ngram_counter();
     char *line = NULL;
     char *word = NULL;
@@ -57,7 +57,7 @@ int dynamic_parser(Trie *trie, FILE *iFile, FILE *qFile) {
         switch (line[0]) {
             case 'Q':
                 query_trie_dynamic(trie, &line[2], bloomFilter, queryResults, ngramCounter);
-                copy_results_to_buffer_query_results(queryResults);
+                copy_results_to_buffer_query_results_old(queryResults);
                 break;
             case 'A':
                 insert_trie(trie, &line[2]);
@@ -78,7 +78,7 @@ int dynamic_parser(Trie *trie, FILE *iFile, FILE *qFile) {
                     ngramArray = copy_to_ngram_array(ngramCounter);
 
                 }
-                flush_query_results(queryResults);
+                print_query_results_old(queryResults);
                 if (ngramArray != NULL) {
                     sort_topk(ngramArray, (unsigned int) topk);
                     destroy_ngram_array(ngramArray);
@@ -91,14 +91,14 @@ int dynamic_parser(Trie *trie, FILE *iFile, FILE *qFile) {
     }
     destroy_gram_counter(ngramCounter);
     free(line);
-    destroy_query_results(queryResults);
+    destroy_query_results_old(queryResults);
     destroy_bloom_filter(bloomFilter);
     return SUCCESS;
 }
 
 int static_parser(Trie *trie, FILE *iFile, FILE *qFile) {
     BloomFilter *bloomFilter = create_bloom_filter();
-    QueryResults *queryResults = create_query_results(DEFAULT_LINES, DEFAULT_LINE_SIZE);
+    QueryResults *queryResults = create_query_results_old(DEFAULT_LINES, DEFAULT_LINE_SIZE);
     NgramCounter *ngramCounter = create_ngram_counter();
     QueryList *queryList = create_querylist();
     char *line = NULL;
@@ -122,7 +122,7 @@ int static_parser(Trie *trie, FILE *iFile, FILE *qFile) {
             case 'Q':
                 insert_querylist(queryList, line, 0, 0);
                 query_trie_static(trie, &line[2], bloomFilter, queryResults, ngramCounter);
-                copy_results_to_buffer_query_results(queryResults);
+                copy_results_to_buffer_query_results_old(queryResults);
                 break;
             case 'F':
                 word = strtok(line + 1, " \n");
@@ -134,7 +134,7 @@ int static_parser(Trie *trie, FILE *iFile, FILE *qFile) {
                     }
                     ngramArray = copy_to_ngram_array(ngramCounter);
                 }
-                flush_query_results(queryResults);
+                print_query_results_old(queryResults);
                 if (ngramArray != NULL) {
                     sort_topk(ngramArray, (unsigned int) topk);
                     destroy_ngram_array(ngramArray);
@@ -151,7 +151,7 @@ int static_parser(Trie *trie, FILE *iFile, FILE *qFile) {
     destroy_gram_counter(ngramCounter);
     destroy_querylist(queryList);
 
-    destroy_query_results(queryResults);
+    destroy_query_results_old(queryResults);
     destroy_bloom_filter(bloomFilter);
     return SUCCESS;
 }
