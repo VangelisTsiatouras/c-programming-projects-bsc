@@ -4,7 +4,6 @@
 #include <errno.h>
 #include <pthread.h>
 #include "queryresults.h"
-#include "../oldqueryresults/oldqueryresults.h"
 
 QueryResults *create_query_results(int lines, size_t lineSize) {
     pthread_mutex_init(&finishedMutex, 0);

@@ -3,7 +3,7 @@ project(ngrams)
 
 set(CMAKE_C_STANDARD 99)
 
-set(SOURCE_FILES main.c parser/parser.c parser/parser.h trie/trie.h trie/trie.c oldqueryresults/oldqueryresults.c oldqueryresults/oldqueryresults.h definitions.h bloomfilter/bloomfilter.c bloomfilter/bloomfilter.h hashfunctions/hashfunctions.c hashfunctions/hashfunctions.h ngramcounter/ngramcounter.c ngramcounter/ngramcounter.h linearhash/linearhash.c linearhash/linearhash.h threadpool/threadpool.c threadpool/threadpool.h querylist/querylist.c querylist/querylist.h bloomfilterstorage/bfstorage.c bloomfilterstorage/bfstorage.h queryresults/queryresults.c queryresults/queryresults.h)
+set(SOURCE_FILES main.c parser/parser.c parser/parser.h trie/trie.h trie/trie.c queryresults/queryresults.c oldqueryresults/oldqueryresults.h definitions.h bloomfilter/bloomfilter.c bloomfilter/bloomfilter.h hashfunctions/hashfunctions.c hashfunctions/hashfunctions.h ngramcounter/ngramcounter.c ngramcounter/ngramcounter.h linearhash/linearhash.c linearhash/linearhash.h threadpool/threadpool.c threadpool/threadpool.h querylist/querylist.c querylist/querylist.h bloomfilterstorage/bfstorage.c bloomfilterstorage/bfstorage.h queryresults/queryresults.c queryresults/queryresults.h)
 add_executable(ngrams ${SOURCE_FILES})
 
 target_link_libraries(ngrams m pthread)
