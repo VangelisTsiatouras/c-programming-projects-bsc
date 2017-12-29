@@ -8,6 +8,7 @@
 
 QueryResults *create_query_results(int lines, size_t lineSize) {
     pthread_mutex_init(&finishedMutex, 0);
+    pthread_mutex_init(&elementsMutex, 0);
     pthread_mutex_init(&mainThreadLock, 0);
 //    pthread_mutex_lock(&mainThreadLock);
     pthread_cond_init(&mainThreadSleep, 0);
@@ -52,6 +53,7 @@ void destroy_query_results(QueryResults *queryResults) {
         free(queryResults->lines[i]);
     }
     pthread_mutex_destroy(&finishedMutex);
+    pthread_mutex_destroy(&elementsMutex);
     pthread_mutex_destroy(&mainThreadLock);
     pthread_cond_destroy(&mainThreadSleep);
     free(queryResults->lines);
@@ -93,19 +95,19 @@ void expand_query_results(QueryResults *queryResults, int newSize) {
 
 void print_query_results(QueryResults *queryResults) {
 //    usleep(100000);
-//    for (int i = 0; i < queryResults->finished; i++) {
-//        printf("%s\n", queryResults->lines[i]);
-//    }
-//    clear_query_results(queryResults);
-
-
-    for (int i = 0; i < queryResults->totalLines; i++) {
-        if (queryResults->lines[i][0] == '\0') {
-            continue;
-        }
+    for (int i = 0; i < queryResults->elements; i++) {
         printf("%s\n", queryResults->lines[i]);
     }
     clear_query_results(queryResults);
+
+
+//    for (int i = 0; i < queryResults->totalLines; i++) {
+//        if (queryResults->lines[i][0] == '\0') {
+//            continue;
+//        }
+//        printf("%s\n", queryResults->lines[i]);
+//    }
+//    clear_query_results(queryResults);
 }
 
 int add_line_query_results_append(QueryResults *queryResults, char *newLine, int position) { //todo na ginei void
@@ -132,7 +134,9 @@ int add_line_query_results_append(QueryResults *queryResults, char *newLine, int
         }
     }
     if (queryResults->lines[position][0] == '\0') {
+        pthread_mutex_lock(&elementsMutex);
         queryResults->elements++;
+        pthread_mutex_unlock(&elementsMutex);
         strcpy(queryResults->lines[position], newLine);
     } else {
         strcat(queryResults->lines[position], "|");

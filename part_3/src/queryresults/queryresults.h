@@ -4,6 +4,7 @@
 #include "../definitions.h"
 
 pthread_mutex_t finishedMutex;
+pthread_mutex_t elementsMutex;
 pthread_mutex_t mainThreadLock;
 pthread_cond_t mainThreadSleep;
 
@@ -22,8 +23,7 @@ void destroy_query_results(QueryResults *queryResults);
 void expand_query_results(QueryResults *queryResults, int newSize);
 //void copy_results_to_buffer_query_results(QueryResults *queryResults);
 void print_query_results(QueryResults *queryResults);
-int add_line_query_results(QueryResults *queryResults, char *line);
-int add_line_query_results_append(QueryResults *queryResults, char *newLine, int position);
+int add_line_query_results_append(QueryResults *queryResults, char *newLine, int position); //todo rename
 void clear_query_results(QueryResults *queryResults);
 void wake_main_thread(QueryResults *queryResults, int totalQueries);
 
