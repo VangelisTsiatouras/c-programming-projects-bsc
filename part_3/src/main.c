@@ -2,12 +2,15 @@
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
+#include <sys/time.h>
 
 #include "parser/parser.h"
 
 int main(int argc, char *argv[]) {
 
-    clock_t begin = clock();
+    struct timeval  tv1, tv2;
+    gettimeofday(&tv1, NULL);
+
     int i, error = 0;
     char *initFile = NULL, *queryFile = NULL;
     // Parse arguments
@@ -57,9 +60,10 @@ int main(int argc, char *argv[]) {
     parser(trie, initFile, queryFile);
     destroy_trie(trie);
 
-    clock_t end = clock();
-    double timeSpent = (double) (end - begin) / CLOCKS_PER_SEC;
-    printf("\nTime elapsed %.4f seconds\n", timeSpent);
+    gettimeofday(&tv2, NULL);
+    printf ("Time elapsed %.4f seconds\n",
+            (double) (tv2.tv_usec - tv1.tv_usec) / 1000000 +
+            (double) (tv2.tv_sec - tv1.tv_sec));
 
     return SUCCESS;
 }
