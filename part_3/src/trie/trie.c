@@ -140,6 +140,10 @@ void query_trie_static(Trie *trie, char *ngram, BFStorage *bloomFilterStorage, Q
     SearchResults result;
     BloomFilterArrayElement *bloomFilterArrayElement = obtain_filter_bf_storage(bloomFilterStorage);
     BloomFilter *bloomFilter = bloomFilterArrayElement->bloomFilter;
+    int flag = 0;//todo na fugei
+    if(!strncmp(ngram, "1 introduction in our daily lives wireless home automation networks whans promise an important role as the devices in common use can easily", 30)){
+        flag = 1;
+    }//todo na fugei
     int numberOfWords;
     char **splitNgram = split_ngram(ngram, &numberOfWords);
     int offset;
@@ -181,6 +185,9 @@ void query_trie_static(Trie *trie, char *ngram, BFStorage *bloomFilterStorage, Q
 
             if (current->isFinal == 1 || (current->staticArraySize && current->staticTrieWordOffsets[0] < 0)) {
                 if (check_insert_bloom_filter(bloomFilter, resultsBuffer) == SUCCESS) {
+                    if(flag == 1){//todo na fugei
+                        fprintf(stderr, "%s ", resultsBuffer);
+                    }//todo na fugei
                     add_line_query_results_append(queryResults, resultsBuffer, *queryID);
                     resultsFound = 1;
                     insert_ngram_counter(ngramCounter, resultsBuffer, (unsigned int) offset);
@@ -209,6 +216,9 @@ void query_trie_static(Trie *trie, char *ngram, BFStorage *bloomFilterStorage, Q
                 if (current->staticTrieWordOffsets[k] < 0) {
                     // Final
                     if (check_insert_bloom_filter(bloomFilter, resultsBuffer) == SUCCESS) {
+                        if(flag == 1){//todo na fugei
+                            fprintf(stderr, "%s ", resultsBuffer);
+                        }//todo na fugei
                         add_line_query_results_append(queryResults, resultsBuffer, *queryID);
                         resultsFound = 1;
                         insert_ngram_counter(ngramCounter, resultsBuffer, (unsigned int) offset);

@@ -143,8 +143,11 @@ int add_line_query_results_append(QueryResults *queryResults, char *newLine, int
         pthread_mutex_unlock(&elementsMutex);
         strcpy(queryResults->lines[position], newLine);
     } else {
-        strcat(queryResults->lines[position], "|"); //todo optimize an exoume xrono
-        strcat(queryResults->lines[position], newLine);
+        char *str = malloc(sizeof(char) * wordSize);
+        strcpy(str, "|");
+        strcat(str, newLine); //todo optimize an exoume xrono
+        strcat(queryResults->lines[position], str);
+        free(str);
     }
     queryResults->offsets[position] += wordSize;
     return SUCCESS;

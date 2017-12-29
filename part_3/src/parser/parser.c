@@ -129,7 +129,7 @@ int static_parser(Trie *trie, FILE *iFile, FILE *qFile) {
         NgramArray *ngramArray = NULL;
         switch (line[0]) {
             case 'Q':
-                insert_querylist(queryList, line, queryID, 0);
+                insert_querylist(queryList, line + 2, queryID, 0);
 
 //                query_trie_static(trie, &line[2], bfStorage, queryResults, ngramCounter, queryID);
                 queryID++;

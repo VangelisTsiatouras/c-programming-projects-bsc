@@ -33,7 +33,7 @@ void empty_querylist(QueryList *qlist) {
     while (iterator != NULL) {
         ListNode* temp = iterator;
         iterator = iterator->next;
-        free(temp->query);
+        free(temp->query - 2);
         free(temp);
     }
     qlist->start = NULL;
