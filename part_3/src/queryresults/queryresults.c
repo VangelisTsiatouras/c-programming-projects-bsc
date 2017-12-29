@@ -97,20 +97,23 @@ void print_query_results(QueryResults *queryResults) {
 }
 
 int add_line_query_results_append(QueryResults *queryResults, char *newLine, int position) { //todo na ginei void
-    if (position > queryResults->totalLines){//todo na fugei
-        printf("add line\n");
-    }
+//    if (position == 0){//todo na fugei
+//        printf("add line\n");
+//    }
     size_t wordSize = strlen(newLine) + 2;
     size_t newLineSize = wordSize;
     size_t currentSize = queryResults->lineSize[position];
     size_t avaliableSize = currentSize - queryResults->offsets[position];
     // If new line cant fit in existing space
     if (newLineSize > avaliableSize) {
-        if (newLineSize < currentSize * 2) {
+        if (newLineSize + queryResults->offsets[position] < currentSize * 2) {
             newLineSize = currentSize * 2;
+        } else {
+            newLineSize += currentSize;
         }
         queryResults->lineSize[position] = newLineSize;
-        queryResults->lines[position] = realloc(queryResults->lines[position], newLineSize * sizeof(char));
+
+        queryResults->lines[position] = (char *)realloc(queryResults->lines[position], newLineSize * sizeof(char));
         if (!queryResults->lines[position]) {
             printf("realloc error %s\n", strerror(errno));
             exit(REALLOC_ERROR);
@@ -137,9 +140,10 @@ void clear_query_results(QueryResults *queryResults) {
 }
 
 void wake_main_thread(QueryResults *queryResults, int totalQueries) {
-//    printf("time to wake\n");
+
     pthread_mutex_lock(&finishedMutex);
     queryResults->finished++;
+//    printf("totalq %d fin %d\n", totalQueries, queryResults->finished);
     if (queryResults->finished == totalQueries) {
 //        printf("time to really wake\n");
         pthread_cond_signal(&mainThreadSleep);
