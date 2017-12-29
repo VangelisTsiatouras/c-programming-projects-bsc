@@ -2,6 +2,7 @@
 #define QUERYRESULTS_H
 
 #include "../definitions.h"
+#include <pthread.h>
 
 pthread_mutex_t finishedMutex;
 pthread_mutex_t elementsMutex;

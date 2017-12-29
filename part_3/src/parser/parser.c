@@ -48,6 +48,7 @@ int dynamic_parser(Trie *trie, FILE *iFile, FILE *qFile) {
     char *word = NULL;
     int topk = 3;
     size_t lineSize = 0;
+    char* saveptr;
 
     while (getline(&line, &lineSize, iFile) > 0) {
         if (check_whitespace(line)) {
@@ -71,7 +72,7 @@ int dynamic_parser(Trie *trie, FILE *iFile, FILE *qFile) {
                 break;
             case 'F':
 //                pthread_mutex_lock(&mainThreadLock);
-                word = strtok(line + 1, " \n");
+                word = strtok_r(line + 1, " \n", &saveptr);
                 if (word != NULL) {
                     topk = atoi(word);
                     if (topk < 1) {
@@ -110,6 +111,7 @@ int static_parser(Trie *trie, FILE *iFile, FILE *qFile) {
     char *word = NULL;
     int topk;
     size_t lineSize = 0;
+    char *saveptr;
 
     while (getline(&line, &lineSize, iFile) > 0) {
         if (check_whitespace(line)) {
@@ -172,7 +174,7 @@ int static_parser(Trie *trie, FILE *iFile, FILE *qFile) {
 
                 empty_querylist(queryList);
                 queryID = 0;
-                word = strtok(line + 1, " \n");
+                word = strtok_r(line + 1, " \n", &saveptr);
                 if (word != NULL) {
                     topk = atoi(word);
                     if (topk < 1) {

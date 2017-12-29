@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
-#include <pthread.h>
 #include <unistd.h>
 #include "queryresults.h"
 
@@ -114,12 +113,17 @@ int add_line_query_results_append(QueryResults *queryResults, char *newLine, int
 //    if (position == 0){//todo na fugei
 //        printf("add line\n");
 //    }
+//    if (!strcmp(newLine, "rangarajan")) {
+//        printf("asdsadasdsad\n");
+//    }
+    //fprintf(stderr, "%s\n", newLine);
     size_t wordSize = strlen(newLine) + 2;
     size_t newLineSize = wordSize;
     size_t currentSize = queryResults->lineSize[position];
     size_t availableSize = currentSize - queryResults->offsets[position];
     // If new line cant fit in existing space
     if (newLineSize > availableSize) {
+        //printf("KANEI REALLOC\n");
         if (newLineSize + queryResults->offsets[position] < currentSize * 2) {
             newLineSize = currentSize * 2;
         } else {
@@ -139,7 +143,7 @@ int add_line_query_results_append(QueryResults *queryResults, char *newLine, int
         pthread_mutex_unlock(&elementsMutex);
         strcpy(queryResults->lines[position], newLine);
     } else {
-        strcat(queryResults->lines[position], "|");
+        strcat(queryResults->lines[position], "|"); //todo optimize an exoume xrono
         strcat(queryResults->lines[position], newLine);
     }
     queryResults->offsets[position] += wordSize;

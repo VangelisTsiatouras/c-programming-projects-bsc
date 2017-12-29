@@ -61,9 +61,9 @@ int main(int argc, char *argv[]) {
     destroy_trie(trie);
 
     gettimeofday(&tv2, NULL);
-    printf("\nTime elapsed %.4f seconds\n",
-            (double) (tv2.tv_usec - tv1.tv_usec) / 1000000 +
-            (double) (tv2.tv_sec - tv1.tv_sec));
+//    printf("\nTime elapsed %.4f seconds\n",
+//            (double) (tv2.tv_usec - tv1.tv_usec) / 1000000 +
+//            (double) (tv2.tv_sec - tv1.tv_sec));
 
     return SUCCESS;
 }

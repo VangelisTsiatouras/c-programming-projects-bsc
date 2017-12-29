@@ -26,10 +26,11 @@ int destroy_trie(Trie *trie) {
 
 int insert_trie(Trie *trie, char *ngram) {
     SearchResults result;
-    char *word = strtok(ngram, " \n");
+    char *saveptr;
+    char *word = strtok_r(ngram, " \n", &saveptr);
     insert_LinearHash(trie->linearHash, word);
     TrieNode *current = lookup_LinearHash(trie->linearHash, word);
-    word = strtok(NULL, " \n");
+    word = strtok_r(NULL, " \n", &saveptr);
     while (word != NULL) {
         // Don't call binary_search if the children array is empty
         if (current->occupiedPositions == 0) {
@@ -61,7 +62,7 @@ int insert_trie(Trie *trie, char *ngram) {
             current->occupiedPositions++;
         }
         current = &current->children[position];
-        word = strtok(NULL, " \n");
+        word = strtok_r(NULL, " \n", &saveptr);
     }
     // Mark as final
     current->isFinal = 1;
