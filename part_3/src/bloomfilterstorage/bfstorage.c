@@ -77,8 +77,6 @@ void helloBloomFilter(BFStorage *bfStorage) {
     BloomFilter *bloomFilter = bloomFilterArrayElement->bloomFilter;
     printf("i am thread %ld and i am using bloom filter %d\n", pthread_self(), bloomFilterArrayElement->bloomFilterID);
     fflush(stdout);
-    usleep(100);
+    print_bit_vector(bloomFilter);
     release_filter_bf_storage(bfStorage, bloomFilterArrayElement->bloomFilterID);
-//    print_bit_vector(bloomFilter);
-
 }
