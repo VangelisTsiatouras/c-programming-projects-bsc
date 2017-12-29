@@ -36,6 +36,7 @@ void empty_querylist(QueryList *qlist) {
         free(temp->query);
         free(temp);
     }
+    qlist->start = NULL;
 }
 
 void insert_querylist(QueryList *qlist, char *query, int query_ID, int version) {
@@ -55,9 +56,52 @@ void insert_querylist(QueryList *qlist, char *query, int query_ID, int version) 
 
 void tester_querylist() {
     QueryList *queryList = create_querylist();
-    for (int i = 0; i < 20; i++) {
-        insert_querylist(queryList, malloc(50), i, 0);
+//    for (int i = 0; i < 20; i++) {
+//        insert_querylist(queryList, malloc(50), i, 0);
+//    }
+//
+
+    for (int i = 0; i < 5; i++) {
+        char *str = malloc(sizeof(char)*3);
+        strcpy(str,"aa");
+        int r = rand() % 26;
+        int r2 = rand() % 26;
+        str[0] += r;
+        str[1] += r2;
+        insert_querylist(queryList, str, i, 0);
     }
+    ListNode *iterator = queryList->start;
+    printf("1st insertion\n");
+    while (iterator != NULL) {
+        printf("%s\n", iterator->query);
+        iterator = iterator->next;
+    }
+
+    empty_querylist(queryList);
+    iterator = queryList->start;
+    printf("empty\n");
+    while (iterator != NULL) {
+        printf("%s\n", iterator->query);
+        iterator = iterator->next;
+    }
+
+
+    for (int i = 0; i < 5; i++) {
+        char *str = malloc(sizeof(char)*3);
+        strcpy(str,"aa");
+        int r = rand() % 26;
+        int r2 = rand() % 26;
+        str[0] += r;
+        str[1] += r2;
+        insert_querylist(queryList, str, i, 0);
+    }
+    printf("2nd insertion\n");
+    iterator = queryList->start;
+    while (iterator != NULL) {
+        printf("%s\n", iterator->query);
+        iterator = iterator->next;
+    }
+
     destroy_querylist(queryList);
     exit(0);
 }
