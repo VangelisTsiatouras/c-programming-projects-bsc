@@ -135,11 +135,11 @@ int static_parser(Trie *trie, FILE *iFile, FILE *qFile) {
 //                print_query_results(queryResults);
                 break;
             case 'F':
-                iterator = queryList->start;
-                while (iterator != NULL) {
-                    printf("%s", iterator->query);
-                    iterator = iterator->next;
-                }
+//                iterator = queryList->start;
+//                while (iterator != NULL) {
+//                    printf("%s", iterator->query);
+//                    iterator = iterator->next;
+//                }
 
                 iterator = queryList->start;
                 while (iterator != NULL) {
@@ -147,16 +147,12 @@ int static_parser(Trie *trie, FILE *iFile, FILE *qFile) {
                     job->pointerToFunction = query_trie_static;
                     job->args[0] = trie;
                     job->args[1] = iterator->query;
-                    if ((int)iterator->query < 10000) {
-                        printf("skata\n");
-                    }
                     job->args[2] = bfStorage;
                     job->args[3] = queryResults;
                     job->args[4] = ngramCounter;
 //                    job->args[5] = malloc(sizeof(int));
 //                    *(int *) job->args[5] = queryID;
                     job->args[5] = &iterator->query_ID;
-                    printf("qlist1 elem %d\n", queryList->elements);
                     job->args[6] = &queryList->elements;
 
                     submit_scheduler(jobScheduler, job);
@@ -167,6 +163,7 @@ int static_parser(Trie *trie, FILE *iFile, FILE *qFile) {
                 while (queryResults->finished != queryID) {
                     pthread_cond_wait(&mainThreadSleep, &mainThreadLock);
                 }
+                queryResults->finished = 0;
                 pthread_mutex_unlock(&mainThreadLock);
 
 //                pthread_mutex_lock(&mainThreadLock);

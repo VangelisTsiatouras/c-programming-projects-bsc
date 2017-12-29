@@ -137,11 +137,11 @@ void clear_query_results(QueryResults *queryResults) {
 }
 
 void wake_main_thread(QueryResults *queryResults, int totalQueries) {
-    printf("time to wake\n");
+//    printf("time to wake\n");
     pthread_mutex_lock(&finishedMutex);
     queryResults->finished++;
     if (queryResults->finished == totalQueries) {
-        printf("time to really wake\n");
+//        printf("time to really wake\n");
         pthread_cond_signal(&mainThreadSleep);
         //pthread_mutex_unlock(&mainThreadLock);
         // wake main thread

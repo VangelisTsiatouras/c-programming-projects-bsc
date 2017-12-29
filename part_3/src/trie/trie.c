@@ -134,7 +134,6 @@ void query_trie_dynamic(Trie *trie, char *ngram, BloomFilter *bloomFilter, Query
 
 void query_trie_static(Trie *trie, char *ngram, BFStorage *bloomFilterStorage, QueryResults *queryResults,
                        NgramCounter *ngramCounter, int *queryID, int *totalQueries) {
-    printf("qlist elem %d\n", *totalQueries);
     TrieNode *current;
     SearchResults result;
     BloomFilterArrayElement *bloomFilterArrayElement = obtain_filter_bf_storage(bloomFilterStorage);

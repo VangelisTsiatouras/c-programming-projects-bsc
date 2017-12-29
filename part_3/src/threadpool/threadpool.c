@@ -95,7 +95,7 @@ JobScheduler *create_scheduler(unsigned int numberOfThreads) {
 }
 
 void destroy_scheduler(JobScheduler *jobScheduler) {
-    printf("Waiting for kids to exit\n");
+//    printf("Waiting for kids to exit\n");
     for (int i = 0; i < jobScheduler->numberOfThreads; i++) {
         pthread_join(jobScheduler->threadIds[i], 0);
     }
@@ -111,14 +111,14 @@ void submit_scheduler(JobScheduler *jobScheduler, void *job) {
 }
 
 void worker_scheduler(Queue *queue) {
-    printf("I am thread\n");
+//    printf("I am thread\n");
     fflush(stdout);
     while(1) {
         Job *job = pop_queue(queue);
-        printf("got job\n");
+//        printf("got job\n");
         fflush(stdout);
         if (job == NULL) {
-            printf("exiting...\n");
+//            printf("exiting...\n");
             fflush(stdout);
             break;
         }
@@ -127,7 +127,7 @@ void worker_scheduler(Queue *queue) {
 }
 
 void terminate_threads_scheduler(JobScheduler *jobScheduler) {
-    printf("Telling kids to exit\n");
+//    printf("Telling kids to exit\n");
 
     for (int i = 0; i < jobScheduler->numberOfThreads; i++) {
         submit_scheduler(jobScheduler, NULL);
