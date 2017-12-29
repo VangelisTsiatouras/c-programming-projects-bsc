@@ -3,11 +3,13 @@
 #include <string.h>
 #include <errno.h>
 #include <pthread.h>
+#include <unistd.h>
 #include "queryresults.h"
 
 QueryResults *create_query_results(int lines, size_t lineSize) {
     pthread_mutex_init(&finishedMutex, 0);
     pthread_mutex_init(&mainThreadLock, 0);
+//    pthread_mutex_lock(&mainThreadLock);
     pthread_cond_init(&mainThreadSleep, 0);
     QueryResults *queryResults = malloc(sizeof(QueryResults));
     if (!queryResults) {
@@ -90,7 +92,17 @@ void expand_query_results(QueryResults *queryResults, int newSize) {
 }
 
 void print_query_results(QueryResults *queryResults) {
-    for (int i = 0; i < queryResults->elements; i++) {
+//    usleep(100000);
+//    for (int i = 0; i < queryResults->finished; i++) {
+//        printf("%s\n", queryResults->lines[i]);
+//    }
+//    clear_query_results(queryResults);
+
+
+    for (int i = 0; i < queryResults->totalLines; i++) {
+        if (queryResults->lines[i][0] == '\0') {
+            continue;
+        }
         printf("%s\n", queryResults->lines[i]);
     }
     clear_query_results(queryResults);
@@ -103,9 +115,9 @@ int add_line_query_results_append(QueryResults *queryResults, char *newLine, int
     size_t wordSize = strlen(newLine) + 2;
     size_t newLineSize = wordSize;
     size_t currentSize = queryResults->lineSize[position];
-    size_t avaliableSize = currentSize - queryResults->offsets[position];
+    size_t availableSize = currentSize - queryResults->offsets[position];
     // If new line cant fit in existing space
-    if (newLineSize > avaliableSize) {
+    if (newLineSize > availableSize) {
         if (newLineSize + queryResults->offsets[position] < currentSize * 2) {
             newLineSize = currentSize * 2;
         } else {
@@ -137,17 +149,20 @@ void clear_query_results(QueryResults *queryResults) {
         queryResults->offsets[i] = 0;
     }
     queryResults->elements = 0;
+//    queryResults->finished = 0;
 }
 
 void wake_main_thread(QueryResults *queryResults, int totalQueries) {
 
     pthread_mutex_lock(&finishedMutex);
+    //usleep(10000);
+//    printf("### WORKER: Finished job (%d)\n", queryResults->finished);
     queryResults->finished++;
 //    printf("totalq %d fin %d\n", totalQueries, queryResults->finished);
     if (queryResults->finished == totalQueries) {
 //        printf("time to really wake\n");
         pthread_cond_signal(&mainThreadSleep);
-        //pthread_mutex_unlock(&mainThreadLock);
+//        pthread_mutex_unlock(&mainThreadLock);
         // wake main thread
     }
     pthread_mutex_unlock(&finishedMutex);
