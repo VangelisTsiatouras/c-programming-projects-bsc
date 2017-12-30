@@ -104,7 +104,7 @@ int static_parser(Trie *trie, FILE *iFile, FILE *qFile) {
     JobScheduler *jobScheduler = create_scheduler(NUMBER_OF_THREADS);
 //    BloomFilter *bloomFilter = create_bloom_filter();
     BFStorage *bfStorage = create_bf_storage(NUMBER_OF_THREADS);
-    QueryResults *queryResults = create_query_results(1000, DEFAULT_LINE_SIZE);
+    QueryResults *queryResults = create_query_results(DEFAULT_LINES, DEFAULT_LINE_SIZE);
     NgramCounter *ngramCounter = create_ngram_counter();
     QueryList *queryList = create_querylist();
     char *line = NULL;
@@ -142,7 +142,7 @@ int static_parser(Trie *trie, FILE *iFile, FILE *qFile) {
 //                    printf("%s", iterator->query);
 //                    iterator = iterator->next;
 //                }
-
+                expand_query_results(queryResults, queryID);
                 iterator = queryList->start;
                 while (iterator != NULL) {
                     Job *job = create_job(7);
@@ -169,7 +169,6 @@ int static_parser(Trie *trie, FILE *iFile, FILE *qFile) {
                 pthread_mutex_unlock(&mainThreadLock);
 //                printf("### MAIN THREAD: Workers have finished\n");
 //                pthread_mutex_lock(&finishedMutex);
-                queryResults->finished = 0;
 //                pthread_mutex_unlock(&finishedMutex);
 
                 empty_querylist(queryList);

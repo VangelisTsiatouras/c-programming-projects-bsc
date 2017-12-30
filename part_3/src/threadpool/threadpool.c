@@ -112,17 +112,18 @@ void submit_scheduler(JobScheduler *jobScheduler, void *job) {
 
 void worker_scheduler(Queue *queue) {
 //    printf("I am thread\n");
-    fflush(stdout);
+//    fflush(stdout);
     while(1) {
         Job *job = pop_queue(queue);
-//        printf("got job\n");
-        fflush(stdout);
+//        fprintf(stderr, "got job\n");
+//        fflush(stdout);
         if (job == NULL) {
 //            printf("exiting...\n");
             fflush(stdout);
             break;
         }
         function_caller_scheduler(job);
+//        fprintf(stderr, "finished job\n");
     }
 }
 

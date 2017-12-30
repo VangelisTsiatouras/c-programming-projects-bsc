@@ -117,13 +117,17 @@ int add_line_query_results_append(QueryResults *queryResults, char *newLine, int
 //        printf("asdsadasdsad\n");
 //    }
     //fprintf(stderr, "%s\n", newLine);
+    if (position >= queryResults->totalLines) {//todo na fugei otan
+        printf("REKT");
+        exit(1);
+    }
     size_t wordSize = strlen(newLine) + 2;
     size_t newLineSize = wordSize;
     size_t currentSize = queryResults->lineSize[position];
     size_t availableSize = currentSize - queryResults->offsets[position];
     // If new line cant fit in existing space
     if (newLineSize > availableSize) {
-        //printf("KANEI REALLOC\n");
+//        fprintf(stderr, "KANEI REALLOC gia [%d] %s\n", position, newLine);
         if (newLineSize + queryResults->offsets[position] < currentSize * 2) {
             newLineSize = currentSize * 2;
         } else {
@@ -160,7 +164,7 @@ void clear_query_results(QueryResults *queryResults) {
         queryResults->offsets[i] = 0;
     }
     queryResults->elements = 0;
-//    queryResults->finished = 0;
+    queryResults->finished = 0;
 }
 
 void wake_main_thread(QueryResults *queryResults, int totalQueries) {
