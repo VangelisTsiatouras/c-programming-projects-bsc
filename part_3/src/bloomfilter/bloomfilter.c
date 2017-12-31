@@ -71,15 +71,16 @@ void probability_of_query_bloom_filter(BloomFilter *bloomFilter, int numberOfWor
 int check_insert_bloom_filter(BloomFilter *bloomFilter, char *ngram) {
     int position, notFound = 0;
     // Use 4 hash functions
-    unsigned int hashes[4];
+    unsigned int hashes[5];
     size_t length = strlen(ngram);
     hashes[0] = murmurHash3(ngram, (unsigned int) length, SEED1);
     hashes[1] = murmurHash3(ngram, (unsigned int) length, SEED2);
     hashes[2] = murmurHash3(ngram, (unsigned int) length, SEED3);
+    hashes[3] = murmurHash3(ngram, (unsigned int) length, SEED4);
     // Kirsch-Mitzenmacher-Optimization
-    hashes[3] = hashes[0] + 2 * hashes[1];
+    hashes[4] = hashes[0] + 2 * hashes[1];
     // For each hash function evaluate the position in bit vector
-    for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < 5; i++) {
         position = hashes[i] % (int) bloomFilter->bitVectorSize;
         if (bloomFilter->bitVector[position] == 0) {
             // Change bitVector[position] to 1
@@ -103,7 +104,7 @@ void print_bit_vector(BloomFilter *bloomFilter) {
 
 int compare_double(double a, double b) {
 
-    double error = 0.0001;
+//    double error = 0.0001;
 //    printf("a %lf b %.10lf error %.10lf\n",a ,b, error);
 //    return fabs(a - b) > error;
     return fabs(a) > fabs(b);

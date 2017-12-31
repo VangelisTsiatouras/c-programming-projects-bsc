@@ -11,6 +11,7 @@
 #define SEED1 12345678
 #define SEED2 87654321
 #define SEED3 54321876
+#define SEED4 21436587
 
 // Linear Hash
 #define LH_BUCKET_SIZE 8
@@ -33,7 +34,7 @@
 #define DEFAULT_QUERY_BUFFER 20
 
 // Threads
-#define NUMBER_OF_THREADS 50
+#define NUMBER_OF_THREADS 8
 
 
 //////////////////////////////////////
