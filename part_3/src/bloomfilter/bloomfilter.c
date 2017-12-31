@@ -41,13 +41,8 @@ void set_to_zero_bloom_filter(BloomFilter *bloomFilter) {
 }
 
 void probability_of_query_bloom_filter(BloomFilter *bloomFilter, int numberOfWords) {
-    double percentage = 70.0 / 100.0;//    double prob = pow(1.0 - exp(-((double) K) * ((double) partOfWords / (double) bloomFilter->bitVectorSize)),
-//                      ((double) K));
-
+    double percentage = 70.0 / 100.0;
     int partOfWords = (int) (percentage * numberOfWords);
-//
-//    int numhash = (int) ((bloomFilter->bitVectorSize / partOfWords) * log(2));
-//    printf("num hash fun %d\n", numhash);
 
     // Expected probability calculation.
     double prob = pow(1.0 - exp(-((((double) bloomFilter->bitVectorSize / (double) partOfWords) * log(2))) *
@@ -56,21 +51,15 @@ void probability_of_query_bloom_filter(BloomFilter *bloomFilter, int numberOfWor
 
     // If the query's expected probality is bigger than 0.0001
     // Increase the size of the bit vector to a new size
-//    printf("probabilty %f\n", prob);
     if (compare_double(prob, bloomFilter->acceptedProbability) > 0) {
         size_t newSize = (size_t) (-(partOfWords * log(bloomFilter->acceptedProbability) / pow(log(2), 2)));
-//        prob = pow(1.0 - exp(-((((double) newSize / (double) partOfWords) * log(2))) *
-//                                    ((double) partOfWords / (double) newSize)),
-//                          (((double) newSize / (double) partOfWords) * log(2)));
-
-//        printf("new size %d prob %f accpr %f\n", newSize, prob, bloomFilter->acceptedProbability);
         resize_bit_vector(bloomFilter, newSize);
     }
 }
 
 int check_insert_bloom_filter(BloomFilter *bloomFilter, char *ngram) {
     int position, notFound = 0;
-    // Use 4 hash functions
+    // Use 5 hash functions
     unsigned int hashes[5];
     size_t length = strlen(ngram);
     hashes[0] = murmurHash3(ngram, (unsigned int) length, SEED1);
@@ -103,9 +92,5 @@ void print_bit_vector(BloomFilter *bloomFilter) {
 }
 
 int compare_double(double a, double b) {
-
-//    double error = 0.0001;
-//    printf("a %lf b %.10lf error %.10lf\n",a ,b, error);
-//    return fabs(a - b) > error;
     return fabs(a) > fabs(b);
 }
