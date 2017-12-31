@@ -41,29 +41,45 @@ void set_to_zero_bloom_filter(BloomFilter *bloomFilter) {
 }
 
 void probability_of_query_bloom_filter(BloomFilter *bloomFilter, int numberOfWords) {
-    double percentage = 75.0 / 100.0;
+    double percentage = 70.0 / 100.0;//    double prob = pow(1.0 - exp(-((double) K) * ((double) partOfWords / (double) bloomFilter->bitVectorSize)),
+//                      ((double) K));
+
     int partOfWords = (int) (percentage * numberOfWords);
-    double prob = pow(1.0 - pow(1.0 - (1.0 / (double) bloomFilter->bitVectorSize), (double) K * (double) partOfWords),
-                      (double) K);
+//
+//    int numhash = (int) ((bloomFilter->bitVectorSize / partOfWords) * log(2));
+//    printf("num hash fun %d\n", numhash);
+
+    // Expected probability calculation.
+    double prob = pow(1.0 - exp(-((((double) bloomFilter->bitVectorSize / (double) partOfWords) * log(2))) *
+                                ((double) partOfWords / (double) bloomFilter->bitVectorSize)),
+                      (((double) bloomFilter->bitVectorSize / (double) partOfWords) * log(2)));
+
     // If the query's expected probality is bigger than 0.0001
     // Increase the size of the bit vector to a new size
-    if(compare_double(prob, bloomFilter->acceptedProbability) > 0) {
-        size_t newSize = (size_t)(-(partOfWords * log(bloomFilter->acceptedProbability)/pow(log(2), 2)));
+//    printf("probabilty %f\n", prob);
+    if (compare_double(prob, bloomFilter->acceptedProbability) > 0) {
+        size_t newSize = (size_t) (-(partOfWords * log(bloomFilter->acceptedProbability) / pow(log(2), 2)));
+//        prob = pow(1.0 - exp(-((((double) newSize / (double) partOfWords) * log(2))) *
+//                                    ((double) partOfWords / (double) newSize)),
+//                          (((double) newSize / (double) partOfWords) * log(2)));
+
+//        printf("new size %d prob %f accpr %f\n", newSize, prob, bloomFilter->acceptedProbability);
         resize_bit_vector(bloomFilter, newSize);
     }
 }
 
 int check_insert_bloom_filter(BloomFilter *bloomFilter, char *ngram) {
     int position, notFound = 0;
-    // Use 3 hash functions
-    unsigned int hashes[3];
+    // Use 4 hash functions
+    unsigned int hashes[4];
     size_t length = strlen(ngram);
     hashes[0] = murmurHash3(ngram, (unsigned int) length, SEED1);
     hashes[1] = murmurHash3(ngram, (unsigned int) length, SEED2);
+    hashes[2] = murmurHash3(ngram, (unsigned int) length, SEED3);
     // Kirsch-Mitzenmacher-Optimization
-    hashes[2] = hashes[0] + 2 * hashes[1];
+    hashes[3] = hashes[0] + 2 * hashes[1];
     // For each hash function evaluate the position in bit vector
-    for (int i = 0; i < 3; i++) {
+    for (int i = 0; i < 4; i++) {
         position = hashes[i] % (int) bloomFilter->bitVectorSize;
         if (bloomFilter->bitVector[position] == 0) {
             // Change bitVector[position] to 1
@@ -86,5 +102,9 @@ void print_bit_vector(BloomFilter *bloomFilter) {
 }
 
 int compare_double(double a, double b) {
-    return fabs(a - b) > 0.01;
+
+    double error = 0.0001;
+//    printf("a %lf b %.10lf error %.10lf\n",a ,b, error);
+//    return fabs(a - b) > error;
+    return fabs(a) > fabs(b);
 }

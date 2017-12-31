@@ -1,6 +1,6 @@
 #! /bin/sh
 
-max=20
+max=50
 smallFailures=0
 mediumFailures=0
 largeFailures=0

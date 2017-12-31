@@ -6,10 +6,11 @@
 
 // Bloom Filter
 #define K 3                 // Number of hash functions
-#define PROBABILITY 0.0001  // Probability of false positives
+#define PROBABILITY 0.000001  // Probability of false positives
 #define STARTING_M 40099    // Starting bit vector size
 #define SEED1 12345678
 #define SEED2 87654321
+#define SEED3 54321876
 
 // Linear Hash
 #define LH_BUCKET_SIZE 8
@@ -32,7 +33,7 @@
 #define DEFAULT_QUERY_BUFFER 20
 
 // Threads
-#define NUMBER_OF_THREADS 8
+#define NUMBER_OF_THREADS 50
 
 
 //////////////////////////////////////

@@ -163,8 +163,11 @@ int static_parser(Trie *trie, FILE *iFile, FILE *qFile) {
                 }
 //                printf("### MAIN THREAD: Waiting for workers...\n");
                 pthread_mutex_lock(&mainThreadLock);
-                while (queryResults->finished != queryID) {
+//                printf("number of queries %d qid %d\n", queryList->elements, queryID);
+
+                while (queryResults->finished != queryList->elements) {
                     pthread_cond_wait(&mainThreadSleep, &mainThreadLock);
+
                 }
                 pthread_mutex_unlock(&mainThreadLock);
 //                printf("### MAIN THREAD: Workers have finished\n");
@@ -183,10 +186,12 @@ int static_parser(Trie *trie, FILE *iFile, FILE *qFile) {
                     ngramArray = copy_to_ngram_array(ngramCounter);
                 }
                 print_query_results(queryResults);
+
                 if (ngramArray != NULL) {
                     sort_topk(ngramArray, (unsigned int) topk);
                     destroy_ngram_array(ngramArray);
                 }
+                empty_querylist(queryList);
                 clear_ngram_counter(ngramCounter);
                 free(line);
 //                pthread_mutex_lock(&mainThreadLock);
