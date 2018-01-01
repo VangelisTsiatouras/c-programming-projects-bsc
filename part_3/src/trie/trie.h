@@ -35,14 +35,15 @@ typedef struct SearchResults {
 
 Trie *create_trie();
 int destroy_trie(Trie *trie);
-int insert_trie(Trie *trie, char *ngram, int version);
+int insert_ngram_trie(Trie *trie, char *ngram);
+int insert_ngram_version_trie(Trie *trie, char *ngram, int version);
 void query_trie_dynamic(Trie *trie, char *ngram, BloomFilter *bloomFilter, QueryResults *queryResults,
                         NgramCounter *ngramCounter, int queryID, int totalQueries, int version);
 void query_trie_static(Trie *trie, char *ngram, BFStorage *bloomFilterStorage, QueryResults *queryResults,
                        NgramCounter *ngramCounter, int *queryID, int *totalQueries);
 void compress_trie(Trie *trie);
 int delete_ngram_trie(Trie *trie, char *ngram);
-int delete_version_ngram_trie(Trie *trie, char *ngram);
+int delete_ngram_version_trie(Trie *trie, char *ngram, int version);
 
 int create_trie_node(TrieNode *trieNode);
 void destroy_trie_node(TrieNode *trieNode);

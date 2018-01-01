@@ -24,7 +24,7 @@ int destroy_trie(Trie *trie) {
     return SUCCESS;
 }
 
-int insert_trie(Trie *trie, char *ngram, int version) {
+int insert_ngram_trie(Trie *trie, char *ngram) {
     SearchResults result;
     char *saveptr;
     char *word = strtok_r(ngram, " \n", &saveptr);
@@ -40,10 +40,59 @@ int insert_trie(Trie *trie, char *ngram, int version) {
             result = binary_search(current->children, word, current->occupiedPositions);
         }
         int position = result.position;
+        if (result.found == 0){
+            // Reallocate space if the children array is full
+            if (current->occupiedPositions == current->capacity) {
+                // The new size will be the double of the old size
+                current->capacity *= 2;
+                TrieNode *tempChildren = realloc(current->children, current->capacity * sizeof(TrieNode));
+                if (tempChildren == NULL) {
+                    printf("realloc error %s\n", strerror(errno));
+                    exit(REALLOC_ERROR);
+                }
+                current->children = tempChildren;
+            }
+            // Shift elements to keep the children array sorted
+            if (position < current->occupiedPositions) {
+                memmove(&current->children[position + 1], &current->children[position],
+                        sizeof(TrieNode) * (current->occupiedPositions - position));
+            }
+            create_trie_node(&current->children[position]);
+            store_word_trie_node(&current->children[position], word);
+            current->occupiedPositions++;
+        }
+        current = &current->children[position];
+        word = strtok_r(NULL, " \n", &saveptr);
+    }
+    // Mark as final
+    current->isFinal = 1;
+    return SUCCESS;
+}
+
+int insert_ngram_version_trie(Trie *trie, char *ngram, int version) {
+    SearchResults result;
+    char *saveptr;
+    char *word = strtok_r(ngram, " \n", &saveptr);
+    insert_LinearHash(trie->linearHash, word);
+    TrieNode *current = lookup_LinearHash(trie->linearHash, word);
+    if (current->isDeleted == 1) {
+//        current->appendVersion = version;
+        current->isDeleted = 0;
+    }
+    word = strtok_r(NULL, " \n", &saveptr);
+    while (word != NULL) {
+        // Don't call binary_search if the children array is empty
+        if (current->occupiedPositions == 0) {
+            result.position = 0;
+            result.found = 0;
+        } else {
+            result = binary_search(current->children, word, current->occupiedPositions);
+        }
+        int position = result.position;
 //        if (!strcmp(word, "genome")){
 //            printf("%s\n", word);
 //        }
-        if (result.found == 0) {
+        if (result.found == 0 /*&& current->isDeleted == 0*/){
 
             // Reallocate space if the children array is full
             if (current->occupiedPositions == current->capacity) {
@@ -67,6 +116,10 @@ int insert_trie(Trie *trie, char *ngram, int version) {
             current->children[position].deleteVersion = -1;
             current->children[position].isDeleted = 0;
             current->occupiedPositions++;
+        }
+        if (current->isDeleted == 1) {
+            current->appendVersion = version;
+            current->isDeleted = 0;
         }
         current = &current->children[position];
         word = strtok_r(NULL, " \n", &saveptr);
@@ -111,7 +164,7 @@ void query_trie_dynamic(Trie *trie, char *ngram, BloomFilter *bloomFilter, Query
 //            if (!strcmp(splitNgram[j], "genome")){
 //                    printf("%s\n", splitNgram[j]);
 //            }
-            if (current->appendVersion <= version) {
+            if (current->appendVersion <= version && (current->deleteVersion > version || current->deleteVersion == -1)) {
 
                 // Check if next word fits in resultsBuffer
                 // If not realloc buffer
@@ -345,6 +398,88 @@ int delete_ngram_trie(Trie *trie, char *ngram) {
     return SUCCESS;
 }
 
+int delete_ngram_version_trie(Trie *trie, char *ngram, int version) {
+    TrieNode *current;
+    LookupStruct lookupResult;
+    SearchResults result;
+    int numberOfWords;
+    char **splitNgram = split_ngram(ngram, &numberOfWords);
+    int *positionArray = malloc((numberOfWords - 1) * sizeof(int));
+    if (!positionArray) {
+        printf("malloc error %s\n", strerror(errno));
+        exit(MALLOC_ERROR);
+    }
+    TrieNode **parents = malloc((numberOfWords - 1) * sizeof(TrieNode *));
+    if (!parents) {
+        printf("malloc error %s\n", strerror(errno));
+        exit(MALLOC_ERROR);
+    }
+    // Iterate the trie from root and compare its words with the ngram given
+    lookupResult = lookup_for_delete_LinearHash(trie->linearHash, splitNgram[0]);
+    current = lookupResult.trieNode;
+    if (current == NULL) {
+        return DELETE_NOT_FOUND;
+    }
+
+    for (int i = 0; i < numberOfWords - 1; i++) {
+        result = binary_search(current->children, splitNgram[i + 1], current->occupiedPositions);
+        positionArray[i] = result.position;
+        // If word was not found OR if it was found check if it was deleted permanently before
+        if (result.found == 0 || current->isDeleted == 1) {
+            free(positionArray);
+            free(splitNgram);
+            free(parents);
+            return DELETE_NOT_FOUND;
+        }
+//        if (current->isDeleted == 1) {
+//            return DELETE_NOT_FOUND;
+//        }
+        parents[i] = current;
+        current = &current->children[result.position];
+    }
+    // If you are then the ngram was stored in the trie
+    // Iterate the ngram bottom-up
+    for (int i = numberOfWords - 2; i >= 0; i--) {
+        // If this is the last word of the ngram
+        if (i == numberOfWords - 2) {
+            current->isFinal = 0;
+//            current->deleteVersion = version;
+            // If it has children
+            if (current->occupiedPositions > 0) {
+                free(positionArray);
+                free(splitNgram);
+                free(parents);
+                return SUCCESS;
+            }
+        }
+        // If it has children or if it is a final state
+        if (current->occupiedPositions > 0 || current->isFinal == 1) {
+            free(positionArray);
+            free(splitNgram);
+            free(parents);
+            return SUCCESS;
+        }
+        current = parents[i];
+        // Mark as permanently deleted
+        current->isDeleted = 1;
+        current->deleteVersion = version;
+//        delete_word_trie_node(current, positionArray[i]);
+    }
+    if (numberOfWords == 1 && lookupResult.trieNode->children != 0) {
+        lookupResult.trieNode->isFinal = 0;
+        lookupResult.trieNode->deleteVersion = version;
+    }
+    // Delete word inside the hashtable bucket
+    if (lookupResult.trieNode->isFinal == 0) {
+        lookupResult.trieNode->isDeleted = 1;
+//        delete_word_LHBucket(trie->linearHash->bucketArray[lookupResult.bucket], lookupResult.trieNode->word);
+    }
+    free(positionArray);
+    free(splitNgram);
+    free(parents);
+    return SUCCESS;
+}
+
 int create_trie_node(TrieNode *trieNode) {
     if (trieNode == NULL) {
         return NOT_ALLOCATED_ERROR;
@@ -354,6 +489,7 @@ int create_trie_node(TrieNode *trieNode) {
     trieNode->capacity = STARTING_SIZE_CHILD_ARRAY;
     trieNode->occupiedPositions = 0;
     trieNode->isFinal = 0;
+    trieNode->isDeleted = 0;
     trieNode->children = malloc(trieNode->capacity * sizeof(TrieNode));
     if (!trieNode->children) {
         printf("malloc error %s\n", strerror(errno));
@@ -629,9 +765,9 @@ void tester_compress() {
     Trie *trie = create_trie();
 
     // Check compress
-    insert_trie(trie, tNgram5, 0);
-    insert_trie(trie, tNgram6, 0);
-    insert_trie(trie, tNgram7, 0);
+    insert_ngram_version_trie(trie, tNgram5, 0);
+    insert_ngram_version_trie(trie, tNgram6, 0);
+    insert_ngram_version_trie(trie, tNgram7, 0);
     compress_trie_node(&trie->linearHash->bucketArray[0]->nodeArray[0]);
 
     destroy_trie(trie);

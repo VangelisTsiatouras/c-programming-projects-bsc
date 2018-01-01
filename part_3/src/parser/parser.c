@@ -58,7 +58,7 @@ int dynamic_parser(Trie *trie, FILE *iFile, FILE *qFile) {
         if (check_whitespace(line)) {
             continue;
         }
-        insert_trie(trie, line, 0);
+        insert_ngram_version_trie(trie, line, 0);
     }
     free(line);
     lineSize = 0;
@@ -81,13 +81,18 @@ int dynamic_parser(Trie *trie, FILE *iFile, FILE *qFile) {
 //                    printf("%s\n", line+2);
 //                }
 
-                insert_trie(trie, &line[2], versionID);
+                insert_ngram_version_trie(trie, &line[2], versionID);
                 free(line);
                 break;
             case 'D':
                 versionID++;
-                // TODO na ginei nea delete xwris free
-                delete_ngram_trie(trie, &line[2]);
+                if (!strcmp(line + 2, "the \n")){
+                    printf("%s\n", line+2);
+                }
+
+                    // TODO na ginei nea delete xwris free
+//                delete_ngram_trie(trie, &line[2]);
+                delete_ngram_version_trie(trie, &line[2], versionID);
                 free(line);
                 break;
             case 'F':
@@ -154,7 +159,7 @@ int static_parser(Trie *trie, FILE *iFile, FILE *qFile) {
         if (check_whitespace(line)) {
             continue;
         }
-        insert_trie(trie, line, 0);
+        insert_ngram_trie(trie, line);
     }
     free(line);
 
