@@ -42,36 +42,68 @@ void parser(Trie *trie, char *initFile, char *queryFile) {
 
 int dynamic_parser(Trie *trie, FILE *iFile, FILE *qFile) {
     BloomFilter *bloomFilter = create_bloom_filter();
+    JobScheduler *jobScheduler = create_scheduler(NUMBER_OF_THREADS);
+    BFStorage *bfStorage = create_bf_storage(NUMBER_OF_THREADS);
     QueryResults *queryResults = create_query_results(DEFAULT_LINES, DEFAULT_LINE_SIZE);
     NgramCounter *ngramCounter = create_ngram_counter();
+    QueryList *queryList = create_querylist();
+    char *saveptr;
     char *line = NULL;
     char *word = NULL;
-    int topk = 3;
+    int topk;
     size_t lineSize = 0;
-    char* saveptr;
 
+    int versionID = 0;
     while (getline(&line, &lineSize, iFile) > 0) {
         if (check_whitespace(line)) {
             continue;
         }
-        insert_trie(trie, line);
+        insert_trie(trie, line, 0);
     }
+    free(line);
+    lineSize = 0;
+    int queryID = 0;
+    ListNode *iterator;
     while (getline(&line, &lineSize, qFile) > 0) {
+        lineSize = 0;
         NgramArray *ngramArray = NULL;
         switch (line[0]) {
             case 'Q':
-                query_trie_dynamic(trie, &line[2], bloomFilter, queryResults, ngramCounter, 0);
-//                copy_results_to_buffer_query_results_old(queryResults);
+                insert_querylist(queryList, line + 2, queryID, versionID);
+                queryID++;
                 break;
             case 'A':
-                insert_trie(trie, &line[2]);
+                versionID++;
+//                if (!strcmp(line + 2, "genome\n")){
+//                    printf("%s\n", line+2);
+//                }
+//                if (!strcmp(line + 2, "log p\n")){
+//                    printf("%s\n", line+2);
+//                }
+
+                insert_trie(trie, &line[2], versionID);
+                free(line);
                 break;
             case 'D':
+                versionID++;
+                // TODO na ginei nea delete xwris free
                 delete_ngram_trie(trie, &line[2]);
-
+                free(line);
                 break;
             case 'F':
-//                pthread_mutex_lock(&mainThreadLock);
+                expand_query_results(queryResults, queryID);
+
+                iterator = queryList->start;
+                //TODO add job submit here!
+                while (iterator != NULL) {
+                    query_trie_dynamic(trie, iterator->query, bloomFilter, queryResults, ngramCounter,
+                                       iterator->query_ID, queryList->elements, iterator->version);
+                    iterator = iterator->next;
+                }
+
+                queryID = 0;
+                empty_querylist(queryList);
+
                 word = strtok_r(line + 1, " \n", &saveptr);
                 if (word != NULL) {
                     topk = atoi(word);
@@ -80,46 +112,52 @@ int dynamic_parser(Trie *trie, FILE *iFile, FILE *qFile) {
                         exit(WRONG_F_VALUE);
                     }
                     ngramArray = copy_to_ngram_array(ngramCounter);
-
                 }
+
                 print_query_results(queryResults);
                 if (ngramArray != NULL) {
                     sort_topk(ngramArray, (unsigned int) topk);
                     destroy_ngram_array(ngramArray);
                 }
                 clear_ngram_counter(ngramCounter);
+                free(line);
                 break;
             default:
                 printf("Unknown Command\n");
+                free(line);
         }
     }
-    destroy_gram_counter(ngramCounter);
     free(line);
-    destroy_query_results(queryResults);
     destroy_bloom_filter(bloomFilter);
+    destroy_gram_counter(ngramCounter);
+    destroy_querylist(queryList);
+    destroy_query_results(queryResults);
+    destroy_bf_storage(bfStorage);
+    terminate_threads_scheduler(jobScheduler);
+    destroy_scheduler(jobScheduler);
     return SUCCESS;
 }
 
 int static_parser(Trie *trie, FILE *iFile, FILE *qFile) {
     JobScheduler *jobScheduler = create_scheduler(NUMBER_OF_THREADS);
-//    BloomFilter *bloomFilter = create_bloom_filter();
     BFStorage *bfStorage = create_bf_storage(NUMBER_OF_THREADS);
     QueryResults *queryResults = create_query_results(DEFAULT_LINES, DEFAULT_LINE_SIZE);
     NgramCounter *ngramCounter = create_ngram_counter();
     QueryList *queryList = create_querylist();
+    char *saveptr;
     char *line = NULL;
     char *word = NULL;
     int topk;
     size_t lineSize = 0;
-    char *saveptr;
 
     while (getline(&line, &lineSize, iFile) > 0) {
         if (check_whitespace(line)) {
             continue;
         }
-        insert_trie(trie, line);
+        insert_trie(trie, line, 0);
     }
     free(line);
+
     compress_trie(trie);
     lineSize = 0;
     int queryID = 0;
@@ -130,18 +168,9 @@ int static_parser(Trie *trie, FILE *iFile, FILE *qFile) {
         switch (line[0]) {
             case 'Q':
                 insert_querylist(queryList, line + 2, queryID, 0);
-
-//                query_trie_static(trie, &line[2], bfStorage, queryResults, ngramCounter, queryID);
                 queryID++;
-//                copy_results_to_buffer_query_results(queryResults);
-//                print_query_results(queryResults);
                 break;
             case 'F':
-//                iterator = queryList->start;
-//                while (iterator != NULL) {
-//                    printf("%s", iterator->query);
-//                    iterator = iterator->next;
-//                }
                 expand_query_results(queryResults, queryID);
                 iterator = queryList->start;
                 while (iterator != NULL) {
@@ -152,8 +181,6 @@ int static_parser(Trie *trie, FILE *iFile, FILE *qFile) {
                     job->args[2] = bfStorage;
                     job->args[3] = queryResults;
                     job->args[4] = ngramCounter;
-//                    job->args[5] = malloc(sizeof(int));
-//                    *(int *) job->args[5] = queryID;
                     job->args[5] = &iterator->query_ID;
                     job->args[6] = &queryList->elements;
 
@@ -191,7 +218,6 @@ int static_parser(Trie *trie, FILE *iFile, FILE *qFile) {
                     sort_topk(ngramArray, (unsigned int) topk);
                     destroy_ngram_array(ngramArray);
                 }
-                empty_querylist(queryList);
                 clear_ngram_counter(ngramCounter);
                 free(line);
 //                pthread_mutex_lock(&mainThreadLock);
@@ -204,9 +230,7 @@ int static_parser(Trie *trie, FILE *iFile, FILE *qFile) {
     free(line); //todo an vgei error mallon ftaei auto. einai ok gia ta arxeia eisodou
     destroy_gram_counter(ngramCounter);
     destroy_querylist(queryList);
-
     destroy_query_results(queryResults);
-//    destroy_bloom_filter(bloomFilter);
     destroy_bf_storage(bfStorage);
     terminate_threads_scheduler(jobScheduler);
     destroy_scheduler(jobScheduler);
