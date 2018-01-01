@@ -16,6 +16,7 @@ typedef struct TrieNode {
     char isDeleted;
     int appendVersion;
     int deleteVersion;
+    int markedAsFinalVersion;
     struct TrieNode *children;
     int occupiedPositions;
     int capacity;

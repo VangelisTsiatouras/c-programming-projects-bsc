@@ -40,7 +40,7 @@ int insert_ngram_trie(Trie *trie, char *ngram) {
             result = binary_search(current->children, word, current->occupiedPositions);
         }
         int position = result.position;
-        if (result.found == 0){
+        if (result.found == 0) {
             // Reallocate space if the children array is full
             if (current->occupiedPositions == current->capacity) {
                 // The new size will be the double of the old size
@@ -73,14 +73,19 @@ int insert_ngram_version_trie(Trie *trie, char *ngram, int version) {
     SearchResults result;
     char *saveptr;
     char *word = strtok_r(ngram, " \n", &saveptr);
+    int appendManyWords = 0;
     insert_LinearHash(trie->linearHash, word);
     TrieNode *current = lookup_LinearHash(trie->linearHash, word);
-    if (current->isDeleted == 1) {
+//    if (current->isDeleted == 1) {
 //        current->appendVersion = version;
-        current->isDeleted = 0;
+//        current->isDeleted = 0;
+//    }
+    if (!strcmp(word, "absorption")){
+//        printf("%s\n", word);
     }
     word = strtok_r(NULL, " \n", &saveptr);
     while (word != NULL) {
+        appendManyWords = 1;
         // Don't call binary_search if the children array is empty
         if (current->occupiedPositions == 0) {
             result.position = 0;
@@ -89,10 +94,8 @@ int insert_ngram_version_trie(Trie *trie, char *ngram, int version) {
             result = binary_search(current->children, word, current->occupiedPositions);
         }
         int position = result.position;
-//        if (!strcmp(word, "genome")){
-//            printf("%s\n", word);
-//        }
-        if (result.found == 0 /*&& current->isDeleted == 0*/){
+
+        if (result.found == 0 /*&& current->isDeleted == 0*/) {
 
             // Reallocate space if the children array is full
             if (current->occupiedPositions == current->capacity) {
@@ -117,23 +120,34 @@ int insert_ngram_version_trie(Trie *trie, char *ngram, int version) {
             current->children[position].isDeleted = 0;
             current->occupiedPositions++;
         }
-        if (current->isDeleted == 1) {
+        if (current->appendVersion == -1 || current->isDeleted) {
             current->appendVersion = version;
-            current->isDeleted = 0;
         }
+//        current->deleteVersion = -1;
+        current->isDeleted = 0;
         current = &current->children[position];
         word = strtok_r(NULL, " \n", &saveptr);
     }
-    current->appendVersion = version;
-    current->deleteVersion = -1;
-    current->isDeleted = 0;
+    if(appendManyWords == 0){
+        if (current->appendVersion == -1 || current->isDeleted) {
+            current->appendVersion = version;
+        }
+        current->deleteVersion = -1;
+        current->isDeleted = 0;
+    }
+
     // Mark as final
+    current->markedAsFinalVersion = version;
     current->isFinal = 1;
     return SUCCESS;
 }
 
 void query_trie_dynamic(Trie *trie, char *ngram, BloomFilter *bloomFilter, QueryResults *queryResults,
                         NgramCounter *ngramCounter, int queryID, int totalQueries, int version) {
+//    printf("ver %d\n",version);
+    if (version == 971){
+//        printf("break\n");
+    }
     TrieNode *current;
     SearchResults result;
     int numberOfWords;
@@ -157,27 +171,33 @@ void query_trie_dynamic(Trie *trie, char *ngram, BloomFilter *bloomFilter, Query
         if (current == NULL) {
             continue;
         }
+
+        if (current->isDeleted == 1){
+            continue;
+        }
+
         offset = 0;
         resultsBuffer[0] = '\0';
         int j = i;
         do {
-//            if (!strcmp(splitNgram[j], "genome")){
-//                    printf("%s\n", splitNgram[j]);
-//            }
-            if (current->appendVersion <= version && (current->deleteVersion > version || current->deleteVersion == -1)) {
+            if (!strcmp(splitNgram[j], "southern")) {
+//                printf("%s\n", splitNgram[j]);
+            }
+            // Check if next word fits in resultsBuffer
+            // If not realloc buffer
+            size_t wordSize = strlen(splitNgram[j]) + 1;
+            size_t newSize = offset + wordSize + 1;
+            realloc_buffer(&resultsBuffer, &sizeBuffer, newSize);
+            // Avoid overflows with offset
+            // If this is not the first, add a space to separate words
+            if (j != i) {
+                offset += snprintf(resultsBuffer + offset, sizeBuffer - offset, " ");
+            }
+            offset += snprintf(resultsBuffer + offset, sizeBuffer - offset, "%s", splitNgram[j]);
 
-                // Check if next word fits in resultsBuffer
-                // If not realloc buffer
-                size_t wordSize = strlen(splitNgram[j]) + 1;
-                size_t newSize = offset + wordSize + 1;
-                realloc_buffer(&resultsBuffer, &sizeBuffer, newSize);
-                // Avoid overflows with offset
-                // If this is not the first, add a space to separate words
-                if (j != i) {
-                    offset += snprintf(resultsBuffer + offset, sizeBuffer - offset, " ");
-                }
-                offset += snprintf(resultsBuffer + offset, sizeBuffer - offset, "%s", splitNgram[j]);
-                if (current->isFinal == 1) {
+            if (current->appendVersion <= version &&
+                (current->deleteVersion > version || current->deleteVersion == -1)) {
+                if (current->isFinal == 1 && (current->markedAsFinalVersion <= version || current->markedAsFinalVersion == -1)) {
                     if (check_insert_bloom_filter(bloomFilter, resultsBuffer) == SUCCESS) {
                         add_line_query_results_append(queryResults, resultsBuffer, queryID);
                         resultsFound = 1;
@@ -185,6 +205,7 @@ void query_trie_dynamic(Trie *trie, char *ngram, BloomFilter *bloomFilter, Query
                     }
                 }
             }
+
             j++;
             if (j < numberOfWords) {
                 result = binary_search(current->children, splitNgram[j], current->occupiedPositions);
@@ -442,8 +463,8 @@ int delete_ngram_version_trie(Trie *trie, char *ngram, int version) {
     for (int i = numberOfWords - 2; i >= 0; i--) {
         // If this is the last word of the ngram
         if (i == numberOfWords - 2) {
-            current->isFinal = 0;
-//            current->deleteVersion = version;
+//            current->isFinal = 0;
+            current->deleteVersion = version;
             // If it has children
             if (current->occupiedPositions > 0) {
                 free(positionArray);
@@ -466,12 +487,15 @@ int delete_ngram_version_trie(Trie *trie, char *ngram, int version) {
 //        delete_word_trie_node(current, positionArray[i]);
     }
     if (numberOfWords == 1 && lookupResult.trieNode->children != 0) {
-        lookupResult.trieNode->isFinal = 0;
+//        lookupResult.trieNode->isFinal = 0;
         lookupResult.trieNode->deleteVersion = version;
     }
     // Delete word inside the hashtable bucket
     if (lookupResult.trieNode->isFinal == 0) {
-        lookupResult.trieNode->isDeleted = 1;
+//        lookupResult.trieNode->deleteVersion = version;
+        if (lookupResult.trieNode->occupiedPositions == 0) {
+            lookupResult.trieNode->isDeleted = 1;
+      }
 //        delete_word_LHBucket(trie->linearHash->bucketArray[lookupResult.bucket], lookupResult.trieNode->word);
     }
     free(positionArray);
@@ -490,6 +514,9 @@ int create_trie_node(TrieNode *trieNode) {
     trieNode->occupiedPositions = 0;
     trieNode->isFinal = 0;
     trieNode->isDeleted = 0;
+    trieNode->deleteVersion = -1;
+    trieNode->appendVersion = -1;
+    trieNode->markedAsFinalVersion = -1;
     trieNode->children = malloc(trieNode->capacity * sizeof(TrieNode));
     if (!trieNode->children) {
         printf("malloc error %s\n", strerror(errno));
