@@ -24,7 +24,7 @@ int destroy_trie(Trie *trie) {
     return SUCCESS;
 }
 
-int insert_trie(Trie *trie, char *ngram) {
+int insert_trie(Trie *trie, char *ngram, int version) {
     SearchResults result;
     char *saveptr;
     char *word = strtok_r(ngram, " \n", &saveptr);
@@ -59,6 +59,8 @@ int insert_trie(Trie *trie, char *ngram) {
             }
             create_trie_node(&current->children[position]);
             store_word_trie_node(&current->children[position], word);
+            current->children[position].version = version;
+            current->children[position].isDeleted = 0;
             current->occupiedPositions++;
         }
         current = &current->children[position];
@@ -613,9 +615,9 @@ void tester_compress() {
     Trie *trie = create_trie();
 
     // Check compress
-    insert_trie(trie, tNgram5);
-    insert_trie(trie, tNgram6);
-    insert_trie(trie, tNgram7);
+    insert_trie(trie, tNgram5, 0);
+    insert_trie(trie, tNgram6, 0);
+    insert_trie(trie, tNgram7, 0);
     compress_trie_node(&trie->linearHash->bucketArray[0]->nodeArray[0]);
 
     destroy_trie(trie);

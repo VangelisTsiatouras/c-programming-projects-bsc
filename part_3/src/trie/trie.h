@@ -12,10 +12,12 @@ typedef struct LinearHash LinearHash;
 typedef struct TrieNode {
     char word[WORD_SIZE];
     char *largeWord;
+    char isFinal;
+    char isDeleted;
+    int version;
     struct TrieNode *children;
     int occupiedPositions;
     int capacity;
-    char isFinal;
     short *staticTrieWordOffsets;
     unsigned int staticArraySize;
 } TrieNode;
@@ -32,13 +34,14 @@ typedef struct SearchResults {
 
 Trie *create_trie();
 int destroy_trie(Trie *trie);
-int insert_trie(Trie *trie, char *ngram);
+int insert_trie(Trie *trie, char *ngram, int version);
 void query_trie_dynamic(Trie *trie, char *ngram, BloomFilter *bloomFilter, QueryResults *queryResults,
                         NgramCounter *ngramCounter, int queryID);
 void query_trie_static(Trie *trie, char *ngram, BFStorage *bloomFilterStorage, QueryResults *queryResults,
                        NgramCounter *ngramCounter, int *queryID, int *totalQueries);
 void compress_trie(Trie *trie);
 int delete_ngram_trie(Trie *trie, char *ngram);
+int delete_version_ngram_trie(Trie *trie, char *ngram);
 
 int create_trie_node(TrieNode *trieNode);
 void destroy_trie_node(TrieNode *trieNode);
