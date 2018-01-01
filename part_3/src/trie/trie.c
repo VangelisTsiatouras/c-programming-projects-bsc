@@ -40,7 +40,11 @@ int insert_trie(Trie *trie, char *ngram, int version) {
             result = binary_search(current->children, word, current->occupiedPositions);
         }
         int position = result.position;
+//        if (!strcmp(word, "genome")){
+//            printf("%s\n", word);
+//        }
         if (result.found == 0) {
+
             // Reallocate space if the children array is full
             if (current->occupiedPositions == current->capacity) {
                 // The new size will be the double of the old size
@@ -59,20 +63,24 @@ int insert_trie(Trie *trie, char *ngram, int version) {
             }
             create_trie_node(&current->children[position]);
             store_word_trie_node(&current->children[position], word);
-            current->children[position].version = version;
+            current->children[position].appendVersion = version;
+            current->children[position].deleteVersion = -1;
             current->children[position].isDeleted = 0;
             current->occupiedPositions++;
         }
         current = &current->children[position];
         word = strtok_r(NULL, " \n", &saveptr);
     }
+    current->appendVersion = version;
+    current->deleteVersion = -1;
+    current->isDeleted = 0;
     // Mark as final
     current->isFinal = 1;
     return SUCCESS;
 }
 
 void query_trie_dynamic(Trie *trie, char *ngram, BloomFilter *bloomFilter, QueryResults *queryResults,
-                        NgramCounter *ngramCounter, int queryID) {
+                        NgramCounter *ngramCounter, int queryID, int totalQueries, int version) {
     TrieNode *current;
     SearchResults result;
     int numberOfWords;
@@ -84,8 +92,8 @@ void query_trie_dynamic(Trie *trie, char *ngram, BloomFilter *bloomFilter, Query
         printf("malloc error %s\n", strerror(errno));
         exit(MALLOC_ERROR);
     }
-    // Calculate probality of false positive based on the incoming query
-    // If the probabilty is greater than 0.0001 the bit vector will be increased
+    // Calculate probability of false positive based on the incoming query
+    // If the probability is greater than 0.000001 the bit vector will be increased
     probability_of_query_bloom_filter(bloomFilter, numberOfWords);
     // Set to zero bit vector
     set_to_zero_bloom_filter(bloomFilter);
@@ -100,22 +108,28 @@ void query_trie_dynamic(Trie *trie, char *ngram, BloomFilter *bloomFilter, Query
         resultsBuffer[0] = '\0';
         int j = i;
         do {
-            // Check if next word fits in resultsBuffer
-            // If not realloc buffer
-            size_t wordSize = strlen(splitNgram[j]) + 1;
-            size_t newSize = offset + wordSize + 1;
-            realloc_buffer(&resultsBuffer, &sizeBuffer, newSize);
-            // Avoid overflows with offset
-            // If this is not the first, add a space to separate words
-            if (j != i) {
-                offset += snprintf(resultsBuffer + offset, sizeBuffer - offset, " ");
-            }
-            offset += snprintf(resultsBuffer + offset, sizeBuffer - offset, "%s", splitNgram[j]);
-            if (current->isFinal == 1) {
-                if (check_insert_bloom_filter(bloomFilter, resultsBuffer) == SUCCESS) {
-                    add_line_query_results_append(queryResults, resultsBuffer, queryID);
-                    resultsFound = 1;
-                    insert_ngram_counter(ngramCounter, resultsBuffer, (unsigned int) offset);
+//            if (!strcmp(splitNgram[j], "genome")){
+//                    printf("%s\n", splitNgram[j]);
+//            }
+            if (current->appendVersion <= version) {
+
+                // Check if next word fits in resultsBuffer
+                // If not realloc buffer
+                size_t wordSize = strlen(splitNgram[j]) + 1;
+                size_t newSize = offset + wordSize + 1;
+                realloc_buffer(&resultsBuffer, &sizeBuffer, newSize);
+                // Avoid overflows with offset
+                // If this is not the first, add a space to separate words
+                if (j != i) {
+                    offset += snprintf(resultsBuffer + offset, sizeBuffer - offset, " ");
+                }
+                offset += snprintf(resultsBuffer + offset, sizeBuffer - offset, "%s", splitNgram[j]);
+                if (current->isFinal == 1) {
+                    if (check_insert_bloom_filter(bloomFilter, resultsBuffer) == SUCCESS) {
+                        add_line_query_results_append(queryResults, resultsBuffer, queryID);
+                        resultsFound = 1;
+                        insert_ngram_counter(ngramCounter, resultsBuffer, (unsigned int) offset);
+                    }
                 }
             }
             j++;
@@ -155,8 +169,8 @@ void query_trie_static(Trie *trie, char *ngram, BFStorage *bloomFilterStorage, Q
         printf("malloc error %s\n", strerror(errno));
         exit(MALLOC_ERROR);
     }
-    // Calculate probality of false positive based on the incoming query
-    // If the probabilty is greater than 0.0001 the bit vector will be increased
+    // Calculate probability of false positive based on the incoming query
+    // If the probability is greater than 0.000001 the bit vector will be increased
     probability_of_query_bloom_filter(bloomFilter, numberOfWords);
     // Set to zero bit vector
     set_to_zero_bloom_filter(bloomFilter);

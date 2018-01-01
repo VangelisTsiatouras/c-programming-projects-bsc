@@ -14,7 +14,8 @@ typedef struct TrieNode {
     char *largeWord;
     char isFinal;
     char isDeleted;
-    int version;
+    int appendVersion;
+    int deleteVersion;
     struct TrieNode *children;
     int occupiedPositions;
     int capacity;
@@ -36,7 +37,7 @@ Trie *create_trie();
 int destroy_trie(Trie *trie);
 int insert_trie(Trie *trie, char *ngram, int version);
 void query_trie_dynamic(Trie *trie, char *ngram, BloomFilter *bloomFilter, QueryResults *queryResults,
-                        NgramCounter *ngramCounter, int queryID);
+                        NgramCounter *ngramCounter, int queryID, int totalQueries, int version);
 void query_trie_static(Trie *trie, char *ngram, BFStorage *bloomFilterStorage, QueryResults *queryResults,
                        NgramCounter *ngramCounter, int *queryID, int *totalQueries);
 void compress_trie(Trie *trie);
