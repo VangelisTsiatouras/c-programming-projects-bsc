@@ -342,6 +342,9 @@ int delete_ngram_trie(Trie *trie, char *ngram) {
     lookupResult = lookup_for_delete_LinearHash(trie->linearHash, splitNgram[0]);
     current = lookupResult.trieNode;
     if (current == NULL) {
+        free(positionArray);
+        free(splitNgram);
+        free(parents);
         return DELETE_NOT_FOUND;
     }
     for (int i = 0; i < numberOfWords - 1; i++) {
@@ -413,6 +416,9 @@ int delete_ngram_version_trie(Trie *trie, char *ngram, int version) {
     lookupResult = lookup_for_delete_LinearHash(trie->linearHash, splitNgram[0]);
     current = lookupResult.trieNode;
     if (current == NULL) {
+        free(positionArray);
+        free(splitNgram);
+        free(parents);
         return DELETE_NOT_FOUND;
     }
 
