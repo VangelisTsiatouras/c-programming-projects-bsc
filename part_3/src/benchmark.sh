@@ -13,10 +13,10 @@ do
 	./ngrams -i ../datasets/small_static/small_static.init -q ../datasets/small_static/small_static.work > small_static.out
 	tt=$((($(date +%s%N) - $ts)/1000000))
 	sum=$(($sum+$tt))
-	echo "$tt milliseconds"
+	echo "$tt msec"
 done
 average=$(($sum/10))
-echo "Average $average milliseconds"
+echo "Average $average msec"
 
 sum=0
 average=0
@@ -28,10 +28,10 @@ do
 	./ngrams -i ../datasets/small_dynamic/small_dynamic.init -q ../datasets/small_dynamic/small_dynamic.work > small_dynamic.out
 	tt=$((($(date +%s%N) - $ts)/1000000))
 	sum=$(($sum+$tt))
-	echo "$tt milliseconds"
+	echo "$tt msec"
 done
 average=$(($sum/10))
-echo "Average $average milliseconds"
+echo "Average $average msec"
 
 sum=0
 average=0
@@ -43,10 +43,10 @@ do
 	./ngrams -i ../datasets/medium_static/medium_static.init -q ../datasets/medium_static/medium_static.work > medium_static.out
 	tt=$((($(date +%s%N) - $ts)/1000000))
 	sum=$(($sum+$tt))
-	echo "$tt milliseconds"
+	echo "$tt msec"
 done
 average=$(($sum/10))
-echo "Average $average milliseconds"
+echo "Average $average msec"
 
 sum=0
 average=0
@@ -58,10 +58,10 @@ do
 	./ngrams -i ../datasets/medium_dynamic/medium_dynamic.init -q ../datasets/medium_dynamic/medium_dynamic.work > medium_dynamic.out
 	tt=$((($(date +%s%N) - $ts)/1000000))
 	sum=$(($sum+$tt))
-	echo "$tt milliseconds"
+	echo "$tt msec"
 done
 average=$(($sum/10))
-echo "Average $average milliseconds"
+echo "Average $average msec"
 
 sum=0
 average=0
@@ -73,10 +73,10 @@ do
 	./ngrams -i ../datasets/large_static/large_static.init -q ../datasets/large_static/large_static.work > large_static.out
 	tt=$((($(date +%s%N) - $ts)/1000000))
 	sum=$(($sum+$tt))
-	echo "$tt milliseconds"
+	echo "$tt msec"
 done
 average=$(($sum/10))
-echo "Average $average milliseconds"
+echo "Average $average msec"
 
 sum=0
 average=0
@@ -88,7 +88,7 @@ do
 	./ngrams -i ../datasets/large_dynamic/large_dynamic.init -q ../datasets/large_dynamic/large_dynamic.work > large_dynamic.out
 	tt=$((($(date +%s%N) - $ts)/1000000))
 	sum=$(($sum+$tt))
-	echo "$tt milliseconds"
+	echo "$tt msec"
 done
 average=$(($sum/10))
-echo "Average $average milliseconds"
+echo "Average $average msec"

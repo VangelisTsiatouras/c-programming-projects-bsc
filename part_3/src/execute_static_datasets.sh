@@ -2,7 +2,7 @@
 
 alias time='/usr/bin/time'
 
-max=1
+max=20
 smallFailures=0
 mediumFailures=0
 largeFailures=0
