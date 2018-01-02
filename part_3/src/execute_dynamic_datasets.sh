@@ -1,4 +1,6 @@
-#! /bin/sh
+#!/bin/sh
+
+alias time='/usr/bin/time'
 
 max=1
 smallFailures=0
@@ -7,44 +9,46 @@ largeFailures=0
 
 for i in `seq 1 $max`
 do
-	printf "##### TEST $i #####\n"
-	printf "\n--- Executing small dynamic ---\n"
+	echo "##### TEST $i #####"
+	echo "--- Executing small dynamic ---"
 	time ./ngrams -i ../datasets/small_dynamic/small_dynamic.init -q ../datasets/small_dynamic/small_dynamic.work > small_dynamic.out
-
-	printf "\n--- Executing medium dynamic ---\n"
+	echo
+	echo "--- Executing medium dynamic ---"
 	time ./ngrams -i ../datasets/medium_dynamic/medium_dynamic.init -q ../datasets/medium_dynamic/medium_dynamic.work > medium_dynamic.out
-
-	printf "\n--- Executing large dynamic ---\n"
+	echo
+	echo "--- Executing large dynamic ---"
 	time ./ngrams -i ../datasets/large_dynamic/large_dynamic.init -q ../datasets/large_dynamic/large_dynamic.work > large_dynamic.out
 
-	
-	printf "\n--- Differences ---"
-	printf "\nSmall Dynamic\n"
+	echo
+	echo "--- Differences ---"
+	echo "Small Dynamic"
 	diff small_dynamic.out ../datasets/small_dynamic/small_dynamic.result
 	if [ $? -ne 0 ]
 		then
 		smallFailures=$((smallFailures+1))
 	else
-		printf "No Differences!\n"
+		echo "No Differences!"
 	fi
-	printf "\nMedium Dynamic\n"
+	echo
+	echo "Medium Dynamic"
 	diff medium_dynamic.out ../datasets/medium_dynamic/medium_dynamic.result
 	if [ $? -ne 0 ]
 		then
 		mediumFailures=$((mediumFailures+1))
 	else
-		printf "No Differences!\n"
+		echo "No Differences!"
 	fi
-	printf "\nLarge Dynamic\n"
+	echo
+	echo "Large Dynamic"
 	diff large_dynamic.out ../datasets/large_dynamic/large_dynamic.result
 	if [ $? -ne 0 ]
 		then
 		largeFailures=$((largeFailures+1))
 	else
-		printf "No Differences!\n"
+		echo "No Differences!"
 	fi
-	printf "\n"
+	echo
 done
-printf "Failures in small dataset: %d/%d\n" $((smallFailures)) $((max))
-printf "Failures in medium dataset: %d/%d\n" $((mediumFailures)) $((max))
-printf "Failures in large dataset: %d/%d\n" $((largeFailures)) $((max))
+echo "Failures in small dataset: $((smallFailures))/$((max))"
+echo "Failures in medium dataset: $((mediumFailures))/$((max))"
+echo "Failures in large dataset: $((largeFailures))/$((max))"
