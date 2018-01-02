@@ -84,17 +84,38 @@ int dynamic_parser(Trie *trie, FILE *iFile, FILE *qFile) {
                 break;
             case 'F':
                 expand_query_results(queryResults, queryID);
-
                 iterator = queryList->start;
-                //TODO add job submit here!
+
                 while (iterator != NULL) {
-                    query_trie_dynamic(trie, iterator->query, bloomFilter, queryResults, ngramCounter,
-                                       iterator->query_ID, queryList->elements, iterator->version);
+//                    query_trie_dynamic(trie, iterator->query, bloomFilter, queryResults, ngramCounter,
+//                                       &iterator->query_ID, &queryList->elements, &iterator->version);
+                    Job *job = create_job(8);
+                    job->pointerToFunction = query_trie_dynamic;
+                    job->args[0] = trie;
+                    job->args[1] = iterator->query;
+                    job->args[2] = bfStorage;
+                    job->args[3] = queryResults;
+                    job->args[4] = ngramCounter;
+                    job->args[5] = &iterator->query_ID;
+                    job->args[6] = &queryList->elements;
+                    job->args[7] = &iterator->version;
+
+                    submit_scheduler(jobScheduler, job);
+
                     iterator = iterator->next;
                 }
 
-                queryID = 0;
+                pthread_mutex_lock(&mainThreadLock);
+//                printf("number of queries %d qid %d\n", queryList->elements, queryID);
+
+                while (queryResults->finished != queryList->elements) {
+                    pthread_cond_wait(&mainThreadSleep, &mainThreadLock);
+
+                }
+                pthread_mutex_unlock(&mainThreadLock);
+
                 empty_querylist(queryList);
+                queryID = 0;
 
                 word = strtok_r(line + 1, " \n", &saveptr);
                 if (word != NULL) {

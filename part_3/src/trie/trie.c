@@ -134,10 +134,12 @@ int insert_ngram_version_trie(Trie *trie, char *ngram, int version) {
     return SUCCESS;
 }
 
-void query_trie_dynamic(Trie *trie, char *ngram, BloomFilter *bloomFilter, QueryResults *queryResults,
-                        NgramCounter *ngramCounter, int queryID, int totalQueries, int version) {
+void query_trie_dynamic(Trie *trie, char *ngram, BFStorage *bloomFilterStorage, QueryResults *queryResults,
+                        NgramCounter *ngramCounter, int *queryID, int *totalQueries, int *version) {
     TrieNode *current;
     SearchResults result;
+    BloomFilterArrayElement *bloomFilterArrayElement = obtain_filter_bf_storage(bloomFilterStorage);
+    BloomFilter *bloomFilter = bloomFilterArrayElement->bloomFilter;
     int numberOfWords;
     char **splitNgram = split_ngram(ngram, &numberOfWords);
     int offset;
@@ -175,11 +177,11 @@ void query_trie_dynamic(Trie *trie, char *ngram, BloomFilter *bloomFilter, Query
             }
             offset += snprintf(resultsBuffer + offset, sizeBuffer - offset, "%s", splitNgram[j]);
 
-            if (current->appendVersion <= version &&
-                (current->deleteVersion > version || current->deleteVersion == -1)) {
-                if (current->isFinal == 1 && (current->markedAsFinalVersion <= version || current->markedAsFinalVersion == -1)) {
+            if (current->appendVersion <= *version &&
+                (current->deleteVersion > *version || current->deleteVersion == -1)) {
+                if (current->isFinal == 1 && (current->markedAsFinalVersion <= *version || current->markedAsFinalVersion == -1)) {
                     if (check_insert_bloom_filter(bloomFilter, resultsBuffer) == SUCCESS) {
-                        add_line_query_results_append(queryResults, resultsBuffer, queryID);
+                        add_line_query_results_append(queryResults, resultsBuffer, *queryID);
                         resultsFound = 1;
                         insert_ngram_counter(ngramCounter, resultsBuffer, (unsigned int) offset);
                     }
@@ -198,10 +200,12 @@ void query_trie_dynamic(Trie *trie, char *ngram, BloomFilter *bloomFilter, Query
     }
     if (resultsFound == 0) {
         sprintf(resultsBuffer, "-1");
-        add_line_query_results_append(queryResults, resultsBuffer, queryID);
+        add_line_query_results_append(queryResults, resultsBuffer, *queryID);
     }
+    release_filter_bf_storage(bloomFilterStorage, bloomFilterArrayElement->bloomFilterID);
     free(resultsBuffer);
     free(splitNgram);
+    wake_main_thread(queryResults, *totalQueries);
 }
 
 void query_trie_static(Trie *trie, char *ngram, BFStorage *bloomFilterStorage, QueryResults *queryResults,
