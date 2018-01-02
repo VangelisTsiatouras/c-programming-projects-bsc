@@ -5,12 +5,11 @@
 #include <ctype.h>
 #include <pthread.h>
 
+#include "parser.h"
 #include "../queryresults/queryresults.h"
 #include "../ngramcounter/ngramcounter.h"
 #include "../linearhash/linearhash.h"
-#include "parser.h"
 #include "../querylist/querylist.h"
-#include "../queryresults/queryresults.h"
 #include "../threadpool/threadpool.h"
 
 void parser(Trie *trie, char *initFile, char *queryFile) {
@@ -74,24 +73,12 @@ int dynamic_parser(Trie *trie, FILE *iFile, FILE *qFile) {
                 break;
             case 'A':
                 versionID++;
-//                if (!strcmp(line + 2, "genome\n")){
-//                    printf("%s\n", line+2);
-//                }
-//                if (!strcmp(line + 2, "log p\n")){
-//                    printf("%s\n", line+2);
-//                }
-
                 insert_ngram_version_trie(trie, &line[2], versionID);
                 free(line);
                 break;
             case 'D':
+                //TODO na klh8ei h physical delete sto F na adeiasei ligo h mnhmh giati gemizei 2GB sto large
                 versionID++;
-                if (!strcmp(line + 2, "the \n")){
-                    printf("%s\n", line+2);
-                }
-
-                    // TODO na ginei nea delete xwris free
-//                delete_ngram_trie(trie, &line[2]);
                 delete_ngram_version_trie(trie, &line[2], versionID);
                 free(line);
                 break;

@@ -13,7 +13,7 @@ typedef struct TrieNode {
     char word[WORD_SIZE];
     char *largeWord;
     char isFinal;
-    char isDeleted;
+    char isDeleted; // TODO isws auto to pedio na mhn xreiazetai telika
     int appendVersion;
     int deleteVersion;
     int markedAsFinalVersion;
