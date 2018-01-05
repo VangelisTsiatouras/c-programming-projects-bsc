@@ -21,7 +21,7 @@ void destroy_queue(Queue* queue) {
     QueueNode* iterator = queue->head;
     while (iterator != NULL) {
         QueueNode* temp = iterator;
-        iterator = iterator->next; // todo mallon einai fixed
+        iterator = iterator->next;
         free(temp);
 
     }
@@ -95,7 +95,6 @@ JobScheduler *create_scheduler(unsigned int numberOfThreads) {
 }
 
 void destroy_scheduler(JobScheduler *jobScheduler) {
-//    printf("Waiting for kids to exit\n");
     for (int i = 0; i < jobScheduler->numberOfThreads; i++) {
         pthread_join(jobScheduler->threadIds[i], 0);
     }
@@ -111,25 +110,17 @@ void submit_scheduler(JobScheduler *jobScheduler, void *job) {
 }
 
 void worker_scheduler(Queue *queue) {
-//    printf("I am thread\n");
-//    fflush(stdout);
     while(1) {
         Job *job = pop_queue(queue);
-//        fprintf(stderr, "got job\n");
-//        fflush(stdout);
         if (job == NULL) {
-//            printf("exiting...\n");
             fflush(stdout);
             break;
         }
         function_caller_scheduler(job);
-//        fprintf(stderr, "finished job\n");
     }
 }
 
 void terminate_threads_scheduler(JobScheduler *jobScheduler) {
-//    printf("Telling kids to exit\n");
-
     for (int i = 0; i < jobScheduler->numberOfThreads; i++) {
         submit_scheduler(jobScheduler, NULL);
     }
@@ -223,14 +214,14 @@ void thread_tester() {
     int reps = 10;
     for (int i = 0; i < reps; i++) {
         Job *job = create_job(1);
-        job->pointerToFunction = hello;
+        job->pointerToFunction = tester_hello;
         job->args[0] = malloc(sizeof(int));
         *(int*)job->args[0] = i;
         submit_scheduler(jobScheduler, job);
     }
     for (int i = 0; i < reps; i++) {
         Job *job = create_job(2);
-        job->pointerToFunction = hello2;
+        job->pointerToFunction = tester_hello2;
         job->args[0] = malloc(sizeof(int));
         job->args[1] = malloc(sizeof(int));
         *(int*)job->args[0] = i;
@@ -242,12 +233,12 @@ void thread_tester() {
     exit(0);
 }
 
-void *hello(int *x){
+void *tester_hello(int *x){
     printf("hello %d\n", *x);
     return NULL;
 }
 
-void *hello2(int *x, int *y){
+void *tester_hello2(int *x, int *y){
     printf("hello2 %d %d\n", *x, *y);
     return NULL;
 }

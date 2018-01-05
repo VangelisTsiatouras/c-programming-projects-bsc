@@ -5,9 +5,8 @@
 //      PARAMETER DEFINES
 
 // Bloom Filter
-#define K 5                 // Number of hash functions
-#define PROBABILITY 0.000001  // Probability of false positives
-#define STARTING_M 40099    // Starting bit vector size
+#define PROBABILITY 0.000001 // Probability of false positives
+#define STARTING_M 40099     // Starting bit vector size
 #define SEED1 12345678
 #define SEED2 87654321
 #define SEED3 54321876

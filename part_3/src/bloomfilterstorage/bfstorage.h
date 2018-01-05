@@ -23,7 +23,7 @@ void destroy_bf_storage(BFStorage *bfStorage);
 BloomFilterArrayElement *obtain_filter_bf_storage(BFStorage *bfStorage);
 void release_filter_bf_storage(BFStorage *bfStorage, int position);
 
-void *testerBFStorage();
-void helloBloomFilter(BFStorage *bfStorage);
+void *tester_bf_storage();
+void tester_function_call_bf_storage(BFStorage *bfStorage);
 
 #endif //BFSTORAGE_H

@@ -132,7 +132,7 @@ int insert_ngram_counter(NgramCounter *ngramCounter, char *ngram, unsigned int n
     int position = hash_function(ngram, ngramLength);
     int returnValue = insert_ncbucket_array(&(ngramCounter->buckets[position]), ngram, ngramLength);
     pthread_mutex_lock(&ngramCounter->elementsMutex);
-    ngramCounter->elements += returnValue;//todo na mpei mutex
+    ngramCounter->elements += returnValue;
     pthread_mutex_unlock(&ngramCounter->elementsMutex);
     return returnValue;
 }

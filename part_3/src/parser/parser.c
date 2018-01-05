@@ -6,9 +6,6 @@
 #include <pthread.h>
 
 #include "parser.h"
-#include "../queryresults/queryresults.h"
-#include "../ngramcounter/ngramcounter.h"
-#include "../linearhash/linearhash.h"
 #include "../querylist/querylist.h"
 #include "../threadpool/threadpool.h"
 
@@ -77,7 +74,6 @@ int dynamic_parser(Trie *trie, FILE *iFile, FILE *qFile) {
                 free(line);
                 break;
             case 'D':
-                //TODO na klh8ei h physical delete sto F na adeiasei ligo h mnhmh giati gemizei 2GB sto large
                 versionID++;
                 delete_ngram_version_trie(trie, &line[2], versionID);
                 free(line);
@@ -85,10 +81,7 @@ int dynamic_parser(Trie *trie, FILE *iFile, FILE *qFile) {
             case 'F':
                 expand_query_results(queryResults, queryID);
                 iterator = queryList->start;
-
                 while (iterator != NULL) {
-//                    query_trie_dynamic(trie, iterator->query, bloomFilter, queryResults, ngramCounter,
-//                                       &iterator->query_ID, &queryList->elements, &iterator->version);
                     Job *job = create_job(8);
                     job->pointerToFunction = query_trie_dynamic;
                     job->args[0] = trie;
@@ -104,19 +97,14 @@ int dynamic_parser(Trie *trie, FILE *iFile, FILE *qFile) {
 
                     iterator = iterator->next;
                 }
-
                 pthread_mutex_lock(&mainThreadLock);
-//                printf("number of queries %d qid %d\n", queryList->elements, queryID);
-
                 while (queryResults->finished != queryList->elements) {
                     pthread_cond_wait(&mainThreadSleep, &mainThreadLock);
 
                 }
                 pthread_mutex_unlock(&mainThreadLock);
-
                 empty_querylist(queryList);
                 queryID = 0;
-
                 word = strtok_r(line + 1, " \n", &saveptr);
                 if (word != NULL) {
                     topk = atoi(word);
@@ -126,7 +114,6 @@ int dynamic_parser(Trie *trie, FILE *iFile, FILE *qFile) {
                     }
                     ngramArray = copy_to_ngram_array(ngramCounter);
                 }
-
                 print_query_results(queryResults);
                 if (ngramArray != NULL) {
                     sort_topk(ngramArray, (unsigned int) topk);
@@ -170,7 +157,6 @@ int static_parser(Trie *trie, FILE *iFile, FILE *qFile) {
         insert_ngram_trie(trie, line);
     }
     free(line);
-
     compress_trie(trie);
     lineSize = 0;
     int queryID = 0;
@@ -201,19 +187,12 @@ int static_parser(Trie *trie, FILE *iFile, FILE *qFile) {
 
                     iterator = iterator->next;
                 }
-//                printf("### MAIN THREAD: Waiting for workers...\n");
                 pthread_mutex_lock(&mainThreadLock);
-//                printf("number of queries %d qid %d\n", queryList->elements, queryID);
-
                 while (queryResults->finished != queryList->elements) {
                     pthread_cond_wait(&mainThreadSleep, &mainThreadLock);
 
                 }
                 pthread_mutex_unlock(&mainThreadLock);
-//                printf("### MAIN THREAD: Workers have finished\n");
-//                pthread_mutex_lock(&finishedMutex);
-//                pthread_mutex_unlock(&finishedMutex);
-
                 empty_querylist(queryList);
                 queryID = 0;
                 word = strtok_r(line + 1, " \n", &saveptr);
@@ -233,14 +212,13 @@ int static_parser(Trie *trie, FILE *iFile, FILE *qFile) {
                 }
                 clear_ngram_counter(ngramCounter);
                 free(line);
-//                pthread_mutex_lock(&mainThreadLock);
                 break;
             default:
                 free(line);
                 printf("Unknown Command\n");
         }
     }
-    free(line); //todo an vgei error mallon ftaei auto. einai ok gia ta arxeia eisodou
+    free(line);
     destroy_gram_counter(ngramCounter);
     destroy_querylist(queryList);
     destroy_query_results(queryResults);

@@ -57,12 +57,12 @@ void release_filter_bf_storage(BFStorage *bfStorage, int position) {
     pthread_mutex_unlock(&storageMutex);
 }
 
-void *testerBFStorage() {
+void *tester_bf_storage() {
     BFStorage *bfStorage = create_bf_storage(NUMBER_OF_THREADS);
     JobScheduler *jobScheduler = create_scheduler(NUMBER_OF_THREADS);
     for (int i = 0; i < 10; i++) {
         Job *job = create_job(1);
-        job->pointerToFunction = helloBloomFilter;
+        job->pointerToFunction = tester_function_call_bf_storage;
         job->args[0] = bfStorage;
         submit_scheduler(jobScheduler, job);
     }
@@ -72,7 +72,7 @@ void *testerBFStorage() {
     exit(0);
 }
 
-void helloBloomFilter(BFStorage *bfStorage) {
+void tester_function_call_bf_storage(BFStorage *bfStorage) {
     BloomFilterArrayElement *bloomFilterArrayElement = obtain_filter_bf_storage(bfStorage);
     BloomFilter *bloomFilter = bloomFilterArrayElement->bloomFilter;
     printf("i am thread %ld and i am using bloom filter %d\n", pthread_self(), bloomFilterArrayElement->bloomFilterID);

@@ -56,11 +56,6 @@ void insert_querylist(QueryList *qlist, char *query, int query_ID, int version) 
 
 void tester_querylist() {
     QueryList *queryList = create_querylist();
-//    for (int i = 0; i < 20; i++) {
-//        insert_querylist(queryList, malloc(50), i, 0);
-//    }
-//
-
     for (int i = 0; i < 5; i++) {
         char *str = malloc(sizeof(char)*3);
         strcpy(str,"aa");

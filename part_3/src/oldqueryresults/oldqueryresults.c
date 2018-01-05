@@ -50,7 +50,7 @@ void destroy_query_results_old(QueryResults *queryResults) {
     free(queryResults);
 }
 
-void copy_results_to_buffer_query_results_old(QueryResults *queryResults) { // todo optimize na mhn kanei perites antigrafes
+void copy_results_to_buffer_query_results_old(QueryResults *queryResults) {
     char *buffer = queryResults->printBuffer;
     int offset = queryResults->printBufferOffset;
     for (int i = 0; i < queryResults->elements; i++) {

@@ -19,10 +19,9 @@ typedef struct QueueNode {
 } QueueNode;
 
 typedef struct JobScheduler {
-    int numberOfThreads;       // number of execution threads
-    Queue* queue;              // a queue that holds submitted jobs / tasks
-    pthread_t* threadIds;      // execution threads
-// mutex, condition variable, ...
+    int numberOfThreads;  // number of execution threads
+    Queue* queue;         // a queue that holds submitted jobs / tasks
+    pthread_t* threadIds; // execution threads
 } JobScheduler;
 
 typedef struct Job {
@@ -49,7 +48,7 @@ void destroy_job(Job *job);
 void queue_tester();
 void thread_tester();
 
-void *hello(int *x);
-void *hello2(int *x, int *y);
+void *tester_hello(int *x);
+void *tester_hello2(int *x, int *y);
 
 #endif // THREADPOOL_H

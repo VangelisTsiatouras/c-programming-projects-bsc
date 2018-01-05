@@ -2,21 +2,17 @@
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
-#include <unistd.h>
 #include "queryresults.h"
 
 QueryResults *create_query_results(int lines, size_t lineSize) {
     pthread_mutex_init(&finishedMutex, 0);
-    pthread_mutex_init(&elementsMutex, 0);
     pthread_mutex_init(&mainThreadLock, 0);
-//    pthread_mutex_lock(&mainThreadLock);
     pthread_cond_init(&mainThreadSleep, 0);
     QueryResults *queryResults = malloc(sizeof(QueryResults));
     if (!queryResults) {
         printf("malloc error %s\n", strerror(errno));
         exit(MALLOC_ERROR);
     }
-    queryResults->elements = 0;
     queryResults->finished = 0;
     queryResults->totalLines = lines;
     queryResults->lineSize = malloc(lines * sizeof(size_t));
@@ -52,7 +48,6 @@ void destroy_query_results(QueryResults *queryResults) {
         free(queryResults->lines[i]);
     }
     pthread_mutex_destroy(&finishedMutex);
-    pthread_mutex_destroy(&elementsMutex);
     pthread_mutex_destroy(&mainThreadLock);
     pthread_cond_destroy(&mainThreadSleep);
     free(queryResults->lines);
@@ -93,41 +88,19 @@ void expand_query_results(QueryResults *queryResults, int newSize) {
 }
 
 void print_query_results(QueryResults *queryResults) {
-//    usleep(100000);
-    for (int i = 0; i < queryResults->elements; i++) {
+    for (int i = 0; i < queryResults->finished; i++) {
         printf("%s\n", queryResults->lines[i]);
     }
     clear_query_results(queryResults);
-
-
-//    for (int i = 0; i < queryResults->totalLines; i++) {
-//        if (queryResults->lines[i][0] == '\0') {
-//            continue;
-//        }
-//        printf("%s\n", queryResults->lines[i]);
-//    }
-//    clear_query_results(queryResults);
 }
 
-int add_line_query_results_append(QueryResults *queryResults, char *newLine, int position) { //todo na ginei void
-//    if (position == 0){//todo na fugei
-//        printf("add line\n");
-//    }
-//    if (!strcmp(newLine, "rangarajan")) {
-//        printf("asdsadasdsad\n");
-//    }
-    //fprintf(stderr, "%s\n", newLine);
-    if (position >= queryResults->totalLines) {//todo na fugei otan
-        printf("REKT");
-        exit(1);
-    }
+int add_line_query_results(QueryResults *queryResults, char *newLine, int position) {
     size_t wordSize = strlen(newLine) + 2;
     size_t newLineSize = wordSize;
     size_t currentSize = queryResults->lineSize[position];
     size_t availableSize = currentSize - queryResults->offsets[position];
     // If new line cant fit in existing space
     if (newLineSize > availableSize) {
-//        fprintf(stderr, "KANEI REALLOC gia [%d] %s\n", position, newLine);
         if (newLineSize + queryResults->offsets[position] < currentSize * 2) {
             newLineSize = currentSize * 2;
         } else {
@@ -142,16 +115,10 @@ int add_line_query_results_append(QueryResults *queryResults, char *newLine, int
         }
     }
     if (queryResults->lines[position][0] == '\0') {
-        pthread_mutex_lock(&elementsMutex);
-        queryResults->elements++;
-        pthread_mutex_unlock(&elementsMutex);
         strcpy(queryResults->lines[position], newLine);
     } else {
-        char *str = malloc(sizeof(char) * wordSize);
-        strcpy(str, "|");
-        strcat(str, newLine); //todo optimize an exoume xrono
-        strcat(queryResults->lines[position], str);
-        free(str);
+        strcat(queryResults->lines[position], "|");
+        strcat(queryResults->lines[position], newLine);
     }
     queryResults->offsets[position] += wordSize;
     return SUCCESS;
@@ -163,22 +130,15 @@ void clear_query_results(QueryResults *queryResults) {
         queryResults->lines[i][0] = '\0';
         queryResults->offsets[i] = 0;
     }
-    queryResults->elements = 0;
     queryResults->finished = 0;
 }
 
 void wake_main_thread(QueryResults *queryResults, int totalQueries) {
 
     pthread_mutex_lock(&finishedMutex);
-    //usleep(10000);
-//    printf("### WORKER: Finished job (%d)\n", queryResults->finished);
     queryResults->finished++;
-//    printf("totalq %d fin %d\n", totalQueries, queryResults->finished);
     if (queryResults->finished == totalQueries) {
-//        printf("time to really wake\n");
         pthread_cond_signal(&mainThreadSleep);
-//        pthread_mutex_unlock(&mainThreadLock);
-        // wake main thread
     }
     pthread_mutex_unlock(&finishedMutex);
 }
@@ -193,7 +153,7 @@ void tester_query_results() {
         int r2 = rand() % 26;
         str[0] += r;
         str[1] += r2;
-        add_line_query_results_append(queryResults, str, rand() % 5);
+        add_line_query_results(queryResults, str, rand() % 5);
         str[0] -= r;
         str[1] -= r2;
     }
@@ -205,7 +165,7 @@ void tester_query_results() {
         int r2 = rand() % 26;
         str[0] += r;
         str[1] += r2;
-        add_line_query_results_append(queryResults, str, rand() % 10);
+        add_line_query_results(queryResults, str, rand() % 10);
         str[0] -= r;
         str[1] -= r2;
     }
