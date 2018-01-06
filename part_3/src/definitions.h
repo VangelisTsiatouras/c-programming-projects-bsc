@@ -17,7 +17,7 @@
 #define LH_STARTING_SIZE 32
 
 // Ngram Counter
-#define NC_STATIC_HASH_SIZE 4999
+#define NC_STATIC_HASH_SIZE 39999
 #define NC_BUCKET_SIZE 4
 #define MURMUR_SEED 5
 
