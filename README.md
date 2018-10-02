@@ -63,5 +63,7 @@ This part is the final part of this project and the most impacting in terms of p
 After all these optimizations we have achieved impressive execution times. In small dataset the execution time was ~0.1 sec, at medium ~3.5 seconds and at large dataset was ~9 seconds.
 
 ![Execution times](https://github.com/VangelisTsiatouras/software-development-di/blob/master/readme_assets/execution_times.png)
-![Med Dyn memory](https://github.com/VangelisTsiatouras/software-development-di/blob/master/readme_assets/med_dyn_mem.png)
-![Med Static memory](https://github.com/VangelisTsiatouras/software-development-di/blob/master/readme_assets/med_static_mem.png)
+![Med Dyn memory](https://github.com/VangelisTsiatouras/software-development-di/blob/master/readme_assets/dyn_mem_med.png)
+![Med Static memory](https://github.com/VangelisTsiatouras/software-development-di/blob/master/readme_assets/dyn_mem_med.png)
+![Large Dyn memory](https://github.com/VangelisTsiatouras/software-development-di/blob/master/readme_assets/dyn_mem_large.png)
+![Large Static memory](https://github.com/VangelisTsiatouras/software-development-di/blob/master/readme_assets/static_mem_large.png)
