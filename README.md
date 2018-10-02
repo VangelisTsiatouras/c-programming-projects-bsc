@@ -30,6 +30,8 @@ typedef struct Trie {
 } Trie;
 ```
 
+![Trie](https://github.com/VangelisTsiatouras/software-development-di/blob/master/readme_assets/trie.png)
+
 The algorithms that used for the insertions, deletions and the queries are [Depth-First Search](https://en.wikipedia.org/wiki/Depth-first_search) and [Binary Search](https://en.wikipedia.org/wiki/Binary_search_algorithm). The main concept of the implementation was the below:
 
 * In each N-gram given, start from the root of the trie.
@@ -43,9 +45,14 @@ With this algorithm the program prints out correct results but it was pretty slo
 
 One important problem that causes massive slowdown at the execution is that if a Query contains duplicate N-grams, the  algorithm form Part 1 searches them again and again. To avoid this we have added a [Bloom Filter](https://en.wikipedia.org/wiki/Bloom_filter), to filter these duplicate N-grams that already have been searched. With that way, the search algorithm executes only on N-grams that are unique on each Query. For the implementation of the Bloom Filter we used 3 [murmur3](https://en.wikipedia.org/wiki/MurmurHash) hash functions and a large bit array. According to our calculations the false positive probability is ~0.001% and with the current datasets the filter seems to work well.
 
+![Bloom Filter False](https://github.com/VangelisTsiatouras/software-development-di/blob/master/readme_assets/bloom_filter_false.png)
+![Bloom Filter Positive](https://github.com/VangelisTsiatouras/software-development-di/blob/master/readme_assets/bloom_filter_positive.png)
+
 The next optimization was to apply [Linear Hashing](https://en.wikipedia.org/wiki/Linear_hashing) at the root node of the trie. The reason of this modification was that the children node array of the root of the trie, expands very fast and as a result searching inside this array becomes slower. With the linear hashing this problem is solved and the search algorithm applies inside the buckets of the Hash Table which are significantly smaller. In that way the program gains a satisfying performance boost.
 
 An extra feature we added in this part was to find the top k N-ngrams that printed out the most times in one burst of commands. To implement this feature we used 2 basic and fast sorting algorithms which are [Quickselect](https://en.wikipedia.org/wiki/Quickselect) and [Quicksort](https://en.wikipedia.org/wiki/Quicksort). With these algorithms combined the results are calculated very fast. Also an other feature we added was the static trie mode. In this mode the trie after the init compresses the nodes that have only one child and after that the trie cannot expand or delete nodes (the work file doesn't contain 'A' and 'D' operations). The biggest benefit of the static trie is that the proram now consumes a lot less memory.
+
+![Static Trie](https://github.com/VangelisTsiatouras/software-development-di/blob/master/readme_assets/static_trie.png)
 
 In conclusion, with all above combined the program execution times dropped and more precisely in small dataset was 0.9 sec, in medium was 28 secs and in large dataset was 32 seconds!
 
@@ -55,3 +62,6 @@ This part is the final part of this project and the most impacting in terms of p
 
 After all these optimizations we have achieved impressive execution times. In small dataset the execution time was ~0.1 sec, at medium ~3.5 seconds and at large dataset was ~9 seconds.
 
+![Execution times](https://github.com/VangelisTsiatouras/software-development-di/blob/master/readme_assets/execution_times.png)
+![Med Dyn memory](https://github.com/VangelisTsiatouras/software-development-di/blob/master/readme_assets/med_dyn_mem.png)
+![Med Static memory](https://github.com/VangelisTsiatouras/software-development-di/blob/master/readme_assets/med_static_mem.png)
