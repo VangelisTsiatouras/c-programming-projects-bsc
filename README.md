@@ -62,8 +62,25 @@ This part is the final part of this project and the most impacting in terms of p
 
 After all these optimizations we have achieved impressive execution times. In small dataset the execution time was ~0.1 sec, at medium ~3.5 seconds and at large dataset was ~9 seconds.
 
+Execution times graphically:
+
 ![Execution times](https://github.com/VangelisTsiatouras/software-development-di/blob/master/readme_assets/execution_times.png)
+
+Some memory allocation graphsL:
+
 ![Med Dyn memory](https://github.com/VangelisTsiatouras/software-development-di/blob/master/readme_assets/dyn_mem_med.png)
 ![Med Static memory](https://github.com/VangelisTsiatouras/software-development-di/blob/master/readme_assets/dyn_mem_med.png)
 ![Large Dyn memory](https://github.com/VangelisTsiatouras/software-development-di/blob/master/readme_assets/dyn_mem_large.png)
 ![Large Static memory](https://github.com/VangelisTsiatouras/software-development-di/blob/master/readme_assets/static_mem_large.png)
+
+## Build & Execution
+
+To build this project just run `make` and to clean run `make clean`. To run the program execute `./ngrams -i [init_file] -q [query_file]`. Also to run the the unit tests you must build the project first with the following `make u_test`.
+
+## Frameworks and Tools used
+
+* [Valgrind](http://valgrind.org/)
+* [KCachegrind](http://kcachegrind.sourceforge.net/html/Home.html)
+* [Massif](http://valgrind.org/docs/manual/ms-manual.html)
+* [Massif-Visualizer](http://milianw.de/tag/massif-visualizer)
+* [Check](https://libcheck.github.io/check/)
