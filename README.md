@@ -66,7 +66,7 @@ Execution times graphically:
 
 ![Execution times](https://github.com/VangelisTsiatouras/software-development-di/blob/master/readme_assets/execution_times.png)
 
-Some memory allocation graphsL:
+Some memory allocation graphs:
 
 ![Med Dyn memory](https://github.com/VangelisTsiatouras/software-development-di/blob/master/readme_assets/dyn_mem_med.png)
 ![Med Static memory](https://github.com/VangelisTsiatouras/software-development-di/blob/master/readme_assets/dyn_mem_med.png)
