@@ -1,5 +1,7 @@
 # Software Development for Information Systems
 
+Copyright (C) 2018 Vangelis Tsiatouras & Nick Sofras
+
 ## About
 
 This project is based on [ACM SIGMOD Programming Contest 2017](http://sigmod17contest.athenarc.gr/) and it was assignment for the course "Software Development for Information Systems". The task of this project was to implement a [trie](https://en.wikipedia.org/wiki/Trie) that stores [N-grams](https://en.wikipedia.org/wiki/N-gram). The next crucial task was to handle queries and return results, as quickly as possible. The project was split into 3 parts and is written in C. The first part was about implementing the base data structure of the trie, the second was mostly optimizations over the first part and the last part was to add multithread support. The program at the beginning of the execution, initializes the trie struct from a dataset that contains multiple N-grams. After that, the program reads from another dataset the queries that will handle. These queries are documents (texts with >1000 words) and these datasets vary at sizes (small dataset: ~16MB, medium dataset: ~300MB, large dataset: ~220MB ). Also the program supports the following operations:
