@@ -1,5 +1,9 @@
 # Operating Systems
 
+Copyright (C) 2017 Vangelis Tsiatouras
+
+## About
+
 This repository contains the assignments for the course Operating Systems (k24) of DIT-NKUA.
 
 __Project 1__ is an implementation of a complex data structure, which consists of a skip-list and a hashtable.
