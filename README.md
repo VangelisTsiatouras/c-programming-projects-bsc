@@ -1,6 +1,6 @@
 # System Programming
 
-Copyright (C) 2018 Vangelis Tsiatouras
+Copyright (C) 2016 Vangelis Tsiatouras
 
 ## About
 
