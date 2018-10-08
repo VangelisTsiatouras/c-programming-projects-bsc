@@ -1,5 +1,9 @@
 # System Programming
 
+Copyright (C) 2018 Vangelis Tsiatouras
+
+## About
+
 This repository contains the assignments for the course System Programming (k24) of DIT-NKUA.
 
 __Project 1__ is an implementation of a graph using hashing.
