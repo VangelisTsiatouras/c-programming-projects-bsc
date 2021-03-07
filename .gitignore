@@ -1,0 +1,49 @@
+# Object files
+*.o
+*.ko
+*.obj
+*.elf
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Libraries
+*.lib
+*.a
+*.la
+*.lo
+
+# Shared objects (inc. Windows DLLs)
+*.dll
+*.so
+*.so.*
+*.dylib
+
+# Executables
+*.exe
+*.out
+*.app
+*.i*86
+*.x86_64
+*.hex
+MPI_implementation/game_of_life
+MPI_OpenMP_implementation/game_of_life
+
+# Debug files/directories
+*.dSYM/
+*Debug/
+
+# Eclipse project files
+*/.settings
+*.cproject
+*.project
+*language.settings.xml
+
+#Output Directories
+*outputs/
+CUDA_implementation/test
+
+CUDA_implementation/game_of_life
+
+CUDA_implementation/out\.txt
